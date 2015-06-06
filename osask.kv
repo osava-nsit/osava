@@ -40,7 +40,7 @@
                     root.manager.transition.direction = 'right'
                     root.manager.current = 'menu'
             Button:
-                text: 'Submit'
+                text: 'FCFS'
                 on_press:
                     root.load_form()
                     root.manager.transition.direction = 'left'
@@ -78,4 +78,35 @@
             Button:
                 text: 'Submit'
                 on_press:
-                    root.show_data()
+                    root.calculate_schedule()
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'fcfs2'
+
+<FCFSOutputScreen>:
+    layout: layout
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: 'The processes will be scheduled as follows:'
+            size_hint_y: 0.15
+        BoxLayout:
+            orientation: 'horizontal'
+            Label:
+                text: 'Process'
+            Label:
+                text: 'Start time'
+            Label:
+                text: 'End time'
+        BoxLayout:
+            orientation: 'vertical'
+            id: layout
+        GridLayout:
+            size_hint_y: 0.2
+            cols: 2
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'cpu1'
+            Button:
+                text: 'Exit'
