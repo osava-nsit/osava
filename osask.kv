@@ -1,16 +1,30 @@
 <MainMenuScreen>:
-	Label:
-        text: 'Operating Systems Algorithm Simulator Kit'
+    GridLayout:
+        rows: 5
+    	Label:
+            text: 'Operating Systems Algorithm Simulator Kit'
+        Button:
+        	text: 'CPU Scheduling Algorithms'
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'cpu1'
+        Button:
+        	text: 'Bankers Algorithm'
+        Button:
+        	text: 'Page Replacement Algorithms'
+        Button:
+        	text: 'Disk Scheduling Algorithms'
 
-    Button:
-    	text: 'CPU Scheduling Algorithms'
-
-    Button:
-    	text: 'Bankers Algorithm'
-
-    Button:
-    	text: 'Page Replacement Algorithms'
-
-    Button:
-    	text: 'Disk Scheduling Algorithms'
+<CPUSchedulingInputScreen>:
+    GridLayout:
+        rows: 3
+        Label:
+            text: 'CPU Scheduling Algorithms'
+        Button:
+            text: 'Back'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'menu'
+        Button:
+            text: 'Submit'
 
