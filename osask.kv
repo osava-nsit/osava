@@ -3,6 +3,7 @@
         rows: 5
     	Label:
             text: 'Operating Systems Algorithm Simulator Kit'
+            size_hint_y: 0.3
         Button:
         	text: 'CPU Scheduling Algorithms'
             on_press:
@@ -15,19 +16,24 @@
         Button:
         	text: 'Disk Scheduling Algorithms'
 
-<CPUSchedulingInputScreen>:
+<CPUSchedulingScreen>:
+    num_processes: num_processes
     GridLayout:
         rows: 3
         Label:
             text: 'CPU Scheduling Algorithms'
+            size_hint_y: 0.1
         GridLayout:
             cols: 2
+            size_hint_y: 0.5
             Label:
                 text: 'Number of Processes (Max 25):'
             TextInput:
+                id: num_processes
                 multiline: 'False'
         GridLayout:
             cols: 2
+            size_hint_y: 0.2
             Button:
                 text: 'Back'
                 on_press:
@@ -36,17 +42,41 @@
             Button:
                 text: 'Submit'
                 on_press:
+                    root.load_form()
                     root.manager.transition.direction = 'left'
-                    root.mananger.current = 'fcfs1'
+                    root.manager.current = 'fcfs1'
 
 <FCFSInputScreen>:
-    GridLayout:
-        rows: 2
+    layout: layout
+    BoxLayout:
+        orientation: 'vertical'
         Label:
             text: 'FCFS CPU Scheduling'
+            size_hint_y: 0.1
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.2
+            Label:
+                text: 'Sno.'
+            Label:
+                text: 'Processes'
+            Label:
+                text: 'Arrival time (ms)'
+            Label:
+                text: 'CPU burst time (ms)'
+        BoxLayout:
+            orientation: 'vertical'
+            id: layout
         GridLayout:
+            size_hint_y: 0.2
             cols: 2
-            Label:
-                text: '1'
-            Label:
-                text: '2'
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'cpu1'
+            Button:
+                text: 'Submit'
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'fcfs1'
