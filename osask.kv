@@ -20,11 +20,33 @@
         rows: 3
         Label:
             text: 'CPU Scheduling Algorithms'
-        Button:
-            text: 'Back'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'menu'
-        Button:
-            text: 'Submit'
+        GridLayout:
+            cols: 2
+            Label:
+                text: 'Number of Processes (Max 25):'
+            TextInput:
+                multiline: 'False'
+        GridLayout:
+            cols: 2
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'menu'
+            Button:
+                text: 'Submit'
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.mananger.current = 'fcfs1'
 
+<FCFSInputScreen>:
+    GridLayout:
+        rows: 2
+        Label:
+            text: 'FCFS CPU Scheduling'
+        GridLayout:
+            cols: 2
+            Label:
+                text: '1'
+            Label:
+                text: '2'

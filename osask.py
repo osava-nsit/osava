@@ -1,5 +1,7 @@
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.dropdown import DropDown
+from kivy.uix.button import Button
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 Builder.load_file('osask.kv')
@@ -10,10 +12,14 @@ class MainMenuScreen(Screen):
 class CPUSchedulingInputScreen(Screen):
 	pass
 
+class FCFSInputScreen(Screen):
+	pass
+
 # Create the screen manager
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
 sm.add_widget(CPUSchedulingInputScreen(name='cpu1'))
+sm.add_widget(FCFSInputScreen(name='fcfs1'))
 
 class OSASK(App):
     def build(self):
