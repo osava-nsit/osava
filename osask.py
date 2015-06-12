@@ -7,21 +7,29 @@ from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
+from kivy.graphics import Color, Rectangle, Line
 # python libraries
 from functools import partial
 # algorithms
 import cpu_scheduling
 
 Builder.load_file('osask.kv')
+cpu_scheduling_type = 'FCFS'
 data_cpu = {}
 
 def on_name(instace, value, i):
+    if value == '':
+        value = 'a'
     data_cpu['name'+str(i)] = value
 
 def on_arrival(instace, value, i):
+    if value == '':
+        value = 1
     data_cpu['arrival'+str(i)] = value
 
 def on_burst(instace, value, i):
+    if value == '':
+        value = 1
     data_cpu['burst'+str(i)] = value
 
 class MainMenuScreen(Screen):
@@ -29,10 +37,16 @@ class MainMenuScreen(Screen):
 
 class CPUSchedulingScreen(Screen):
     num_processes = ObjectProperty(None)
-
+    cpu_type = ''
     # Load the form for input
     def load_form(self, *args):
-        layout = self.manager.get_screen('fcfs1').layout
+        cpu_scheduling_type = self.cpu_type
+        type_text = self.manager.get_screen('cpu2').type_text
+        type_text.clear_widgets()
+        label = Label(text=str(self.cpu_type)+' CPU Scheduling')
+        type_text.add_widget(label)
+
+        layout = self.manager.get_screen('cpu2').layout
         layout.clear_widgets()
         if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
             self.num_processes.text = "1"
@@ -57,12 +71,12 @@ class CPUSchedulingScreen(Screen):
 
             layout.add_widget(box)
 
-class FCFSInputScreen(Screen):
+class CPUInputScreen(Screen):
     def show_data(self, *args):
         print str(data_cpu)
 
     def calculate_schedule(self, *args):
-        layout = self.manager.get_screen('fcfs2').layout
+        layout = self.manager.get_screen('cpu3').layout
         layout.clear_widgets()
 
         formatted_data = []
@@ -107,15 +121,25 @@ class FCFSInputScreen(Screen):
         label = Label(text='CPU Utilization: ' + str(float(sum_time*100)/curr_time) + ' %')
         layout.add_widget(label)
 
-class FCFSOutputScreen(Screen):
+        # Draw Gantt Chart
+        gantt = self.manager.get_screen('cpu3').gantt
+        with gantt.canvas:
+           # draw a line using the default color
+           Line(points=(0, 0, 50, 100, 100, 200))
+
+           # lets draw a semi-transparent red square
+           # Color(1, 0, 0, .5, mode='rgba')
+           Rectangle(pos=gantt.pos, size=(100, 200))
+
+class CPUOutputScreen(Screen):
     layout = ObjectProperty(None)
 
 # Create the screen manager
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
 sm.add_widget(CPUSchedulingScreen(name='cpu1'))
-sm.add_widget(FCFSInputScreen(name='fcfs1'))
-sm.add_widget(FCFSOutputScreen(name='fcfs2'))
+sm.add_widget(CPUInputScreen(name='cpu2'))
+sm.add_widget(CPUOutputScreen(name='cpu3'))
 
 class OSASK(App):
     def build(self):

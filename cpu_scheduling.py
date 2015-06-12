@@ -140,76 +140,78 @@ def shortest_job_prempted(data):
 	return process_chart
 
 
-list_process_round_robin = list()
-list_process_shortest_job_non_prempted = list()
-list_process_shortest_job_prempted = list()
+###### Test code ######
 
-# Test case for round robin
-process = {}
-process['name'] = 1
-process['burst'] = 7
-process['arrival'] = 0
-list_process_round_robin += [process]
-process = {}
-process['name'] = 2
-process['burst'] = 10
-process['arrival'] = 9
-list_process_round_robin += [process]
-process = {}
-process['name'] = 3
-process['burst'] = 5
-process['arrival'] = 11
-list_process_round_robin += [process]
-process = {}
-process['name'] = 4
-process['burst'] = 7
-process['arrival'] = 12
-list_process_round_robin += [process]
+# list_process_round_robin = list()
+# list_process_shortest_job_non_prempted = list()
+# list_process_shortest_job_prempted = list()
 
-process = {}
-process['name'] = 1
-process['burst'] = 7
-process['arrival'] = 0
-list_process_shortest_job_non_prempted += [process]
-process = {}
-process['name'] = 2
-process['burst'] = 10
-process['arrival'] = 0
-list_process_shortest_job_non_prempted += [process]
-process = {}
-process['name'] = 3
-process['burst'] = 5
-process['arrival'] = 0
-list_process_shortest_job_non_prempted += [process]
-process = {}
-process['name'] = 4
-process['burst'] = 7
-process['arrival'] = 0
-list_process_shortest_job_non_prempted += [process]
+# # Test case for round robin
+# process = {}
+# process['name'] = 1
+# process['burst'] = 7
+# process['arrival'] = 0
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 2
+# process['burst'] = 10
+# process['arrival'] = 9
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 3
+# process['burst'] = 5
+# process['arrival'] = 11
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 4
+# process['burst'] = 7
+# process['arrival'] = 12
+# list_process_round_robin += [process]
+
+# process = {}
+# process['name'] = 1
+# process['burst'] = 7
+# process['arrival'] = 0
+# list_process_shortest_job_non_prempted += [process]
+# process = {}
+# process['name'] = 2
+# process['burst'] = 10
+# process['arrival'] = 0
+# list_process_shortest_job_non_prempted += [process]
+# process = {}
+# process['name'] = 3
+# process['burst'] = 5
+# process['arrival'] = 0
+# list_process_shortest_job_non_prempted += [process]
+# process = {}
+# process['name'] = 4
+# process['burst'] = 7
+# process['arrival'] = 0
+# list_process_shortest_job_non_prempted += [process]
 
 
-process = {}
-process['name'] = 1
-process['burst'] = 7
-process['arrival'] = 0
-list_process_shortest_job_prempted += [process]
-process = {}
-process['name'] = 2
-process['burst'] = 4
-process['arrival'] = 4
-list_process_shortest_job_prempted += [process]
-process = {}
-process['name'] = 3
-process['burst'] = 5
-process['arrival'] = 1
-list_process_shortest_job_prempted += [process]
-process = {}
-process['name'] = 4
-process['burst'] = 2
-process['arrival'] = 5
-list_process_shortest_job_prempted += [process]
-#val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
-val = shortest_job_prempted(list_process_shortest_job_prempted)
-#val = round_robin(list_process_round_robin,4)
-for x in val:
-	print str(x['name'])+ " "+str(x['start']) + " " + str(x['end'])
+# process = {}
+# process['name'] = 1
+# process['burst'] = 7
+# process['arrival'] = 0
+# list_process_shortest_job_prempted += [process]
+# process = {}
+# process['name'] = 2
+# process['burst'] = 4
+# process['arrival'] = 4
+# list_process_shortest_job_prempted += [process]
+# process = {}
+# process['name'] = 3
+# process['burst'] = 5
+# process['arrival'] = 1
+# list_process_shortest_job_prempted += [process]
+# process = {}
+# process['name'] = 4
+# process['burst'] = 2
+# process['arrival'] = 5
+# list_process_shortest_job_prempted += [process]
+# #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
+# val = shortest_job_prempted(list_process_shortest_job_prempted)
+# #val = round_robin(list_process_round_robin,4)
+# for x in val:
+# 	print str(x['name'])+ " "+str(x['start']) + " " + str(x['end'])

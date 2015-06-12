@@ -18,41 +18,68 @@
 
 <CPUSchedulingScreen>:
     num_processes: num_processes
-    GridLayout:
-        rows: 3
+    BoxLayout:
+        orientation: 'vertical'
         Label:
             text: 'CPU Scheduling Algorithms'
             size_hint_y: 0.1
-        GridLayout:
-            cols: 2
-            size_hint_y: 0.5
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.2
             Label:
                 text: 'Number of Processes (Max 25):'
             TextInput:
                 id: num_processes
                 multiline: 'False'
-        GridLayout:
-            cols: 2
-            size_hint_y: 0.2
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.7
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'FCFS'
+                    on_press:
+                        root.cpu_type = 'FCFS'
+                        root.load_form()
+                        root.manager.transition.direction = 'left'
+                        root.manager.current = 'cpu2'
+                Button:
+                    text: 'Round Robin'
+                    on_press:
+                        root.cpu_type = 'Round Robin'
+                        root.load_form()
+                        root.manager.transition.direction = 'left'
+                        root.manager.current = 'cpu2'
+            BoxLayout:
+                orientation: 'horizontal'
+                Button:
+                    text: 'SJF Non-Preemptive'
+                    on_press:
+                        root.cpu_type = 'SJF Non-Preemptive'
+                        root.load_form()
+                        root.manager.transition.direction = 'left'
+                        root.manager.current = 'cpu2'
+                Button:
+                    text: 'SJF Preemptive'
+                    on_press:
+                        root.cpu_type = 'SJF Preemptive'
+                        root.load_form()
+                        root.manager.transition.direction = 'left'
+                        root.manager.current = 'cpu2'
             Button:
                 text: 'Back'
                 on_press:
                     root.manager.transition.direction = 'right'
                     root.manager.current = 'menu'
-            Button:
-                text: 'FCFS'
-                on_press:
-                    root.load_form()
-                    root.manager.transition.direction = 'left'
-                    root.manager.current = 'fcfs1'
 
-<FCFSInputScreen>:
+<CPUInputScreen>:
     layout: layout
+    type_text: type_text
     BoxLayout:
         orientation: 'vertical'
-        Label:
-            text: 'FCFS CPU Scheduling'
+        BoxLayout:
             size_hint_y: 0.1
+            id: type_text
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: 0.2
@@ -80,11 +107,13 @@
                 on_press:
                     root.calculate_schedule()
                     root.manager.transition.direction = 'left'
-                    root.manager.current = 'fcfs2'
+                    root.manager.current = 'cpu3'
 
-<FCFSOutputScreen>:
+<CPUOutputScreen>:
     layout: layout
+    gantt: gantt
     BoxLayout:
+        size_hint_y: 0.8
         orientation: 'vertical'
         Label:
             text: 'The processes will be scheduled as follows:'
@@ -100,6 +129,9 @@
         BoxLayout:
             orientation: 'vertical'
             id: layout
+        BoxLayout:
+            size_hint_y: 0.2
+            id: gantt
         GridLayout:
             size_hint_y: 0.2
             cols: 2
@@ -107,6 +139,7 @@
                 text: 'Back'
                 on_press:
                     root.manager.transition.direction = 'right'
-                    root.manager.current = 'cpu1'
+                    root.manager.current = 'cpu2'
             Button:
                 text: 'Exit'
+                on_press: root.stop()
