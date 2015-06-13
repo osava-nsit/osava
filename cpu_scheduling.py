@@ -35,12 +35,26 @@ def fcfs(data):
 
 def round_robin(data,max_quanta=20):
 	time_present = 0
+    	wait_time = 0
+    	turn_time = 0
+    	sum_time = 0
 	count = 0
+	
+	details_process = []
+
 	q = Queue.Queue(maxsize=0)
 	for process in data:
 		q.put(process)
 		count += 1
-	
+		temp_val = {}
+		temp_val['name'] = process['name']
+		temp_val['arrival'] = process['arrival']
+		temp_val['burst'] = process['burst']
+		temp_val['flag'] = 0
+		temp_val['start'] = -1
+		temp_val['end'] = -1
+		details_process += [temp_val]
+		
 	process_chart = []
 	active_process = []
 	var_count = 0
@@ -50,6 +64,11 @@ def round_robin(data,max_quanta=20):
 			
 		if temp_process['burst'] > 0 and temp_process['arrival'] <= time_present:
 			#print str(temp_process['name']) + " " + str(temp_process['burst']) + " " + str(time_present)
+			for data in details_process:
+				if data['name'] == temp_process['name'] and data['flag'] == 0:
+					data['start'] = time_present
+					data['flag'] = 1
+
 			quanta = max_quanta
 			var_count = 0
 			chart_details['name'] = temp_process['name']
@@ -65,6 +84,9 @@ def round_robin(data,max_quanta=20):
 				active_process.append(temp_process)
 			else:
 				if temp_process in active_process:
+					for data in details_process:
+						if data['name'] == temp_process['name']:
+							data['end'] = time_present
 					active_process.remove(temp_process)
 					count -= 1
 			
@@ -93,7 +115,21 @@ def round_robin(data,max_quanta=20):
 			
 		if q.empty():
 			break
-	return process_chart
+	for data in details_process:
+    		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
+    		turn_time += (data['end'] - data['arrival'])
+    		sum_time += data['burst']
+	
+	curr_time = time_present
+	print curr_time
+	stats = {}
+	stats['sum_time'] = sum_time
+	stats['wait_time'] = float(wait_time)/len(details_process)
+	stats['turn_time'] = float(turn_time)/len(details_process)
+	stats['throughput'] = len(details_process)*1000/float(curr_time)
+	stats['cpu_utilization'] = float(sum_time)*100/curr_time
+		
+	return process_chart,stats
 
 def shortest_job_non_prempted(data):
 	all_processes = sorted(data, key=itemgetter('burst'))
@@ -166,31 +202,31 @@ def shortest_job_prempted(data):
 
 ###### Test code ######
 
-# list_process_round_robin = list()
+list_process_round_robin = list()
 # list_process_shortest_job_non_prempted = list()
 # list_process_shortest_job_prempted = list()
 
 # # Test case for round robin
-# process = {}
-# process['name'] = 1
-# process['burst'] = 7
-# process['arrival'] = 0
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 2
-# process['burst'] = 10
-# process['arrival'] = 9
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 3
-# process['burst'] = 5
-# process['arrival'] = 11
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 4
-# process['burst'] = 7
-# process['arrival'] = 12
-# list_process_round_robin += [process]
+process = {}
+process['name'] = 1
+process['burst'] = 7
+process['arrival'] = 0
+list_process_round_robin += [process]
+process = {}
+process['name'] = 2
+process['burst'] = 10
+process['arrival'] = 9
+list_process_round_robin += [process]
+process = {}
+process['name'] = 3
+process['burst'] = 5
+process['arrival'] = 11
+list_process_round_robin += [process]
+process = {}
+process['name'] = 4
+process['burst'] = 7
+process['arrival'] = 12
+list_process_round_robin += [process]
 
 # process = {}
 # process['name'] = 1
@@ -236,6 +272,5 @@ def shortest_job_prempted(data):
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-# #val = round_robin(list_process_round_robin,4)
-# for x in val:
-# 	print str(x['name'])+ " "+str(x['start']) + " " + str(x['end'])
+xyz,x = round_robin(list_process_round_robin,4)
+print str(x['cpu_utilization'])+ " "+str(x['wait_time'])+ " "+str(x['sum_time']) + " " + str(x['throughput'])
