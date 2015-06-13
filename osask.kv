@@ -105,20 +105,23 @@
             Button:
                 text: 'Submit'
                 on_press:
-                    root.calculate_schedule()
+                    #root.calculate_schedule()
                     root.manager.transition.direction = 'left'
                     root.manager.current = 'cpu3'
 
 <CPUOutputScreen>:
     layout: layout
     gantt: gantt
+    time: time
+    on_pre_enter: root.calculate_schedule()
+    on_enter: root.draw_gantt()
     BoxLayout:
-        size_hint_y: 0.8
         orientation: 'vertical'
         Label:
             text: 'The processes will be scheduled as follows:'
-            size_hint_y: 0.15
+            size_hint_y: 0.1
         BoxLayout:
+            size_hint_y: 0.1
             orientation: 'horizontal'
             Label:
                 text: 'Process'
@@ -127,13 +130,19 @@
             Label:
                 text: 'End time'
         BoxLayout:
+            size_hint_y: 0.4
             orientation: 'vertical'
             id: layout
         BoxLayout:
-            size_hint_y: 0.2
+            size_hint_y: 0.3
+            orientation: 'horizontal'
             id: gantt
+        BoxLayout:
+            size_hint_y: 0.1
+            orientation: 'horizontal'
+            id: time
         GridLayout:
-            size_hint_y: 0.2
+            size_hint_y: 0.1
             cols: 2
             Button:
                 text: 'Back'

@@ -2,16 +2,38 @@ from operator import itemgetter
 import Queue
 
 def fcfs(data):
-	schedule = sorted(data, key=itemgetter('arrival'))
-	# curr_time = 0
-	# wait_time = 0
-	# turn_time = 0
-	# for process in schedule:
-	# 	if process['arrival'] > curr_time:
-	# 		curr_time = process['arrival']
-	return schedule
+    processes = sorted(data, key=itemgetter('arrival'))
+    process_chart = []
+    curr_time = 0
+    wait_time = 0
+    turn_time = 0
+    sum_time = 0
+    for process in processes:
+        chart_details = {}
+        if (process['arrival'] > curr_time):
+            curr_time = process['arrival']
 
-def round_robin(data,max_quanta):
+        chart_details['name'] = process['name']
+        chart_details['start'] = curr_time
+        chart_details['end'] = curr_time + process['burst']
+
+        wait_time += (curr_time - process['arrival'])
+        curr_time += process['burst']
+        turn_time += (curr_time - process['arrival'])
+        sum_time += process['burst']
+
+        process_chart += [chart_details]
+
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(wait_time)/len(processes)
+    stats['turn_time'] = float(turn_time)/len(processes)
+    stats['throughput'] = len(processes)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/curr_time
+
+    return process_chart, stats 
+
+def round_robin(data,max_quanta=20):
 	time_present = 0
 	count = 0
 	q = Queue.Queue(maxsize=0)
@@ -21,6 +43,7 @@ def round_robin(data,max_quanta):
 	
 	process_chart = []
 	active_process = []
+	var_count = 0
 	while True:
 		chart_details = {}
 		temp_process = q.get()
@@ -41,8 +64,9 @@ def round_robin(data,max_quanta):
 				q.put(temp_process)
 				active_process.append(temp_process)
 			else:
-				active_process.remove(temp_process)
-				count -= 1
+				if temp_process in active_process:
+					active_process.remove(temp_process)
+					count -= 1
 			
 			time_present += quanta
 			chart_details['end'] = time_present
