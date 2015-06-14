@@ -36,9 +36,9 @@ def fcfs(data):
 def round_robin(data,max_quanta=4):
 	all_processes = sorted(data, key=itemgetter('arrival'))
 	time_present = 0
-    	wait_time = 0
-    	turn_time = 0
-    	sum_time = 0
+	wait_time = 0
+	turn_time = 0
+	sum_time = 0
 	count = 0
 	
 	details_process = []
@@ -80,7 +80,7 @@ def round_robin(data,max_quanta=4):
 			else:
 				quanta = temp_process['burst']
 				temp_process['burst'] = 0
-			print str(temp_process['burst']) + "---"
+			# print str(temp_process['burst']) + "---"
 			if temp_process['burst'] > 0:
 				q.put(temp_process)
 				time_present += quanta
@@ -122,9 +122,9 @@ def round_robin(data,max_quanta=4):
 			break
 
 	for data in details_process:
-    		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
-    		turn_time += (data['end'] - data['arrival'])
-    		sum_time += data['burst']
+		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
+		turn_time += (data['end'] - data['arrival'])
+		sum_time += data['burst']
 
 	curr_time = time_present
 	stats = {}
