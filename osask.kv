@@ -39,14 +39,14 @@
                 Button:
                     text: 'FCFS'
                     on_press:
-                        root.cpu_type = 'FCFS'
+                        root.cpu_type = 0
                         root.load_form()
                         root.manager.transition.direction = 'left'
                         root.manager.current = 'cpu2'
                 Button:
                     text: 'Round Robin'
                     on_press:
-                        root.cpu_type = 'Round Robin'
+                        root.cpu_type = 1
                         root.load_form()
                         root.manager.transition.direction = 'left'
                         root.manager.current = 'cpu2'
@@ -55,14 +55,14 @@
                 Button:
                     text: 'SJF Non-Preemptive'
                     on_press:
-                        root.cpu_type = 'SJF Non-Preemptive'
+                        root.cpu_type = 2
                         root.load_form()
                         root.manager.transition.direction = 'left'
                         root.manager.current = 'cpu2'
                 Button:
                     text: 'SJF Preemptive'
                     on_press:
-                        root.cpu_type = 'SJF Preemptive'
+                        root.cpu_type = 3
                         root.load_form()
                         root.manager.transition.direction = 'left'
                         root.manager.current = 'cpu2'
