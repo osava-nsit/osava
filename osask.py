@@ -20,6 +20,9 @@ cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemp
 cpu_scheduling_type = 0
 data_cpu = {}
 
+def SET_CPU_TYPE(value):
+    cpu_scheduling_type = value
+
 def on_name(instace, value, i):
     if value == '':
         value = 'a'
@@ -35,6 +38,11 @@ def on_burst(instace, value, i):
         value = 1
     data_cpu['burst'+str(i)] = value
 
+def on_quantum(instace, value):
+    if value == '':
+        value = 2
+    data_cpu['quantum'] = value
+
 class MainMenuScreen(Screen):
     pass
 
@@ -43,6 +51,8 @@ class CPUSchedulingScreen(Screen):
     cpu_type = 0
     # Load the form for input
     def load_form(self, *args):
+        # SET_CPU_TYPE(self.cpu_type)
+        global cpu_scheduling_type;
         cpu_scheduling_type = self.cpu_type
         cpu_scheduling_type_text = cpu_scheduling_types[self.cpu_type]
         type_text = self.manager.get_screen('cpu2').type_text
@@ -74,6 +84,14 @@ class CPUSchedulingScreen(Screen):
             box.add_widget(inp)
 
             layout.add_widget(box)
+        if self.cpu_type == 1:
+            box = BoxLayout(orientation='horizontal')
+            inp = TextInput(id='quantum')
+            inp.bind(text=on_quantum)
+            label = Label(text='Time quantum')
+            box.add_widget(label)
+            box.add_widget(inp)
+            layout.add_widget(box)
 
 class CPUInputScreen(Screen):
     def show_data(self, *args):
@@ -104,7 +122,7 @@ class CPUOutputScreen(Screen):
         if cpu_scheduling_type == 0:
             self.cpu_schedule, self.stats = cpu_scheduling.fcfs(formatted_data)
         elif cpu_scheduling_type == 1:
-            self.cpu_schedule, self.stats = cpu_scheduling.round_robin(formatted_data)
+            self.cpu_schedule, self.stats = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
 
         # Display process schedule details
         for process in self.cpu_schedule:
