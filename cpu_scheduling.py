@@ -34,6 +34,7 @@ def fcfs(data):
     return process_chart, stats 
 
 def round_robin(data,max_quanta=4):
+	all_processes = sorted(data, key=itemgetter('arrival'))
 	time_present = 0
     	wait_time = 0
     	turn_time = 0
@@ -43,7 +44,7 @@ def round_robin(data,max_quanta=4):
 	details_process = []
 
 	q = Queue.Queue(maxsize=0)
-	for process in data:
+	for process in all_processes:
 		q.put(process)
 		count += 1
 		temp_val = {}
@@ -55,6 +56,7 @@ def round_robin(data,max_quanta=4):
 		temp_val['end'] = -1
 		details_process += [temp_val]
 		del temp_val
+
 	process_chart = []
 	active_process = []
 	var_count = 0
@@ -63,7 +65,6 @@ def round_robin(data,max_quanta=4):
 		temp_process = q.get()
 			
 		if temp_process['burst'] > 0 and temp_process['arrival'] <= time_present:
-			#print str(temp_process['name']) + " " + str(temp_process['burst']) + " " + str(time_present)
 			for data in details_process:
 				if data['name'] == temp_process['name'] and data['flag'] == 0:
 					data['start'] = time_present
@@ -73,12 +74,13 @@ def round_robin(data,max_quanta=4):
 			var_count = 0
 			chart_details['name'] = temp_process['name']
 			chart_details['start'] = time_present
+
 			if temp_process['burst'] >= max_quanta:
 				temp_process['burst'] -= max_quanta
 			else:
 				quanta = temp_process['burst']
 				temp_process['burst'] = 0
-
+			print str(temp_process['burst']) + "---"
 			if temp_process['burst'] > 0:
 				q.put(temp_process)
 				time_present += quanta
@@ -99,6 +101,7 @@ def round_robin(data,max_quanta=4):
 				if temp_dict['name'] == chart_details['name']:
 					chart_details['start'] = temp_dict['start']
 					del process_chart[-1]
+			
 			process_chart += [chart_details]
 				
 		else:
@@ -242,13 +245,13 @@ def priority_non_preemptive(data):
 	
 ###### Test code ######
 
-list_process_round_robin = list()
+#list_process_round_robin = list()
 # list_process_shortest_job_non_prempted = list()
 # list_process_shortest_job_prempted = list()
 
 # # Test case for round robin
 
-process = {}
+"""process = {}
 process['name'] = 1
 process['burst'] = 5
 process['arrival'] = 2
@@ -278,7 +281,7 @@ process['burst'] = 3
 process['arrival'] = 2
 process['priority'] = 5
 list_process_round_robin += [process]
-
+"""
 # process = {}
 # process['name'] = 1
 # process['burst'] = 7
@@ -323,8 +326,8 @@ list_process_round_robin += [process]
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-xyz,p= round_robin(list_process_round_robin)
-for x in xyz:
-	print str(x['name'])
+#xyz,p = round_robin(list_process_round_robin,2)
+#for x in xyz:
+#	print str(x['name'])
 
 
