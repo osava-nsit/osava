@@ -16,7 +16,8 @@ from random import random
 import cpu_scheduling
 
 Builder.load_file('osask.kv')
-cpu_scheduling_type = 'FCFS'
+cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive']
+cpu_scheduling_type = 0
 data_cpu = {}
 
 def on_name(instace, value, i):
@@ -39,13 +40,14 @@ class MainMenuScreen(Screen):
 
 class CPUSchedulingScreen(Screen):
     num_processes = ObjectProperty(None)
-    cpu_type = ''
+    cpu_type = 0
     # Load the form for input
     def load_form(self, *args):
         cpu_scheduling_type = self.cpu_type
+        cpu_scheduling_type_text = cpu_scheduling_types[self.cpu_type]
         type_text = self.manager.get_screen('cpu2').type_text
         type_text.clear_widgets()
-        label = Label(text=str(self.cpu_type)+' CPU Scheduling')
+        label = Label(text=str(cpu_scheduling_type_text)+' CPU Scheduling')
         type_text.add_widget(label)
 
         layout = self.manager.get_screen('cpu2').layout
@@ -98,7 +100,11 @@ class CPUOutputScreen(Screen):
             process['arrival'] = int(data_cpu['arrival'+str(i)])
             process['burst'] = int(data_cpu['burst'+str(i)])
             formatted_data.append(process)
-        self.cpu_schedule, self.stats = cpu_scheduling.fcfs(formatted_data)
+
+        if cpu_scheduling_type == 0:
+            self.cpu_schedule, self.stats = cpu_scheduling.fcfs(formatted_data)
+        elif cpu_scheduling_type == 1:
+            self.cpu_schedule, self.stats = cpu_scheduling.round_robin(formatted_data)
 
         # Display process schedule details
         for process in self.cpu_schedule:
