@@ -54,7 +54,7 @@ def round_robin(data,max_quanta=20):
 		temp_val['start'] = -1
 		temp_val['end'] = -1
 		details_process += [temp_val]
-		
+		del temp_val
 	process_chart = []
 	active_process = []
 	var_count = 0
@@ -81,16 +81,18 @@ def round_robin(data,max_quanta=20):
 
 			if temp_process['burst'] > 0:
 				q.put(temp_process)
+				time_present += quanta
 				active_process.append(temp_process)
 			else:
+				time_present += quanta
+				for data in details_process:
+					if data['name'] == temp_process['name'] and data['flag'] == 1:
+						data['end'] = time_present
+
 				if temp_process in active_process:
-					for data in details_process:
-						if data['name'] == temp_process['name']:
-							data['end'] = time_present
 					active_process.remove(temp_process)
 					count -= 1
 			
-			time_present += quanta
 			chart_details['end'] = time_present
 			if len(process_chart) > 0:
 				temp_dict = process_chart[-1]
@@ -116,12 +118,17 @@ def round_robin(data,max_quanta=20):
 		if q.empty():
 			break
 	for data in details_process:
+		print str(data['end']) +" "+str(data['start'])+" "+str(data['arrival'])
+		
+
+
+	for data in details_process:
     		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
     		turn_time += (data['end'] - data['arrival'])
     		sum_time += data['burst']
-	
+		print str(wait_time) +" "+str(turn_time)+" "+str(sum_time)
+
 	curr_time = time_present
-	print curr_time
 	stats = {}
 	stats['sum_time'] = sum_time
 	stats['wait_time'] = float(wait_time)/len(details_process)
@@ -207,25 +214,31 @@ list_process_round_robin = list()
 # list_process_shortest_job_prempted = list()
 
 # # Test case for round robin
+
 process = {}
 process['name'] = 1
-process['burst'] = 7
-process['arrival'] = 0
+process['burst'] = 10
+process['arrival'] = 2
 list_process_round_robin += [process]
 process = {}
 process['name'] = 2
-process['burst'] = 10
-process['arrival'] = 9
+process['burst'] = 5
+process['arrival'] = 1
 list_process_round_robin += [process]
 process = {}
 process['name'] = 3
-process['burst'] = 5
-process['arrival'] = 11
+process['burst'] = 3
+process['arrival'] = 0
 list_process_round_robin += [process]
 process = {}
 process['name'] = 4
-process['burst'] = 7
-process['arrival'] = 12
+process['burst'] = 5
+process['arrival'] = 2
+list_process_round_robin += [process]
+process = {}
+process['name'] = 5
+process['burst'] = 10
+process['arrival'] = 3
 list_process_round_robin += [process]
 
 # process = {}
@@ -272,5 +285,7 @@ list_process_round_robin += [process]
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-xyz,x = round_robin(list_process_round_robin,4)
-print str(x['cpu_utilization'])+ " "+str(x['wait_time'])+ " "+str(x['sum_time']) + " " + str(x['throughput'])
+xyz,x = round_robin(list_process_round_robin)
+print str(x['cpu_utilization'])+ " "+str(x['wait_time'])+ " "+str(x['sum_time']) + " " + str(x['throughput']) + " "+str(x['turn_time'])
+
+
