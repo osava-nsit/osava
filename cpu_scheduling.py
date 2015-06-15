@@ -22,21 +22,19 @@ def fcfs(data):
         turn_time += (curr_time - process['arrival'])
         sum_time += process['burst']
 
-	if len(process_chart) > 0:
-		if process_chart[-1]['end'] != chart_details['start']:
-			idle_cpu = dict()
-			idle_cpu['name'] = 'Idle'
-			idle_cpu['start'] = process_chart[-1]['end']
-			idle_cpu['end'] = chart_details['start']
-			process_chart += [idle_cpu]
-			del idle_cpu
-	elif len(process_chart) == 0:
-		idle_cpu = dict()
+        if len(process_chart) > 0:
+            if process_chart[-1]['end'] != chart_details['start']:
+                idle_cpu = dict()
                 idle_cpu['name'] = 'Idle'
-                idle_cpu['start'] = 0
+                idle_cpu['start'] = process_chart[-1]['end']
                 idle_cpu['end'] = chart_details['start']
                 process_chart += [idle_cpu]
-                del idle_cpu
+        elif len(process_chart) == 0 and chart_details['start'] > 0:
+            idle_cpu = dict()
+            idle_cpu['name'] = 'Idle'
+            idle_cpu['start'] = 0
+            idle_cpu['end'] = chart_details['start']
+            process_chart += [idle_cpu]
 
         process_chart += [chart_details]
 	
