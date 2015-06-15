@@ -22,7 +22,24 @@ def fcfs(data):
         turn_time += (curr_time - process['arrival'])
         sum_time += process['burst']
 
+	if len(process_chart) > 0:
+		if process_chart[-1]['end'] != chart_details['start']:
+			idle_cpu = dict()
+			idle_cpu['name'] = 'Idle'
+			idle_cpu['start'] = process_chart[-1]['end']
+			idle_cpu['end'] = chart_details['start']
+			process_chart += [idle_cpu]
+			del idle_cpu
+	elif len(process_chart) == 0:
+		idle_cpu = dict()
+                idle_cpu['name'] = 'Idle'
+                idle_cpu['start'] = 0
+                idle_cpu['end'] = chart_details['start']
+                process_chart += [idle_cpu]
+                del idle_cpu
+
         process_chart += [chart_details]
+	
 
     stats = {}
     stats['sum_time'] = sum_time
@@ -245,13 +262,13 @@ def priority_non_preemptive(data):
 	
 ###### Test code ######
 
-#list_process_round_robin = list()
+list_process_round_robin = list()
 # list_process_shortest_job_non_prempted = list()
 # list_process_shortest_job_prempted = list()
 
 # # Test case for round robin
 
-"""process = {}
+process = {}
 process['name'] = 1
 process['burst'] = 5
 process['arrival'] = 2
@@ -281,7 +298,8 @@ process['burst'] = 3
 process['arrival'] = 2
 process['priority'] = 5
 list_process_round_robin += [process]
-"""
+
+
 # process = {}
 # process['name'] = 1
 # process['burst'] = 7
@@ -326,8 +344,8 @@ list_process_round_robin += [process]
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-#xyz,p = round_robin(list_process_round_robin,2)
-#for x in xyz:
-#	print str(x['name'])
+xyz,p = fcfs(list_process_round_robin)
+for x in xyz:
+	print str(x['name'])
 
 
