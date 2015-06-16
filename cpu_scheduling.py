@@ -46,7 +46,7 @@ def fcfs(data):
     stats['throughput'] = len(processes)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
-    return process_chart, stats 
+    return process_chart,stats 
 
 def round_robin(data,max_quanta=4):
 	all_processes = sorted(data, key=itemgetter('arrival'))
@@ -95,7 +95,7 @@ def round_robin(data,max_quanta=4):
 			else:
 				quanta = temp_process['burst']
 				temp_process['burst'] = 0
-			# print str(temp_process['burst']) + "---"
+
 			if temp_process['burst'] > 0:
 				q.put(temp_process)
 				time_present += quanta
@@ -153,21 +153,28 @@ def round_robin(data,max_quanta=4):
 
 def shortest_job_non_prempted(data):
 	all_processes = sorted(data, key=itemgetter('burst'))
-	time_present = 0
-    	wait_time = 0
-    	turn_time = 0
-    	sum_time = 0
+	time_present = 0 
 	var = 0
+        wait_time = 0 
+        turn_time = 0 
+        sum_time = 0
 	completed_processes = list()
-	process_chart = []
+	process_chart = list()
+	data_process = list()
 	while True:
 		for process in all_processes:
 			chart_details = {}	
 			if process['burst'] > 0 and process['arrival'] <= time_present:
+				details_process = {}
 				chart_details['name'] = process['name']
+				details_process['name'] = process['name']
+				details_process['burst'] = process['burst']
+				details_process['arrival'] = process['arrival']
+				details_process['start'] = time_present
 				chart_details['start'] = time_present
 				time_present += process['burst']
 				chart_details['end'] = time_present
+				details_process['end'] = time_present
 				process['burst'] = 0
 				completed_processes.append(process)
 				if len(process_chart) > 0:
@@ -177,15 +184,54 @@ def shortest_job_non_prempted(data):
 						del process_chart[-1]	
 				process_chart += [chart_details]
 				var = 0
+				data_process += [details_process]
 			else:
 				var += 1
 				if var == len(all_processes):
-					time_present += 1
 					var = 0
+					if len(process_chart) > 0:
+						if process_chart[-1]['name'] == 'Idle':
+                        			    	idle_cpu = dict()
+							time_present += 1
+	                				idle_cpu['end'] = time_present
+               						del process_chart[-1]
+               						process_chart += [idle_cpu]
+               						del idle_cpu
+               					else:
+               						idle_cpu = dict()
+               						idle_cpu['name'] = 'Idle'
+               						idle_cpu['start'] = time_present
+                					time_present += 1
+               						idle_cpu['end'] = time_present
+               						del process_chart[-1]
+               						process_chart += [idle_cpu]
+               						del idle_cpu
+        				elif len(process_chart) == 0:
+            					idle_cpu = dict()
+            					idle_cpu['name'] = 'Idle'
+            					idle_cpu['start'] = 0
+            					time_present += 1
+            					idle_cpu['end'] = time_present
+            					process_chart += [idle_cpu]
+          		  			del idle_cpu
 
 		if len(all_processes) == len(completed_processes):	
 			break
-	return process_chart
+
+	for data in data_process:
+		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
+		turn_time += (data['end'] - data['arrival'])
+		sum_time += data['burst']
+
+	curr_time = time_present
+	stats = {}
+	stats['sum_time'] = sum_time
+	stats['wait_time'] = float(wait_time)/len(data_process)
+	stats['turn_time'] = float(turn_time)/len(data_process)
+	stats['throughput'] = len(data_process)*1000/float(curr_time)
+	stats['cpu_utilization'] = float(sum_time)*100/curr_time
+	
+	return process_chart,stats
 	
 def shortest_job_prempted(data):
 	all_processes = sorted(data, key=itemgetter('burst'))
@@ -342,8 +388,8 @@ list_process_round_robin += [process]
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-xyz,p = fcfs(list_process_round_robin)
+xyz,p = shortest_job_non_prempted(list_process_round_robin)
 for x in xyz:
 	print str(x['name'])
 
-
+print str(p['turn_time']) + " " + str(p['wait_time']) + " " + str(p['throughput'])
