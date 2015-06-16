@@ -209,7 +209,6 @@ def shortest_job_non_prempted(data):
 				process_chart += [chart_details]
 				var = 0
 				data_process += [details_process]
-                del details_process
 			else:
 				var += 1
 				if var == len(all_processes):
@@ -227,9 +226,7 @@ def shortest_job_non_prempted(data):
                						idle_cpu['start'] = time_present
                 					time_present += 1
                						idle_cpu['end'] = time_present
-               						del process_chart[-1]
                						process_chart += [idle_cpu]
-               						del idle_cpu
         				elif len(process_chart) == 0:
             					idle_cpu = dict()
             					idle_cpu['name'] = 'Idle'
@@ -237,7 +234,6 @@ def shortest_job_non_prempted(data):
             					time_present += 1
             					idle_cpu['end'] = time_present
             					process_chart += [idle_cpu]
-          		  			del idle_cpu
 
 		if len(all_processes) == len(completed_processes):	
 			break
