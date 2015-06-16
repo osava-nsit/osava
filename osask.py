@@ -124,6 +124,8 @@ class CPUOutputScreen(Screen):
             self.cpu_schedule, self.stats = cpu_scheduling.fcfs(formatted_data)
         elif cpu_scheduling_type == 1:
             self.cpu_schedule, self.stats = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
+        elif cpu_scheduling_type == 2:
+            self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_non_prempted(formatted_data)
 
         # Display process schedule details
         for process in self.cpu_schedule:
@@ -161,7 +163,8 @@ class CPUOutputScreen(Screen):
             # Starting position of rectangle
             pos_x = gantt.pos[0]+margin_left
             # Increment in width per unit time
-            inc = gantt.size[0]/(self.stats['sum_time']*2)
+            # inc = gantt.size[0]/(self.stats['sum_time']*2)
+            inc = gantt.size[0]/(self.cpu_schedule[-1]['end']*1.5)
 
             # Add description labels
             label = Label(text='Gantt Chart: ', size_hint_x=None, width=margin_left)
