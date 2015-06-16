@@ -130,8 +130,8 @@ def round_robin(data,max_quanta=4):
 				var_count += 1
 				if var_count == count:
 					if len(process_chart) > 0:
-						if process[-1]['name'] == 'Idle':
-							chart_details = process[-1]
+						if process_chart[-1]['name'] == 'Idle':
+							chart_details = process_chart[-1]
 							time_present += quanta
 							chart_details['end'] = time_present
 							del process_chart[-1]	
@@ -152,8 +152,6 @@ def round_robin(data,max_quanta=4):
 						chart_details['end'] = time_present
 						process_chart += [chart_details]
 						del chart_details
-							
-					
 					var_count = 0
 			q.put(temp_process)
 			
@@ -201,14 +199,17 @@ def shortest_job_non_prempted(data):
 				details_process['end'] = time_present
 				process['burst'] = 0
 				completed_processes.append(process)
+				"""
 				if len(process_chart) > 0:
 					temp_dict = process_chart[-1]
 					if temp_dict['name'] == chart_details['name']:
 						chart_details['start'] = temp_dict['start']
 						del process_chart[-1]	
+				"""
 				process_chart += [chart_details]
 				var = 0
 				data_process += [details_process]
+                del details_process
 			else:
 				var += 1
 				if var == len(all_processes):
