@@ -126,6 +126,8 @@ class CPUOutputScreen(Screen):
             self.cpu_schedule, self.stats = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
         elif cpu_scheduling_type == 2:
             self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_non_prempted(formatted_data)
+        elif cpu_scheduling_type == 3:
+            self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_prempted(formatted_data)
 
         # Display process schedule details
         for process in self.cpu_schedule:
