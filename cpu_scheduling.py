@@ -440,6 +440,108 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 	
 	return process_chart,stats
 	
+def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0):
+	all_processes = sorted(data, key=itemgetter('priority'))
+	time_present = 0
+        wait_time = 0 
+        turn_time = 0 
+        sum_time = 0
+	var = 0
+	process_chart = list()
+	details_process = list()
+	for process in all_processes:
+		temp_val = {}
+		temp_val['name'] = process['name']
+		temp_val['arrival'] = process['arrival']
+		temp_val['burst'] = process['burst']
+		temp_val['flag'] = 0
+		temp_val['start'] = -1
+		temp_val['end'] = -1
+		details_process += [temp_val]
+		del temp_val
+
+	while True:	
+		for process in all_processes:
+			chart_details = {}
+			if process['burst'] > 0 and process['arrival'] <= time_present:
+				print str(process['name']) + " " + str(process['priority'])
+				for data in details_process:
+					if data['name'] == process['name'] and data['flag'] == 0:
+						data['start'] = time_present
+						data['flag'] = 1
+
+				chart_details['name'] = process['name']
+				chart_details['start'] = time_present
+				time_present += 1
+				chart_details['end'] = time_present
+				process['burst'] -= 1
+				for val_process in all_processes:
+					if val_process['arrival'] < time_present and val_process['name'] != process['name'] and val_process['burst'] > 0:
+						val_process['wait_time'] += 1
+						val_process['priority']	 -= (val_process['wait_time'] / increment_after_time)
+						val_process['wait_time'] = val_process['wait_time'] % increment_after_time
+						if val_process['priority'] < upper_limit_priority:
+							val_process['priority'] = upper_limit_priority
+				if process['burst'] == 0:
+					for data in details_process:
+						if data['name'] == process['name'] and data['flag'] == 1:
+							data['end'] = time_present
+
+					all_processes.remove(process)
+				if len(process_chart) > 0:
+					temp_dict = process_chart[-1]
+					if temp_dict['name'] == chart_details['name']:
+						chart_details['start'] = temp_dict['start']
+						del process_chart[-1]	
+				process_chart += [chart_details]
+				var = 0
+				
+				break
+			else:
+				var += 1
+				if var == len(all_processes):
+					if len(process_chart) > 0:
+						if process_chart[-1]['name'] == 'Idle':
+                        			    	idle_cpu = process_chart[-1]
+							time_present += 1
+	                				idle_cpu['end'] = time_present
+               						del process_chart[-1]
+               						process_chart += [idle_cpu]
+               					else:
+               						idle_cpu = dict()
+               						idle_cpu['name'] = 'Idle'
+               						idle_cpu['start'] = time_present
+                					time_present += 1
+               						idle_cpu['end'] = time_present
+               						process_chart += [idle_cpu]
+        				elif len(process_chart) == 0:
+            					idle_cpu = dict()
+            					idle_cpu['name'] = 'Idle'
+            					idle_cpu['start'] = 0
+            					time_present += 1
+            					idle_cpu['end'] = time_present
+            					process_chart += [idle_cpu]
+
+					var = 0
+		if len(all_processes) == 0:	
+			break
+		all_processes = sorted(all_processes, key=itemgetter('priority'))
+	
+	for data in details_process:
+		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
+		turn_time += (data['end'] - data['arrival'])
+		sum_time += data['burst']
+
+
+	curr_time = time_present
+	stats = {}
+	stats['sum_time'] = sum_time
+	stats['wait_time'] = float(wait_time)/len(details_process)
+	stats['turn_time'] = float(turn_time)/len(details_process)
+	stats['throughput'] = len(details_process)*1000/float(curr_time)
+	stats['cpu_utilization'] = float(sum_time)*100/curr_time
+	
+	return process_chart,stats
 ###### Test code ######
 
 list_process_round_robin = list()
@@ -529,7 +631,7 @@ list_process_round_robin += [process]
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-xyz,p = priority_non_preemptive(list_process_round_robin)
+xyz,p = priority_preemptive(list_process_round_robin)
 for x in xyz:
 	print str(x['name'])
 
