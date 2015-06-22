@@ -10,7 +10,7 @@
             pos_hint: {'x': .2, 'y': .85}
             on_press:
                 root.manager.transition.direction = 'left'
-                root.manager.current = 'cpu1'
+                root.manager.current = 'cpu_form'
         Button:
         	text: 'Deadlock Avoidance Algorithm'
             size_hint: 0.6, 0.07
@@ -96,7 +96,7 @@
                     root.manager.transition.direction = 'right'
                     root.manager.current = 'menu'
 
-<CPUInputScreen>:
+<CPUInputScreen_old>:
     layout: layout
     type_text: type_text
     BoxLayout:
@@ -131,7 +131,158 @@
                 on_press:
                     #root.calculate_schedule()
                     root.manager.transition.direction = 'left'
-                    root.manager.current = 'cpu3'
+                    root.manager.current = 'cpu_output'
+
+<CPUInputScreen>:
+    on_pre_enter: root.bind_height()
+    layout: layout
+    num_processes: num_processes
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 10
+            size_hint_y: 0.2
+            pos_hint: {'top': 1}
+            Label:
+                text: 'Number of processes: '
+                on_text: root.load_form()
+            TextInput:
+                id: num_processes
+                multiline: 'False'
+            Label:
+                size_hint_x: 0.05
+                text: ''
+            Button:
+                size_hint_x: 0.3
+                size_hint_y: 0.8
+                halign: 'center'
+                valign: 'middle'
+                text: 'Load form'
+                on_release: root.load_form()
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 10, 40
+            size_hint_x: 0.8
+            size_hint_y: 0.2
+            Label:
+                text: 'Information about the scheduling algorithm -'
+                size_hint_x: 0.4
+                text_size: self.size
+                #pos_hint: {'top': 1}
+                padding: 10, 10
+            #__safe_id: [dropdown.__self__]
+            Button:
+                id: btn
+                text: 'FCFS'
+                on_release: dropdown.open(self)
+                size_hint_y: None
+                height: '40dp'
+                size_hint_x: 0.3
+                #pos_hint: {'top': 0.5}
+            #Widget
+            DropDown:
+                id: dropdown
+                on_parent: self.dismiss()
+                on_select: btn.text = format(args[1])
+                Button:
+                    text: 'First Come First Serve'
+                    size_hint_y: None
+                    height: '40dp'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release: dropdown.select('FCFS'); root.set_cpu_type(0)
+                Button:
+                    text: 'Shortest Job First'
+                    size_hint_y: None
+                    height: '40dp'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release: dropdown.select('SJF'); root.set_cpu_type(2)
+                Button:
+                    text: 'Priority'
+                    size_hint_y: None
+                    height: '40dp'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release: dropdown.select('Priority'); root.set_cpu_type(4)
+                Button:
+                    text: 'Round Robin'
+                    size_hint_y: None
+                    height: '40dp'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release: dropdown.select('RR'); root.set_cpu_type(1)
+                Button:
+                    text: 'Multilevel Queue'
+                    size_hint_y: None
+                    height: '40dp'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release: dropdown.select('Multilevel')
+                Button:
+                    text: 'Multilevel Feedback Queue'
+                    size_hint_y: None
+                    height: '40dp'
+                    text_size: self.size
+                    halign: 'center'
+                    valign: 'middle'
+                    on_release: dropdown.select('Multilevel Feedback')
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.2
+            padding: 10, 10
+            Label:
+                text: 'Variant -'
+                size_hint_x: 0.2
+                text_size: self.size
+                padding: 10, 10
+                pos_hint: {'top': 1}
+            ToggleButton:
+                group: 'variant'
+                text: 'Preemptive'
+                size_hint_y: None
+                height: '40dp'
+                size_hint_x: 0.2
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release: root.preemptive_flag = True; root.update_cpu_type(True)
+            ToggleButton:
+                group: 'variant'
+                text: 'Non-Preemptive'
+                size_hint_y: None
+                height: '40dp'
+                size_hint_x: 0.2
+                text_size: self.size
+                halign: 'center'
+                valign: 'middle'
+                on_release: root.preemptive_flag = False; root.update_cpu_type(False)
+            Label:
+                text: ''
+                size_hint_x: 0.05
+            Button:
+                text: 'Submit'
+                size_hint_x: 0.2
+                size_hint_y: None
+                height: '40dp'
+                on_release: 
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'cpu_output'
+        ScrollView
+            #size_hint_y: 0.8
+            size: self.size
+            GridLayout:
+                id: layout
+                cols: 1
+                size_hint_y: None
+                #height: self.size[1]
+                size_hint_y: 0.95
 
 <CPUOutputScreen>:
     layout: layout
@@ -172,7 +323,7 @@
                 text: 'Back'
                 on_press:
                     root.manager.transition.direction = 'right'
-                    root.manager.current = 'cpu2'
+                    root.manager.current = 'cpu_form'
             Button:
                 text: 'Exit'
                 on_press: root.stop()

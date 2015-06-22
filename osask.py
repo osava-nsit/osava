@@ -35,6 +35,11 @@ def on_burst(instace, value, i):
         value = 4
     data_cpu['burst'+str(i)] = value
 
+def on_priority(instace, value, i):
+    if value == '':
+        value = 0
+    data_cpu['priority'+str(i)] = value
+
 def on_quantum(instace, value):
     if value == '':
         value = 2
@@ -47,52 +52,161 @@ class CPUSchedulingScreen(Screen):
     num_processes = ObjectProperty(None)
     cpu_type = 0
     # Load the form for input
-    def load_form(self, *args):
-        # SET_CPU_TYPE(self.cpu_type)
-        global cpu_scheduling_type;
-        cpu_scheduling_type = self.cpu_type
-        cpu_scheduling_type_text = cpu_scheduling_types[self.cpu_type]
-        type_text = self.manager.get_screen('cpu2').type_text
-        type_text.clear_widgets()
-        label = Label(text=str(cpu_scheduling_type_text)+' CPU Scheduling')
-        type_text.add_widget(label)
+    # def load_form(self, *args):
+    #     global cpu_scheduling_type;
+    #     cpu_scheduling_type = self.cpu_type
+    #     cpu_scheduling_type_text = cpu_scheduling_types[self.cpu_type]
+    #     type_text = self.manager.get_screen('cpu2').type_text
+    #     type_text.clear_widgets()
+    #     label = Label(text=str(cpu_scheduling_type_text)+' CPU Scheduling')
+    #     type_text.add_widget(label)
 
-        layout = self.manager.get_screen('cpu2').layout
+    #     layout = self.manager.get_screen('cpu2').layout
+    #     layout.clear_widgets()
+    #     if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
+    #         self.num_processes.text = "5"
+    #     data_cpu['num_processes'] = int(self.num_processes.text)
+
+    #     for i in range(int(self.num_processes.text)):
+    #         box = BoxLayout(orientation='horizontal')
+    #         sno_label = Label(text=str(i+1))
+    #         box.add_widget(sno_label)
+
+    #         # process names
+    #         inp = TextInput(id='name'+str(i))
+    #         inp.bind(text=partial(on_name, i=i))
+    #         box.add_widget(inp)
+    #         # arrival times
+    #         inp = TextInput(id='arrival'+str(i))
+    #         inp.bind(text=partial(on_arrival, i=i))
+    #         box.add_widget(inp)
+    #         # burst times
+    #         inp = TextInput(id='burst'+str(i))
+    #         inp.bind(text=partial(on_burst, i=i))
+    #         box.add_widget(inp)
+
+    #         layout.add_widget(box)
+    #     if self.cpu_type == 1:
+    #         box = BoxLayout(orientation='horizontal')
+    #         inp = TextInput(id='quantum')
+    #         inp.bind(text=on_quantum)
+    #         label = Label(text='Time quantum')
+    #         box.add_widget(label)
+    #         box.add_widget(inp)
+    #         layout.add_widget(box)
+
+class CPUInputScreen_old(Screen):
+    def show_data(self, *args):
+        print str(data_cpu)
+
+class CPUInputScreen(Screen):
+    layout = ObjectProperty(None)
+    cpu_type = 0
+    preemptive_flag = False
+    def bind_height(self, *args):
+        self.layout.bind(minimum_height=self.layout.setter('height'))
+
+    # Called when a new value is chosen from dropdown
+    def set_cpu_type(self, new_cpu_type, *args):
+        global cpu_scheduling_type
+        cpu_scheduling_type = new_cpu_type
+        self.cpu_type = new_cpu_type
+        # If FCFS or RR
+        if new_cpu_type == 0 or new_cpu_type == 1:
+            cpu_scheduling_type = new_cpu_type
+            self.cpu_type = new_cpu_type
+        elif self.preemptive_flag == True and new_cpu_type%2 == 0:
+            new_cpu_type += 1
+            cpu_scheduling_type = new_cpu_type
+            self.cpu_type = new_cpu_type
+        elif self.preemptive_flag == False and new_cpu_type%2 != 0:
+            new_cpu_type -= 1
+            cpu_scheduling_type = new_cpu_type
+            self.cpu_type = new_cpu_type
+        self.load_form()
+
+    # Called when preemptive or non-preemtive option is clicked
+    def update_cpu_type(self, *args):
+        global cpu_scheduling_type
+        # If FCFS or RR
+        if self.cpu_type == 0 or self.cpu_type == 1:
+            pass
+        elif self.preemptive_flag == True and self.cpu_type%2 == 0:
+            self.cpu_type += 1
+            cpu_scheduling_type = self.cpu_type
+        elif self.preemptive_flag == False and self.cpu_type%2 != 0:
+            self.cpu_type -= 1
+            cpu_scheduling_type = self.cpu_type
+        # print 'updated cpu_type:', self.cpu_type
+
+    def load_form(self, *args):
+        # cpu_scheduling_type_text = cpu_scheduling_types[self.cpu_type]
+        # type_text = self.manager.get_screen('cpu2').type_text
+        # type_text.clear_widgets()
+        #label = Label(text=str(cpu_scheduling_type_text)+' CPU Scheduling')
+        #type_text.add_widget(label)
+
+        layout = self.manager.get_screen('cpu_form').layout
         layout.clear_widgets()
         if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
             self.num_processes.text = "5"
         data_cpu['num_processes'] = int(self.num_processes.text)
+
+        # Add input labels
+        box = BoxLayout(orientation='horizontal')
+        label = Label(text='Sno.')
+        box.add_widget(label)
+        label = Label(text='Process name')
+        box.add_widget(label)
+        label = Label(text='Arrival time (ms)')
+        box.add_widget(label)
+        label = Label(text='CPU burst time (ms)')
+        box.add_widget(label)
+
+        # If Priority scheduling selected
+        if self.cpu_type == 4 or self.cpu_type == 5:
+            label = Label(text='Priority')
+            box.add_widget(label)
+
+        layout.add_widget(box)
+
         for i in range(int(self.num_processes.text)):
-            box = BoxLayout(orientation='horizontal')
+            box = BoxLayout(orientation='horizontal', padding=(50,0))
             sno_label = Label(text=str(i+1))
             box.add_widget(sno_label)
 
             # process names
             inp = TextInput(id='name'+str(i))
             inp.bind(text=partial(on_name, i=i))
+            # inp.font_size = inp.size[1]
             box.add_widget(inp)
             # arrival times
             inp = TextInput(id='arrival'+str(i))
             inp.bind(text=partial(on_arrival, i=i))
+            # inp.font_size = inp.size[1]
             box.add_widget(inp)
             # burst times
             inp = TextInput(id='burst'+str(i))
             inp.bind(text=partial(on_burst, i=i))
+            # inp.font_size = inp.size[1]
             box.add_widget(inp)
+
+            # If Priority scheduling selected
+            if self.cpu_type == 4 or self.cpu_type == 5:
+                inp = TextInput(id='priority'+str(i))
+                inp.bind(text=partial(on_priority, i=i))
+                box.add_widget(inp)
 
             layout.add_widget(box)
         if self.cpu_type == 1:
-            box = BoxLayout(orientation='horizontal')
+            box = BoxLayout(orientation='horizontal', padding=(50,0))
             inp = TextInput(id='quantum')
             inp.bind(text=on_quantum)
+            # inp.font_size = inp.size[1]
             label = Label(text='Time quantum')
             box.add_widget(label)
             box.add_widget(inp)
             layout.add_widget(box)
-
-class CPUInputScreen(Screen):
-    def show_data(self, *args):
-        print str(data_cpu)
 
 class CPUOutputScreen(Screen):
     layout = ObjectProperty(None)
@@ -107,7 +221,7 @@ class CPUOutputScreen(Screen):
 
     # Prints the details of the process schedule and statistics
     def calculate_schedule(self, *args):
-        layout = self.manager.get_screen('cpu3').layout
+        layout = self.manager.get_screen('cpu_output').layout
         layout.clear_widgets()
 
         formatted_data = []
@@ -152,10 +266,10 @@ class CPUOutputScreen(Screen):
 
     def draw_gantt(self, *args):
         # Area for drawing gantt chart
-        gantt = self.manager.get_screen('cpu3').gantt
+        gantt = self.manager.get_screen('cpu_output').gantt
         chart_wid = Widget()
         # Area for displaying time values
-        time = self.manager.get_screen('cpu3').time
+        time = self.manager.get_screen('cpu_output').time
         gantt.clear_widgets()
         time.clear_widgets()
         # gantt.canvas.clear()
@@ -200,9 +314,10 @@ class CPUOutputScreen(Screen):
 # Create the screen manager
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
+sm.add_widget(CPUInputScreen(name='cpu_form'))
 sm.add_widget(CPUSchedulingScreen(name='cpu1'))
-sm.add_widget(CPUInputScreen(name='cpu2'))
-sm.add_widget(CPUOutputScreen(name='cpu3'))
+sm.add_widget(CPUInputScreen_old(name='cpu2'))
+sm.add_widget(CPUOutputScreen(name='cpu_output'))
 
 class OSASK(App):
     def build(self):
