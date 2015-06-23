@@ -22,7 +22,7 @@ data_cpu = {}
 
 def on_name(instace, value, i):
     if value == '':
-        value = 'P'+str(i)
+        value = 'P'+str(i+1)
     data_cpu['name'+str(i)] = value
 
 def on_arrival(instace, value, i):
@@ -44,6 +44,11 @@ def on_quantum(instace, value):
     if value == '':
         value = 2
     data_cpu['quantum'] = int(value)
+
+def on_aging(instace, value):
+    if value == '':
+        value = 4
+    data_cpu['aging'] = int(value)
 
 class MainMenuScreen(Screen):
     pass
@@ -165,7 +170,7 @@ class CPUInputScreen(Screen):
 
         # If Priority scheduling selected
         if self.cpu_type == 4 or self.cpu_type == 5:
-            label = Label(text='Priority')
+            label = Label(text='Priority (Highest = 0)')
             box.add_widget(label)
 
         layout.add_widget(box)
@@ -198,12 +203,25 @@ class CPUInputScreen(Screen):
                 box.add_widget(inp)
 
             layout.add_widget(box)
+
+        # If Round Robin scheduling selected
         if self.cpu_type == 1:
             box = BoxLayout(orientation='horizontal', padding=(50,0))
             inp = TextInput(id='quantum')
             inp.bind(text=on_quantum)
             # inp.font_size = inp.size[1]
             label = Label(text='Time quantum')
+            box.add_widget(label)
+            box.add_widget(inp)
+            layout.add_widget(box)
+        # If Priority scheduling selected
+        elif self.cpu_type == 4 or self.cpu_type == 5:
+            box = BoxLayout(orientation='horizontal', padding=(50,0))
+            inp = TextInput(id='aging')
+            inp.bind(text=on_aging)
+            # inp.font_size = inp.size[1]
+            label = Label(text='Aging - Promote priority by 1 unit after time: ')
+            # label.text_size = label.size
             box.add_widget(label)
             box.add_widget(inp)
             layout.add_widget(box)
@@ -230,6 +248,8 @@ class CPUOutputScreen(Screen):
             process['name'] = data_cpu['name'+str(i)]
             process['arrival'] = int(data_cpu['arrival'+str(i)])
             process['burst'] = int(data_cpu['burst'+str(i)])
+            if cpu_scheduling_type == 4 or cpu_scheduling_type == 5:
+                process['priority'] = int(data_cpu['priority'+str(i)])
             formatted_data.append(process)
             self.colors[process['name']] = [random(), random(), random()]
         self.colors['Idle'] = [0.2, 0.2, 0.2]
@@ -242,6 +262,10 @@ class CPUOutputScreen(Screen):
             self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_non_prempted(formatted_data)
         elif cpu_scheduling_type == 3:
             self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_prempted(formatted_data)
+        elif cpu_scheduling_type == 4:
+            self.cpu_schedule, self.stats = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'])
+        elif cpu_scheduling_type == 5:
+            self.cpu_schedule, self.stats = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'])
 
         # Display process schedule details
         for process in self.cpu_schedule:
