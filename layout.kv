@@ -134,9 +134,10 @@
                     root.manager.current = 'cpu_output'
 
 <CPUInputScreen>:
-    on_pre_enter: root.bind_height()
+    on_pre_enter: root.bind_height(); root.bind_spinner()
     layout: layout
     num_processes: num_processes
+    algo_spinner: algo_spinner
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
@@ -171,68 +172,12 @@
                 text_size: self.size
                 #pos_hint: {'top': 1}
                 padding: 10, 10
-            #__safe_id: [dropdown.__self__]
-            Button:
-                id: btn
-                text: 'FCFS'
-                on_release: dropdown.open(self)
-                size_hint_y: None
+            Spinner:
+                id: algo_spinner
+                text:'Select an Algorithm'
+                size_hint_y: 'None'
                 height: '40dp'
-                size_hint_x: 0.3
-                #pos_hint: {'top': 0.5}
-            #Widget
-            DropDown:
-                id: dropdown
-                on_parent: self.dismiss()
-                on_select: btn.text = format(args[1])
-                Button:
-                    text: 'First Come First Serve'
-                    size_hint_y: None
-                    height: '40dp'
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'middle'
-                    on_release: dropdown.select('FCFS'); root.set_cpu_type(0)
-                Button:
-                    text: 'Shortest Job First'
-                    size_hint_y: None
-                    height: '40dp'
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'middle'
-                    on_release: dropdown.select('SJF'); root.set_cpu_type(2)
-                Button:
-                    text: 'Priority'
-                    size_hint_y: None
-                    height: '40dp'
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'middle'
-                    on_release: dropdown.select('Priority'); root.set_cpu_type(4)
-                Button:
-                    text: 'Round Robin'
-                    size_hint_y: None
-                    height: '40dp'
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'middle'
-                    on_release: dropdown.select('RR'); root.set_cpu_type(1)
-                Button:
-                    text: 'Multilevel Queue'
-                    size_hint_y: None
-                    height: '40dp'
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'middle'
-                    on_release: dropdown.select('Multilevel')
-                Button:
-                    text: 'Multilevel Feedback Queue'
-                    size_hint_y: None
-                    height: '40dp'
-                    text_size: self.size
-                    halign: 'center'
-                    valign: 'middle'
-                    on_release: dropdown.select('Multilevel Feedback')
+                values: ('First Come First Serve', 'Shortest Job First', 'Priority', 'Round Robin', 'Multilevel Queue', 'Multilevel Feedback Queue')
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: 0.2

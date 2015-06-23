@@ -109,9 +109,24 @@ class CPUInputScreen(Screen):
     cpu_type = 0
     preemptive_flag = False
     def bind_height(self, *args):
+        layout = self.manager.get_screen('cpu_form').layout
         self.layout.bind(minimum_height=self.layout.setter('height'))
 
-    # Called when a new value is chosen from dropdown
+    def bind_spinner(self, *args):
+        spinner = self.manager.get_screen('cpu_form').algo_spinner
+        spinner.bind(text=self.show_selected_value)
+
+    def show_selected_value(self, spinner, text, *args):
+        if text == 'First Come First Serve':
+            self.set_cpu_type(0)
+        elif text == 'Shortest Job First':
+            self.set_cpu_type(2)
+        elif text == 'Priority':
+            self.set_cpu_type(4)
+        elif text == 'Round Robin':
+            self.set_cpu_type(1)
+
+    # Called when a new value is chosen from spinner
     def set_cpu_type(self, new_cpu_type, *args):
         global cpu_scheduling_type
         cpu_scheduling_type = new_cpu_type
