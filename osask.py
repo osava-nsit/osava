@@ -285,10 +285,6 @@ class CPUOutputScreen(Screen):
         elif cpu_scheduling_type == 5:
             self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'])
 
-        # for process in self.details:
-        #     print str(process)
-        # print '\n\n'
-
         # Display process schedule details
         for process in self.cpu_schedule:
             box = BoxLayout(orientation='horizontal')
@@ -301,11 +297,11 @@ class CPUOutputScreen(Screen):
 
             # Popup showing details of process when box is clicked
             if process['name'] != 'Idle':
-                popup_box = BoxLayout(orientation='vertical')
-                popup_box.add_widget(Label(text="Wait time: "+str(self.details[process['name']]['wait_time'])))
-                popup_box.add_widget(Label(text="Response time: "+str(self.details[process['name']]['resp_time'])))
-                popup_box.add_widget(Label(text="Turnaround time: "+str(self.details[process['name']]['turn_time'])))
-                popup = Popup(title='Details of '+str(process['name']), content=popup_box, size_hint=(None, None), size=(400, 400))
+                content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                    "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                    "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                content_label = Label(text=content_str)
+                popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(400, 400))
                 label_name.bind(on_ref_press=popup.open)
                 popup.open()
                 popup.dismiss()
