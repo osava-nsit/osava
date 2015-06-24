@@ -376,6 +376,8 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 				chart_details['end'] = time_present
 				details_process['end'] = time_present
 				for val_process in all_processes:
+					if 'wait_time' not in val_process:
+						val_process['wait_time'] = 0
 					if val_process['arrival'] < time_present and val_process['name'] != process['name'] and val_process['burst'] > 0:
 						val_process['wait_time'] += val_process['burst']
 						val_process['priority']	 -= (val_process['wait_time'] / increment_after_time)
@@ -477,6 +479,8 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 				chart_details['end'] = time_present
 				process['burst'] -= 1
 				for val_process in all_processes:
+					if 'wait_time' not in val_process:
+						val_process['wait_time'] = 0
 					if val_process['arrival'] < time_present and val_process['name'] != process['name'] and val_process['burst'] > 0:
 						val_process['wait_time'] += 1
 						val_process['priority']	 -= (val_process['wait_time'] / increment_after_time)
