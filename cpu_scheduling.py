@@ -2,59 +2,57 @@ from operator import itemgetter
 import Queue
 
 def fcfs(data):
-    processes = sorted(data, key=itemgetter('arrival'))
-    process_chart = []
-    curr_time = 0
-    wait_time = 0
-    turn_time = 0
-    sum_time = 0
-    details_process = dict()
-    for process in processes:
-        temp_process['name'] = process['name']
-        temp_process['arrival'] = process['arrival']
-        temp_process['burst'] = process['burst']
-        chart_details = {}
-        if (process['arrival'] > curr_time):
-            curr_time = process['arrival']
+	processes = sorted(data, key=itemgetter('arrival'))
+	process_chart = []
+	curr_time = 0
+	wait_time = 0
+	turn_time = 0
+	sum_time = 0
+	details_process = dict()
+	for process in processes:
+		temp_process['name'] = process['name']
+		temp_process['arrival'] = process['arrival']
+		temp_process['burst'] = process['burst']
+		chart_details = {}
+		if (process['arrival'] > curr_time):
+			curr_time = process['arrival']
 
-        chart_details['name'] = process['name']
-        chart_details['start'] = curr_time
-        chart_details['end'] = curr_time + process['burst']
-	
-	temp_process['wait_time'] = curr_time - process['arrival']
-        wait_time += temp_process['wait_time']
-        curr_time += process['burst']
-        temp_process['turn_time'] = curr_time - process['arrival']
-        temp['resp_time'] = process['arrival'] - process['start']
-        turn_time += temp_process['turn_time']
-        sum_time += process['burst']
-        details_process += [temp_process]
+		chart_details['name'] = process['name']
+		chart_details['start'] = curr_time
+		chart_details['end'] = curr_time + process['burst']
 
-        if len(process_chart) > 0:
-            if process_chart[-1]['end'] != chart_details['start']:
-                idle_cpu = dict()
-                idle_cpu['name'] = 'Idle'
-                idle_cpu['start'] = process_chart[-1]['end']
-                idle_cpu['end'] = chart_details['start']
-                process_chart += [idle_cpu]
-        elif len(process_chart) == 0 and chart_details['start'] > 0:
-            idle_cpu = dict()
-            idle_cpu['name'] = 'Idle'
-            idle_cpu['start'] = 0
-            idle_cpu['end'] = chart_details['start']
-            process_chart += [idle_cpu]
+		temp_process['wait_time'] = curr_time - process['arrival']
+		wait_time += temp_process['wait_time']
+		curr_time += process['burst']
+		temp_process['turn_time'] = curr_time - process['arrival']
+		temp['resp_time'] = process['start'] - process['arrival']
+		turn_time += temp_process['turn_time']
+		sum_time += process['burst']
+		details_process += [temp_process]
 
-        process_chart += [chart_details]
-	
+		if len(process_chart) > 0:
+			if process_chart[-1]['end'] != chart_details['start']:
+				idle_cpu = dict()
+				idle_cpu['name'] = 'Idle'
+				idle_cpu['start'] = process_chart[-1]['end']
+				idle_cpu['end'] = chart_details['start']
+				process_chart += [idle_cpu]
+		elif len(process_chart) == 0 and chart_details['start'] > 0:
+			idle_cpu = dict()
+			idle_cpu['name'] = 'Idle'
+			idle_cpu['start'] = 0
+			idle_cpu['end'] = chart_details['start']
+			process_chart += [idle_cpu]
 
-    stats = {}
-    stats['sum_time'] = sum_time
-    stats['wait_time'] = float(wait_time)/len(processes)
-    stats['turn_time'] = float(turn_time)/len(processes)
-    stats['throughput'] = len(processes)*1000/float(curr_time)
-    stats['cpu_utilization'] = float(sum_time)*100/curr_time
+		process_chart += [chart_details]
 
-    return process_chart,stats,details_process
+	stats = {}
+	stats['sum_time'] = sum_time
+	stats['wait_time'] = float(wait_time)/len(processes)
+	stats['turn_time'] = float(turn_time)/len(processes)
+	stats['throughput'] = len(processes)*1000/float(curr_time)
+	stats['cpu_utilization'] = float(sum_time)*100/curr_time
+	return process_chart,stats,details_process
 
 def round_robin(data,max_quanta=4):
 	all_processes = sorted(data, key=itemgetter('arrival'))
@@ -63,9 +61,7 @@ def round_robin(data,max_quanta=4):
 	turn_time = 0
 	sum_time = 0
 	count = 0
-	
 	details_process = []
-
 	q = Queue.Queue(maxsize=0)
 	for process in all_processes:
 		q.put(process)
@@ -188,71 +184,64 @@ def round_robin(data,max_quanta=4):
 	return process_chart,stats,details_process
 
 def shortest_job_non_prempted(data):
-	all_processes = sorted(data, key=itemgetter('burst'))
-	time_present = 0 
-	var = 0
-        wait_time = 0 
-        turn_time = 0 
-        sum_time = 0
-	completed_processes = list()
-	process_chart = list()
-	data_process = list()
+    all_processes = sorted(data, key=itemgetter('burst'))
+    time_present = 0
+    var = 0
+    wait_time = 0
+    turn_time = 0
+    sum_time = 0
+    completed_processes = list()
+    process_chart = list()
+    data_process = list()
 	
-	while True:
-		for process in all_processes:
-			chart_details = {}	
-			if process['burst'] > 0 and process['arrival'] <= time_present:
-				details_process = {}
-				chart_details['name'] = process['name']
-				details_process['name'] = process['name']
-				details_process['burst'] = process['burst']
-				details_process['arrival'] = process['arrival']
-				details_process['start'] = time_present
-				details_process['wait_time'] = 0
-				details_process['turn_time'] = 0
-				details_process['resp_time'] = 0
-				chart_details['start'] = time_present
-				time_present += process['burst']
-				chart_details['end'] = time_present
-				details_process['end'] = time_present
-				process['burst'] = 0
-				completed_processes.append(process)
-				"""
-				if len(process_chart) > 0:
-					temp_dict = process_chart[-1]
-					if temp_dict['name'] == chart_details['name']:
-						chart_details['start'] = temp_dict['start']
-						del process_chart[-1]	
-				"""
-				process_chart += [chart_details]
-				var = 0
-				data_process += [details_process]
-				break
-			else:
-				var += 1
-				if var == len(all_processes):
-					var = 0
-					if len(process_chart) > 0:
-						if process_chart[-1]['name'] == 'Idle':
-                        			    	idle_cpu = process_chart[-1]
-							time_present += 1
-	                				idle_cpu['end'] = time_present
-               						del process_chart[-1]
-               						process_chart += [idle_cpu]
-               					else:
-               						idle_cpu = dict()
-               						idle_cpu['name'] = 'Idle'
-               						idle_cpu['start'] = time_present
-                					time_present += 1
-               						idle_cpu['end'] = time_present
-               						process_chart += [idle_cpu]
-        				elif len(process_chart) == 0:
-            					idle_cpu = dict()
-            					idle_cpu['name'] = 'Idle'
-            					idle_cpu['start'] = 0
-            					time_present += 1
-            					idle_cpu['end'] = time_present
-            					process_chart += [idle_cpu]
+    while True:
+        for process in all_processes:
+            chart_details = {}	
+            if process['burst'] > 0 and process['arrival'] <= time_present:
+                details_process = {}
+                chart_details['name'] = process['name']
+                details_process['name'] = process['name']
+                details_process['burst'] = process['burst']
+                details_process['arrival'] = process['arrival']
+                details_process['start'] = time_present
+                details_process['wait_time'] = 0
+                details_process['turn_time'] = 0
+                details_process['resp_time'] = 0
+                chart_details['start'] = time_present
+                time_present += process['burst']
+                chart_details['end'] = time_present
+                details_process['end'] = time_present
+                process['burst'] = 0
+                completed_processes.append(process)
+                process_chart += [chart_details]
+                var = 0
+                data_process += [details_process]
+                break
+            else:
+                var += 1
+                if var == len(all_processes):
+                    var = 0
+                    if len(process_chart) > 0:
+                        if process_chart[-1]['name'] == 'Idle':
+                            idle_cpu = process_chart[-1]
+                            time_present += 1
+                            idle_cpu['end'] = time_present
+                            del process_chart[-1]
+                            process_chart += [idle_cpu]
+                        else:
+                            idle_cpu = dict()
+                            idle_cpu['name'] = 'Idle'
+                            idle_cpu['start'] = time_present
+                            time_present += 1
+                            idle_cpu['end'] = time_present
+                            process_chart += [idle_cpu]
+                    elif len(process_chart) == 0:
+                        idle_cpu = dict()
+                        idle_cpu['name'] = 'Idle'
+                        idle_cpu['start'] = 0
+                        time_present += 1
+                        idle_cpu['end'] = time_present
+                        process_chart += [idle_cpu]
 
 		if len(all_processes) == len(completed_processes):	
 			break
@@ -276,83 +265,82 @@ def shortest_job_non_prempted(data):
 	return process_chart,stats,data_process
 	
 def shortest_job_prempted(data):
-	all_processes = sorted(data, key=itemgetter('burst'))
-	time_present = 0
-        wait_time = 0 
-        turn_time = 0 
-        sum_time = 0
-	var = 0
-	process_chart = []
-	details_process = list()
-	for process in all_processes:
-		temp_val = {}
-		temp_val['name'] = process['name']
-		temp_val['arrival'] = process['arrival']
-		temp_val['burst'] = process['burst']
-		temp_val['flag'] = 0
-		temp_val['wait_time'] = 0
-		temp_val['resp_time'] = 0
-		temp_val['turn_time'] = 0
-		temp_val['start'] = -1
-		temp_val['end'] = -1
-		details_process += [temp_val]
-		del temp_val
+    all_processes = sorted(data, key=itemgetter('burst'))
+    time_present = 0
+    wait_time = 0 
+    turn_time = 0 
+    sum_time = 0
+    var = 0
+    process_chart = []
+    details_process = list()
+    for process in all_processes:
+        temp_val = {}
+        temp_val['name'] = process['name']
+        temp_val['arrival'] = process['arrival']
+        temp_val['burst'] = process['burst']
+        temp_val['flag'] = 0
+        temp_val['wait_time'] = 0
+        temp_val['resp_time'] = 0
+        temp_val['turn_time'] = 0
+        temp_val['start'] = -1
+        temp_val['end'] = -1
+        details_process += [temp_val]
+        del temp_val
 
-	while True:	
-		for process in all_processes:
-			chart_details = {}
-			if process['burst'] > 0 and process['arrival'] <= time_present:
-				for data in details_process:
-					if data['name'] == process['name'] and data['flag'] == 0:
-						data['start'] = time_present
-						data['flag'] = 1
+    while True:
+        for process in all_processes:
+            chart_details = {}
+            if process['burst'] > 0 and process['arrival'] <= time_present:
+                for data in details_process:
+                    if data['name'] == process['name'] and data['flag'] == 0:
+                        data['start'] = time_present
+                        data['flag'] = 1
 
-				chart_details['name'] = process['name']
-				chart_details['start'] = time_present
-				time_present += 1
-				chart_details['end'] = time_present
-				process['burst'] -= 1
-				if process['burst'] == 0:
-					for data in details_process:
-						if data['name'] == process['name'] and data['flag'] == 1:
-							data['end'] = time_present
+                chart_details['name'] = process['name']
+                chart_details['start'] = time_present
+                time_present += 1
+                chart_details['end'] = time_present
+                process['burst'] -= 1
+                if process['burst'] == 0:
+                    for data in details_process:
+                        if data['name'] == process['name'] and data['flag'] == 1:
+                            data['end'] = time_present
 
-					all_processes.remove(process)
-				if len(process_chart) > 0:
-					temp_dict = process_chart[-1]
-					if temp_dict['name'] == chart_details['name']:
-						chart_details['start'] = temp_dict['start']
-						del process_chart[-1]	
-				process_chart += [chart_details]
-				var = 0
-				
-				break
-			else:
-				var += 1
-				if var == len(all_processes):
-					if len(process_chart) > 0:
-						if process_chart[-1]['name'] == 'Idle':
-                        			    	idle_cpu = process_chart[-1]
-							time_present += 1
-	                				idle_cpu['end'] = time_present
-               						del process_chart[-1]
-               						process_chart += [idle_cpu]
-               					else:
-               						idle_cpu = dict()
-               						idle_cpu['name'] = 'Idle'
-               						idle_cpu['start'] = time_present
-                					time_present += 1
-               						idle_cpu['end'] = time_present
-               						process_chart += [idle_cpu]
-        				elif len(process_chart) == 0:
-            					idle_cpu = dict()
-            					idle_cpu['name'] = 'Idle'
-            					idle_cpu['start'] = 0
-            					time_present += 1
-            					idle_cpu['end'] = time_present
-            					process_chart += [idle_cpu]
+                    all_processes.remove(process)
+                if len(process_chart) > 0:
+                    temp_dict = process_chart[-1]
+                    if temp_dict['name'] == chart_details['name']:
+                        chart_details['start'] = temp_dict['start']
+                        del process_chart[-1]	
+                process_chart += [chart_details]
+                var = 0
+                break
+            else:
+                var += 1
+                if var == len(all_processes):
+                    if len(process_chart) > 0:
+                        if process_chart[-1]['name'] == 'Idle':
+                            idle_cpu = process_chart[-1]
+                            time_present += 1
+                            idle_cpu['end'] = time_present
+                            del process_chart[-1]
+                            process_chart += [idle_cpu]
+                        else:
+                            idle_cpu = dict()
+                            idle_cpu['name'] = 'Idle'
+                            idle_cpu['start'] = time_present
+                            time_present += 1
+                            idle_cpu['end'] = time_present
+                            process_chart += [idle_cpu]
+                    elif len(process_chart) == 0:
+                        idle_cpu = dict()
+                        idle_cpu['name'] = 'Idle'
+                        idle_cpu['start'] = 0
+                        time_present += 1
+                        idle_cpu['end'] = time_present
+                        process_chart += [idle_cpu]
 
-					var = 0
+                    var = 0
 		if len(all_processes) == 0:	
 			break
 		all_processes = sorted(all_processes, key=itemgetter('burst'))
@@ -380,9 +368,9 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 	all_processes = sorted(data, key=itemgetter('priority'))
 	time_present = 0 
 	var = 0
-        wait_time = 0 
-        turn_time = 0 
-        sum_time = 0
+    wait_time = 0 
+    turn_time = 0 
+    sum_time = 0
 	
 	completed_processes = list()
 	process_chart = list()
@@ -433,25 +421,25 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 					var = 0
 					if len(process_chart) > 0:
 						if process_chart[-1]['name'] == 'Idle':
-                        			    	idle_cpu = process_chart[-1]
+        			    	idle_cpu = process_chart[-1]
 							time_present += 1
-	                				idle_cpu['end'] = time_present
-               						del process_chart[-1]
-               						process_chart += [idle_cpu]
-               					else:
-               						idle_cpu = dict()
-               						idle_cpu['name'] = 'Idle'
-               						idle_cpu['start'] = time_present
-                					time_present += 1
-               						idle_cpu['end'] = time_present
-               						process_chart += [idle_cpu]
-        				elif len(process_chart) == 0:
-            					idle_cpu = dict()
-            					idle_cpu['name'] = 'Idle'
-            					idle_cpu['start'] = 0
-            					time_present += 1
-            					idle_cpu['end'] = time_present
-            					process_chart += [idle_cpu]
+            				idle_cpu['end'] = time_present
+       						del process_chart[-1]
+       						process_chart += [idle_cpu]
+       					else:
+       						idle_cpu = dict()
+       						idle_cpu['name'] = 'Idle'
+       						idle_cpu['start'] = time_present
+        					time_present += 1
+       						idle_cpu['end'] = time_present
+       						process_chart += [idle_cpu]
+    				elif len(process_chart) == 0:
+    					idle_cpu = dict()
+    					idle_cpu['name'] = 'Idle'
+    					idle_cpu['start'] = 0
+    					time_present += 1
+    					idle_cpu['end'] = time_present
+    					process_chart += [idle_cpu]
 
 		if len(all_processes) == len(completed_processes):	
 			break
