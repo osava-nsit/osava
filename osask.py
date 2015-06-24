@@ -6,6 +6,7 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
 from kivy.uix.textinput import TextInput
+from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from kivy.graphics import Color, Rectangle, Line
@@ -284,19 +285,31 @@ class CPUOutputScreen(Screen):
         elif cpu_scheduling_type == 5:
             self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'])
 
-        for process in self.details:
-            print str(process)
-        print '\n\n'
+        # for process in self.details:
+        #     print str(process)
+        # print '\n\n'
 
         # Display process schedule details
         for process in self.cpu_schedule:
             box = BoxLayout(orientation='horizontal')
-            label = Label(text=process['name']+':')
-            box.add_widget(label)
+            label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
+            box.add_widget(label_name)
             label = Label(text=str(process['start']))
             box.add_widget(label)
             label = Label(text=str(process['end']))
             box.add_widget(label)
+
+            # Popup showing details of process when box is clicked
+            if process['name'] != 'Idle':
+                popup_box = BoxLayout(orientation='vertical')
+                popup_box.add_widget(Label(text="Wait time: "+str(self.details[process['name']]['wait_time'])))
+                popup_box.add_widget(Label(text="Response time: "+str(self.details[process['name']]['resp_time'])))
+                popup_box.add_widget(Label(text="Turnaround time: "+str(self.details[process['name']]['turn_time'])))
+                popup = Popup(title='Details of '+str(process['name']), content=popup_box, size_hint=(None, None), size=(400, 400))
+                label_name.bind(on_ref_press=popup.open)
+                popup.open()
+                popup.dismiss()
+
             layout.add_widget(box)
 
         # Display statistics
@@ -318,7 +331,7 @@ class CPUOutputScreen(Screen):
         gantt.clear_widgets()
         time.clear_widgets()
         # gantt.canvas.clear()
-        margin_left = 400
+        margin_left = 250
         margin_bottom = 100
         with chart_wid.canvas:
             # Starting position of rectangle
@@ -360,8 +373,8 @@ class CPUOutputScreen(Screen):
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
 sm.add_widget(CPUInputScreen(name='cpu_form'))
-sm.add_widget(CPUSchedulingScreen(name='cpu1'))
-sm.add_widget(CPUInputScreen_old(name='cpu2'))
+#sm.add_widget(CPUSchedulingScreen(name='cpu1'))
+#sm.add_widget(CPUInputScreen_old(name='cpu2'))
 sm.add_widget(CPUOutputScreen(name='cpu_output'))
 
 class OSASK(App):
