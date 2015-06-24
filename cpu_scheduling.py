@@ -8,10 +8,9 @@ def fcfs(data):
     wait_time = 0
     turn_time = 0
     sum_time = 0
-    details_process = []
+    details_process = {}
     for process in processes:
         temp_process = {}
-        temp_process['name'] = process['name']
         temp_process['arrival'] = process['arrival']
         temp_process['burst'] = process['burst']
         chart_details = {}
@@ -29,7 +28,7 @@ def fcfs(data):
         temp_process['resp_time'] = chart_details['start'] - process['arrival']
         turn_time += temp_process['turn_time']
         sum_time += process['burst']
-        details_process += [temp_process]
+        details_process[process['name']] = temp_process
 
         if len(process_chart) > 0:
             if process_chart[-1]['end'] != chart_details['start']:
