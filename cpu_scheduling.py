@@ -196,7 +196,7 @@ def shortest_job_non_prempted(data):
 	
     while True:
         for process in all_processes:
-            chart_details = {}	
+            chart_details = {}
             if process['burst'] > 0 and process['arrival'] <= time_present:
                 details_process = {}
                 chart_details['name'] = process['name']
@@ -243,26 +243,26 @@ def shortest_job_non_prempted(data):
                         idle_cpu['end'] = time_present
                         process_chart += [idle_cpu]
 
-		if len(all_processes) == len(completed_processes):	
-			break
+        if len(all_processes) == len(completed_processes):
+            break
 
-	for data in data_process:
-		data['resp_time'] = data['start'] - data['arrival']
-		data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
-		data['turn_time'] = (data['end'] - data['arrival'])
-		wait_time += data['wait_time']
-		turn_time += data['turn_time']
-		sum_time += data['burst']
+    for data in data_process:
+        data['resp_time'] = data['start'] - data['arrival']
+        data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+        data['turn_time'] = (data['end'] - data['arrival'])
+        wait_time += data['wait_time']
+        turn_time += data['turn_time']
+        sum_time += data['burst']
 
-	curr_time = time_present
-	stats = {}
-	stats['sum_time'] = sum_time
-	stats['wait_time'] = float(wait_time)/len(data_process)
-	stats['turn_time'] = float(turn_time)/len(data_process)
-	stats['throughput'] = len(data_process)*1000/float(curr_time)
-	stats['cpu_utilization'] = float(sum_time)*100/curr_time
-	
-	return process_chart,stats,data_process
+    curr_time = time_present
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(wait_time)/len(data_process)
+    stats['turn_time'] = float(turn_time)/len(data_process)
+    stats['throughput'] = len(data_process)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/curr_time
+
+    return process_chart,stats,data_process
 	
 def shortest_job_prempted(data):
     all_processes = sorted(data, key=itemgetter('burst'))
