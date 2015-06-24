@@ -8,7 +8,11 @@ def fcfs(data):
     wait_time = 0
     turn_time = 0
     sum_time = 0
+    details_process = dict()
     for process in processes:
+        temp_process['name'] = process['name']
+        temp_process['arrival'] = process['arrival']
+        temp_process['burst'] = process['burst']
         chart_details = {}
         if (process['arrival'] > curr_time):
             curr_time = process['arrival']
@@ -16,11 +20,15 @@ def fcfs(data):
         chart_details['name'] = process['name']
         chart_details['start'] = curr_time
         chart_details['end'] = curr_time + process['burst']
-
-        wait_time += (curr_time - process['arrival'])
+	
+	temp_process['wait_time'] = curr_time - process['arrival']
+        wait_time += temp_process['wait_time']
         curr_time += process['burst']
-        turn_time += (curr_time - process['arrival'])
+        temp_process['turn_time'] = curr_time - process['arrival']
+        temp['resp_time'] = process['arrival'] - process['start']
+        turn_time += temp_process['turn_time']
         sum_time += process['burst']
+        details_process += [temp_process]
 
         if len(process_chart) > 0:
             if process_chart[-1]['end'] != chart_details['start']:
@@ -46,7 +54,7 @@ def fcfs(data):
     stats['throughput'] = len(processes)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
-    return process_chart,stats 
+    return process_chart,stats,details_process
 
 def round_robin(data,max_quanta=4):
 	all_processes = sorted(data, key=itemgetter('arrival'))
@@ -65,6 +73,9 @@ def round_robin(data,max_quanta=4):
 		temp_val = {}
 		temp_val['name'] = process['name']
 		temp_val['arrival'] = process['arrival']
+		temp_val['wait_time'] = 0
+		temp_val['turn_time'] = 0
+		temp_val['resp_time'] = 0
 		temp_val['burst'] = process['burst']
 		temp_val['flag'] = 0
 		temp_val['start'] = -1
@@ -159,8 +170,11 @@ def round_robin(data,max_quanta=4):
 			break
 
 	for data in details_process:
-		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
-		turn_time += (data['end'] - data['arrival'])
+		data['resp_time'] = data['start'] - data['arrival']
+		data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+		data['turn_time'] = (data['end'] - data['arrival'])
+		wait_time += data['wait_time']
+		turn_time += data['turn_time']
 		sum_time += data['burst']
 
 	curr_time = time_present
@@ -171,7 +185,7 @@ def round_robin(data,max_quanta=4):
 	stats['throughput'] = len(details_process)*1000/float(curr_time)
 	stats['cpu_utilization'] = float(sum_time)*100/curr_time
 		
-	return process_chart,stats
+	return process_chart,stats,details_process
 
 def shortest_job_non_prempted(data):
 	all_processes = sorted(data, key=itemgetter('burst'))
@@ -183,6 +197,7 @@ def shortest_job_non_prempted(data):
 	completed_processes = list()
 	process_chart = list()
 	data_process = list()
+	
 	while True:
 		for process in all_processes:
 			chart_details = {}	
@@ -193,6 +208,9 @@ def shortest_job_non_prempted(data):
 				details_process['burst'] = process['burst']
 				details_process['arrival'] = process['arrival']
 				details_process['start'] = time_present
+				details_process['wait_time'] = 0
+				details_process['turn_time'] = 0
+				details_process['resp_time'] = 0
 				chart_details['start'] = time_present
 				time_present += process['burst']
 				chart_details['end'] = time_present
@@ -240,8 +258,11 @@ def shortest_job_non_prempted(data):
 			break
 
 	for data in data_process:
-		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
-		turn_time += (data['end'] - data['arrival'])
+		data['resp_time'] = data['start'] - data['arrival']
+		data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+		data['turn_time'] = (data['end'] - data['arrival'])
+		wait_time += data['wait_time']
+		turn_time += data['turn_time']
 		sum_time += data['burst']
 
 	curr_time = time_present
@@ -252,7 +273,7 @@ def shortest_job_non_prempted(data):
 	stats['throughput'] = len(data_process)*1000/float(curr_time)
 	stats['cpu_utilization'] = float(sum_time)*100/curr_time
 	
-	return process_chart,stats
+	return process_chart,stats,data_process
 	
 def shortest_job_prempted(data):
 	all_processes = sorted(data, key=itemgetter('burst'))
@@ -269,6 +290,9 @@ def shortest_job_prempted(data):
 		temp_val['arrival'] = process['arrival']
 		temp_val['burst'] = process['burst']
 		temp_val['flag'] = 0
+		temp_val['wait_time'] = 0
+		temp_val['resp_time'] = 0
+		temp_val['turn_time'] = 0
 		temp_val['start'] = -1
 		temp_val['end'] = -1
 		details_process += [temp_val]
@@ -334,8 +358,11 @@ def shortest_job_prempted(data):
 		all_processes = sorted(all_processes, key=itemgetter('burst'))
 	
 	for data in details_process:
-		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
-		turn_time += (data['end'] - data['arrival'])
+		data['resp_time'] = data['start'] - data['arrival']
+		data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+		data['turn_time'] = (data['end'] - data['arrival'])
+		wait_time += data['wait_time']
+		turn_time += data['turn_time']
 		sum_time += data['burst']
 
 
@@ -347,7 +374,7 @@ def shortest_job_prempted(data):
 	stats['throughput'] = len(details_process)*1000/float(curr_time)
 	stats['cpu_utilization'] = float(sum_time)*100/curr_time
 	
-	return process_chart,stats
+	return process_chart,stats,details_process
 
 def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority = 0):
 	all_processes = sorted(data, key=itemgetter('priority'))
@@ -364,13 +391,15 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 		for process in all_processes:
 			chart_details = {}	
 			if process['burst'] > 0 and process['arrival'] <= time_present:
-				print process['priority']
 				details_process = {}
 				chart_details['name'] = process['name']
 				details_process['name'] = process['name']
 				details_process['burst'] = process['burst']
 				details_process['arrival'] = process['arrival']
 				details_process['start'] = time_present
+				details_process['resp_time'] = 0
+				details_process['turn_time'] = 0
+				details_process['wait_time'] = 0
 				chart_details['start'] = time_present
 				time_present += process['burst']
 				chart_details['end'] = time_present
@@ -429,8 +458,11 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 		all_processes = sorted(all_processes, key=itemgetter('priority'))
 
 	for data in data_process:
-		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
-		turn_time += (data['end'] - data['arrival'])
+		data['resp_time'] = data['start'] - data['arrival']
+		data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+		data['turn_time'] = (data['end'] - data['arrival'])
+		wait_time += data['wait_time']
+		turn_time += data['turn_time']
 		sum_time += data['burst']
 
 	curr_time = time_present
@@ -441,7 +473,7 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 	stats['throughput'] = len(data_process)*1000/float(curr_time)
 	stats['cpu_utilization'] = float(sum_time)*100/curr_time
 	
-	return process_chart,stats
+	return process_chart,stats,data_process
 	
 def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0):
 	all_processes = sorted(data, key=itemgetter('priority'))
@@ -458,6 +490,9 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 		temp_val['arrival'] = process['arrival']
 		temp_val['burst'] = process['burst']
 		temp_val['flag'] = 0
+		temp_val['turn_time'] = 0
+		temp_val['wait_time'] = 0
+		temp_val['resp_time'] = 0
 		temp_val['start'] = -1
 		temp_val['end'] = -1
 		details_process += [temp_val]
@@ -467,7 +502,6 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 		for process in all_processes:
 			chart_details = {}
 			if process['burst'] > 0 and process['arrival'] <= time_present:
-				print str(process['name']) + " " + str(process['priority'])
 				for data in details_process:
 					if data['name'] == process['name'] and data['flag'] == 0:
 						data['start'] = time_present
@@ -533,8 +567,11 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 		all_processes = sorted(all_processes, key=itemgetter('priority'))
 	
 	for data in details_process:
-		wait_time += ((data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst'])))
-		turn_time += (data['end'] - data['arrival'])
+		data['resp_time'] = data['start'] - data['arrival']
+		data['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+		data['turn_time'] = (data['end'] - data['arrival'])
+		wait_time += data['wait_time']
+		turn_time += data['turn_time']
 		sum_time += data['burst']
 
 
@@ -546,7 +583,7 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 	stats['throughput'] = len(details_process)*1000/float(curr_time)
 	stats['cpu_utilization'] = float(sum_time)*100/curr_time
 	
-	return process_chart,stats
+	return process_chart,stats,details_process
 ###### Test code ######
 
 list_process_round_robin = list()
@@ -636,8 +673,6 @@ list_process_round_robin += [process]
 # list_process_shortest_job_prempted += [process]
 # #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
 # val = shortest_job_prempted(list_process_shortest_job_prempted)
-xyz,p = priority_preemptive(list_process_round_robin)
-for x in xyz:
-	print str(x['name'])
-
-print str(p['turn_time']) + " " + str(p['wait_time']) + " " + str(p['throughput'])
+#xyz,p,xxx= priority_preemptive(list_process_round_robin)
+#for p in xxx:
+#	print str(p['name']) + " " +str(p['turn_time']) + " " + str(p['wait_time']) + " " + str(p['resp_time'])
