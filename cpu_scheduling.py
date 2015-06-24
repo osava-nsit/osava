@@ -209,6 +209,7 @@ def shortest_job_non_prempted(data):
 				process_chart += [chart_details]
 				var = 0
 				data_process += [details_process]
+				break
 			else:
 				var += 1
 				if var == len(all_processes):
