@@ -2,57 +2,58 @@ from operator import itemgetter
 import Queue
 
 def fcfs(data):
-	processes = sorted(data, key=itemgetter('arrival'))
-	process_chart = []
-	curr_time = 0
-	wait_time = 0
-	turn_time = 0
-	sum_time = 0
-	details_process = dict()
-	for process in processes:
-		temp_process['name'] = process['name']
-		temp_process['arrival'] = process['arrival']
-		temp_process['burst'] = process['burst']
-		chart_details = {}
-		if (process['arrival'] > curr_time):
-			curr_time = process['arrival']
+    processes = sorted(data, key=itemgetter('arrival'))
+    process_chart = []
+    curr_time = 0
+    wait_time = 0
+    turn_time = 0
+    sum_time = 0
+    details_process = []
+    for process in processes:
+        temp_process = {}
+        temp_process['name'] = process['name']
+        temp_process['arrival'] = process['arrival']
+        temp_process['burst'] = process['burst']
+        chart_details = {}
+        if (process['arrival'] > curr_time):
+            curr_time = process['arrival']
 
-		chart_details['name'] = process['name']
-		chart_details['start'] = curr_time
-		chart_details['end'] = curr_time + process['burst']
+        chart_details['name'] = process['name']
+        chart_details['start'] = curr_time
+        chart_details['end'] = curr_time + process['burst']
 
-		temp_process['wait_time'] = curr_time - process['arrival']
-		wait_time += temp_process['wait_time']
-		curr_time += process['burst']
-		temp_process['turn_time'] = curr_time - process['arrival']
-		temp['resp_time'] = process['start'] - process['arrival']
-		turn_time += temp_process['turn_time']
-		sum_time += process['burst']
-		details_process += [temp_process]
+        temp_process['wait_time'] = curr_time - process['arrival']
+        wait_time += temp_process['wait_time']
+        curr_time += process['burst']
+        temp_process['turn_time'] = curr_time - process['arrival']
+        temp_process['resp_time'] = chart_details['start'] - process['arrival']
+        turn_time += temp_process['turn_time']
+        sum_time += process['burst']
+        details_process += [temp_process]
 
-		if len(process_chart) > 0:
-			if process_chart[-1]['end'] != chart_details['start']:
-				idle_cpu = dict()
-				idle_cpu['name'] = 'Idle'
-				idle_cpu['start'] = process_chart[-1]['end']
-				idle_cpu['end'] = chart_details['start']
-				process_chart += [idle_cpu]
-		elif len(process_chart) == 0 and chart_details['start'] > 0:
-			idle_cpu = dict()
-			idle_cpu['name'] = 'Idle'
-			idle_cpu['start'] = 0
-			idle_cpu['end'] = chart_details['start']
-			process_chart += [idle_cpu]
+        if len(process_chart) > 0:
+            if process_chart[-1]['end'] != chart_details['start']:
+                idle_cpu = dict()
+                idle_cpu['name'] = 'Idle'
+                idle_cpu['start'] = process_chart[-1]['end']
+                idle_cpu['end'] = chart_details['start']
+                process_chart += [idle_cpu]
+        elif len(process_chart) == 0 and chart_details['start'] > 0:
+            idle_cpu = dict()
+            idle_cpu['name'] = 'Idle'
+            idle_cpu['start'] = 0
+            idle_cpu['end'] = chart_details['start']
+            process_chart += [idle_cpu]
 
-		process_chart += [chart_details]
+        process_chart += [chart_details]
 
-	stats = {}
-	stats['sum_time'] = sum_time
-	stats['wait_time'] = float(wait_time)/len(processes)
-	stats['turn_time'] = float(turn_time)/len(processes)
-	stats['throughput'] = len(processes)*1000/float(curr_time)
-	stats['cpu_utilization'] = float(sum_time)*100/curr_time
-	return process_chart,stats,details_process
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(wait_time)/len(processes)
+    stats['turn_time'] = float(turn_time)/len(processes)
+    stats['throughput'] = len(processes)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/curr_time
+    return process_chart,stats,details_process
 
 def round_robin(data,max_quanta=4):
 	all_processes = sorted(data, key=itemgetter('arrival'))

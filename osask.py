@@ -251,6 +251,8 @@ class CPUOutputScreen(Screen):
     cpu_schedule = {}
     # Stores the stats related to schedule like average waiting time
     stats = {}
+    # Stores the individual per process stats
+    details = {}
 
     # Prints the details of the process schedule and statistics
     def calculate_schedule(self, *args):
@@ -270,17 +272,21 @@ class CPUOutputScreen(Screen):
         self.colors['Idle'] = [0.2, 0.2, 0.2]
 
         if cpu_scheduling_type == 0:
-            self.cpu_schedule, self.stats = cpu_scheduling.fcfs(formatted_data)
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.fcfs(formatted_data)
         elif cpu_scheduling_type == 1:
-            self.cpu_schedule, self.stats = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
         elif cpu_scheduling_type == 2:
-            self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_non_prempted(formatted_data)
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_non_prempted(formatted_data)
         elif cpu_scheduling_type == 3:
-            self.cpu_schedule, self.stats = cpu_scheduling.shortest_job_prempted(formatted_data)
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_prempted(formatted_data)
         elif cpu_scheduling_type == 4:
-            self.cpu_schedule, self.stats = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'])
         elif cpu_scheduling_type == 5:
-            self.cpu_schedule, self.stats = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'])
+
+        for process in self.details:
+            print str(process)
+        print '\n\n'
 
         # Display process schedule details
         for process in self.cpu_schedule:
