@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>cpu_scheduling.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id="background"></div>
+<div id='container'>
+  <div class='section'>
+    <div class='docs'><h1>cpu_scheduling.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">itemgetter</span>
+<span class="kn">import</span> <span class="nn">Queue</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">fcfs</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;arrival&#39;</span><span class="p">))</span>
+    <span class="n">process_chart</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">curr_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">turn_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sum_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">details_process</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">processes</span><span class="p">:</span>
+        <span class="n">temp_process</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+        <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">curr_time</span><span class="p">):</span>
+            <span class="n">curr_time</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+
+        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_time</span>
+        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_time</span> <span class="o">+</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+
+        <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_time</span> <span class="o">-</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">wait_time</span> <span class="o">+=</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span>
+        <span class="n">curr_time</span> <span class="o">+=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+        <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curr_time</span> <span class="o">-</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;resp_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">turn_time</span> <span class="o">+=</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span>
+        <span class="n">sum_time</span> <span class="o">+=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+        <span class="n">details_process</span><span class="p">[</span><span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">temp_process</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]:</span>
+                <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;end&#39;</span><span class="p">]</span>
+                <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span>
+                <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span>
+            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+
+        <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;sum_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_time</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">turn_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;throughput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;cpu_utilization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sum_time</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">curr_time</span>
+    <span class="k">return</span> <span class="n">process_chart</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">details_process</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">round_robin</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="n">max_quanta</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+    <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;arrival&#39;</span><span class="p">))</span>
+    <span class="n">time_present</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">turn_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sum_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">details_process</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">Queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+        <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">temp_val</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">details_process</span> <span class="o">+=</span> <span class="p">[</span><span class="n">temp_val</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">temp_val</span>
+
+    <span class="n">process_chart</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">active_process</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">var_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_process</span> <span class="o">=</span> <span class="n">q</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+            
+        <span class="k">if</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time_present</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                    <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="n">quanta</span> <span class="o">=</span> <span class="n">max_quanta</span>
+            <span class="n">var_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+
+            <span class="k">if</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">max_quanta</span><span class="p">:</span>
+                <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="n">max_quanta</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">quanta</span> <span class="o">=</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+                <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">if</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">temp_process</span><span class="p">)</span>
+                <span class="n">time_present</span> <span class="o">+=</span> <span class="n">quanta</span>
+                <span class="n">active_process</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_process</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">time_present</span> <span class="o">+=</span> <span class="n">quanta</span>
+                <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">temp_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+
+                <span class="k">if</span> <span class="n">temp_process</span> <span class="ow">in</span> <span class="n">active_process</span><span class="p">:</span>
+                    <span class="n">active_process</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">temp_process</span><span class="p">)</span>
+                    <span class="n">count</span> <span class="o">-=</span> <span class="mi">1</span>
+            
+            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">temp_dict</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">temp_dict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]:</span>
+                    <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_dict</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span>
+                    <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            
+            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">active_process</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">var_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">quanta</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">quanta</span> <span class="o">=</span> <span class="mi">1</span>
+            
+            <span class="k">if</span> <span class="n">quanta</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">var_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">var_count</span> <span class="o">==</span> <span class="n">count</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Idle&#39;</span><span class="p">:</span>
+                            <span class="n">chart_details</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="n">quanta</span>
+                            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>   
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+                            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="n">quanta</span>  
+                            <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                            <span class="k">del</span> <span class="n">chart_details</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">time_present</span> <span class="o">+=</span> <span class="n">quanta</span>  
+                        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                        <span class="k">del</span> <span class="n">chart_details</span>
+                    <span class="n">var_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">temp_process</span><span class="p">)</span>
+            
+        <span class="k">if</span> <span class="n">q</span><span class="o">.</span><span class="n">empty</span><span class="p">():</span>
+            <span class="k">break</span>
+
+    <span class="n">process_details</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;resp_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]))</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span>
+        <span class="n">wait_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span>
+        <span class="n">turn_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span>
+        <span class="n">sum_time</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+
+    <span class="n">curr_time</span> <span class="o">=</span> <span class="n">time_present</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;sum_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_time</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">turn_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;throughput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;cpu_utilization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sum_time</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">curr_time</span>
+        
+    <span class="k">return</span> <span class="n">process_chart</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">process_details</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">shortest_job_non_prempted</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;burst&#39;</span><span class="p">))</span>
+    <span class="n">time_present</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">turn_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">sum_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">completed_processes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">process_chart</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">data_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+            <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time_present</span><span class="p">:</span>
+                <span class="n">details_process</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">time_present</span> <span class="o">+=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">completed_processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">data_process</span> <span class="o">+=</span> <span class="p">[</span><span class="n">details_process</span><span class="p">]</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">var</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">):</span>
+                    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Idle&#39;</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">completed_processes</span><span class="p">):</span>
+            <span class="k">break</span>
+
+    <span class="n">process_details</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">data_process</span><span class="p">:</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;resp_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]))</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span>
+        <span class="n">wait_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span>
+        <span class="n">turn_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span>
+        <span class="n">sum_time</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+
+    <span class="n">curr_time</span> <span class="o">=</span> <span class="n">time_present</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;sum_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_time</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">turn_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;throughput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_process</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;cpu_utilization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sum_time</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">curr_time</span>
+
+    <span class="k">return</span> <span class="n">process_chart</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">process_details</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">shortest_job_prempted</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;burst&#39;</span><span class="p">))</span>
+    <span class="n">time_present</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">turn_time</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">sum_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">process_chart</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">details_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+        <span class="n">temp_val</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">details_process</span> <span class="o">+=</span> <span class="p">[</span><span class="n">temp_val</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">temp_val</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+            <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time_present</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+
+                    <span class="n">all_processes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">temp_dict</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">temp_dict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]:</span>
+                        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_dict</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span>
+                        <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">var</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Idle&#39;</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+
+                    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_processes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;burst&#39;</span><span class="p">))</span>
+
+    <span class="n">process_details</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;resp_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]))</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span>
+        <span class="n">wait_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span>
+        <span class="n">turn_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span>
+        <span class="n">sum_time</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+
+    <span class="n">curr_time</span> <span class="o">=</span> <span class="n">time_present</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;sum_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_time</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">turn_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;throughput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;cpu_utilization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sum_time</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">curr_time</span>
+
+    <span class="k">return</span> <span class="n">process_chart</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">process_details</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">priority_non_preemptive</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">increment_after_time</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">upper_limit_priority</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;priority&#39;</span><span class="p">))</span>
+    <span class="n">time_present</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">turn_time</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">sum_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">completed_processes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">process_chart</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">data_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+            <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>  
+            <span class="k">if</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time_present</span><span class="p">:</span>
+                <span class="n">details_process</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">time_present</span> <span class="o">+=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">details_process</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="k">for</span> <span class="n">val_process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;wait_time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val_process</span><span class="p">:</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">if</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">time_present</span> <span class="ow">and</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span>  <span class="o">-=</span> <span class="p">(</span><span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">increment_after_time</span><span class="p">)</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="n">increment_after_time</span>
+                        <span class="k">if</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">upper_limit_priority</span><span class="p">:</span>
+                            <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">upper_limit_priority</span>
+                        <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+                <span class="n">completed_processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+                <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">data_process</span> <span class="o">+=</span> <span class="p">[</span><span class="n">details_process</span><span class="p">]</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">var</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">):</span>
+                    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Idle&#39;</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">completed_processes</span><span class="p">):</span>  
+            <span class="k">break</span>
+        <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_processes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;priority&#39;</span><span class="p">))</span>
+
+    <span class="n">process_details</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">data_process</span><span class="p">:</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;resp_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]))</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span>
+        <span class="n">wait_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span>
+        <span class="n">turn_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span>
+        <span class="n">sum_time</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+
+    <span class="n">curr_time</span> <span class="o">=</span> <span class="n">time_present</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;sum_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_time</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">turn_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">data_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;throughput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_process</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;cpu_utilization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sum_time</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">curr_time</span>
+    
+    <span class="k">return</span> <span class="n">process_chart</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">process_details</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">priority_preemptive</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">increment_after_time</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">upper_limit_priority</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+    <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;priority&#39;</span><span class="p">))</span>
+    <span class="n">time_present</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">turn_time</span> <span class="o">=</span> <span class="mi">0</span> 
+    <span class="n">sum_time</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">process_chart</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">details_process</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+        <span class="n">temp_val</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">temp_val</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="n">details_process</span> <span class="o">+=</span> <span class="p">[</span><span class="n">temp_val</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">temp_val</span>
+
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+            <span class="n">chart_details</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time_present</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="k">for</span> <span class="n">val_process</span> <span class="ow">in</span> <span class="n">all_processes</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s">&#39;wait_time&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val_process</span><span class="p">:</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">if</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">time_present</span> <span class="ow">and</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span>  <span class="o">-=</span> <span class="p">(</span><span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">/</span> <span class="n">increment_after_time</span><span class="p">)</span>
+                        <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="n">increment_after_time</span>
+                        <span class="k">if</span> <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">upper_limit_priority</span><span class="p">:</span>
+                            <span class="n">val_process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">upper_limit_priority</span>
+
+                <span class="k">if</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;flag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+
+                    <span class="n">all_processes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">process</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">temp_dict</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">temp_dict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]:</span>
+                        <span class="n">chart_details</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp_dict</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span>
+                        <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">chart_details</span><span class="p">]</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">var</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">var</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Idle&#39;</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="k">del</span> <span class="n">process_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                            <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">process_chart</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">idle_cpu</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Idle&#39;</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">time_present</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">idle_cpu</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_present</span>
+                        <span class="n">process_chart</span> <span class="o">+=</span> <span class="p">[</span><span class="n">idle_cpu</span><span class="p">]</span>
+
+                    <span class="n">var</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_processes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">break</span>
+
+        <span class="n">all_processes</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_processes</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s">&#39;priority&#39;</span><span class="p">))</span>
+
+    <span class="n">process_details</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">details_process</span><span class="p">:</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;resp_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;start&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]))</span>
+        <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;end&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">])</span>
+        <span class="n">wait_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span>
+        <span class="n">turn_time</span> <span class="o">+=</span> <span class="n">process_details</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]][</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span>
+        <span class="n">sum_time</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span>
+
+    <span class="n">curr_time</span> <span class="o">=</span> <span class="n">time_present</span>
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;sum_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sum_time</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;turn_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">turn_time</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;throughput&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">details_process</span><span class="p">)</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">curr_time</span><span class="p">)</span>
+    <span class="n">stats</span><span class="p">[</span><span class="s">&#39;cpu_utilization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">sum_time</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="o">/</span><span class="n">curr_time</span>
+
+    <span class="k">return</span> <span class="n">process_chart</span><span class="p">,</span> <span class="n">stats</span><span class="p">,</span> <span class="n">process_details</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <h5>Test code</h5>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">list_process_round_robin</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>list_process_shortest_job_non_prempted = list()
+list_process_shortest_job_prempted = list()</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <h1>Test case for round robin</h1>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">process</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">list_process_round_robin</span> <span class="o">+=</span> <span class="p">[</span><span class="n">process</span><span class="p">]</span>
+<span class="n">process</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">9</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">list_process_round_robin</span> <span class="o">+=</span> <span class="p">[</span><span class="n">process</span><span class="p">]</span>
+<span class="n">process</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span> 
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">list_process_round_robin</span> <span class="o">+=</span> <span class="p">[</span><span class="n">process</span><span class="p">]</span>
+<span class="n">process</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">7</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">list_process_round_robin</span> <span class="o">+=</span> <span class="p">[</span><span class="n">process</span><span class="p">]</span>
+<span class="n">process</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;burst&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;arrival&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">process</span><span class="p">[</span><span class="s">&#39;wait_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">list_process_round_robin</span> <span class="o">+=</span> <span class="p">[</span><span class="n">process</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>process = {}
+process['name'] = 1
+process['burst'] = 7
+process['arrival'] = 0
+list_process_shortest_job_non_prempted += [process]
+process = {}
+process['name'] = 2
+process['burst'] = 10
+process['arrival'] = 0
+list_process_shortest_job_non_prempted += [process]
+process = {}
+process['name'] = 3
+process['burst'] = 5
+process['arrival'] = 0
+list_process_shortest_job_non_prempted += [process]
+process = {}
+process['name'] = 4
+process['burst'] = 7
+process['arrival'] = 0
+list_process_shortest_job_non_prempted += [process]</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>process = {}
+process['name'] = 1
+process['burst'] = 7
+process['arrival'] = 0
+list_process_shortest_job_prempted += [process]
+process = {}
+process['name'] = 2
+process['burst'] = 4
+process['arrival'] = 4
+list_process_shortest_job_prempted += [process]
+process = {}
+process['name'] = 3
+process['burst'] = 5
+process['arrival'] = 1
+list_process_shortest_job_prempted += [process]
+process = {}
+process['name'] = 4
+process['burst'] = 2
+process['arrival'] = 5
+list_process_shortest_job_prempted += [process]</p>
+<h1>val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)</h1>
+<p>val = shortest_job_prempted(list_process_shortest_job_prempted)
+xyz,p,xxx= priority_preemptive(list_process_round_robin)
+for p in xxx:
+  print str(p['name']) + " " +str(p['turn_time']) + " " + str(p['wait_time']) + " " + str(p['resp_time'])</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

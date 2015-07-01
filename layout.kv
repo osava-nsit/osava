@@ -15,6 +15,9 @@
         	text: 'Deadlock Avoidance Algorithm'
             size_hint: 0.6, 0.07
             pos_hint: {'x': .2, 'y': .75}
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'da_form'
         Button:
         	text: 'Deadlock Detection Algorithm'
             size_hint: 0.6, 0.07
@@ -39,99 +42,6 @@
             text: 'Developed By -\nUdit Arora\nRohit Takhar\nAdvisor -\nDr. Pinaki Chakraborthy'
             size_hint: 0.6, 0.06
             pos_hint: {'x': .5, 'y': .15}
-
-<CPUSchedulingScreen>:
-    num_processes: num_processes
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: 'CPU Scheduling Algorithms'
-            size_hint_y: 0.1
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: 0.2
-            Label:
-                text: 'Number of Processes (Max 25):'
-            TextInput:
-                id: num_processes
-                multiline: 'False'
-        BoxLayout:
-            orientation: 'vertical'
-            size_hint_y: 0.7
-            BoxLayout:
-                orientation: 'horizontal'
-                Button:
-                    text: 'FCFS'
-                    on_press:
-                        root.cpu_type = 0
-                        root.load_form()
-                        root.manager.transition.direction = 'left'
-                        root.manager.current = 'cpu2'
-                Button:
-                    text: 'Round Robin'
-                    on_press:
-                        root.cpu_type = 1
-                        root.load_form()
-                        root.manager.transition.direction = 'left'
-                        root.manager.current = 'cpu2'
-            BoxLayout:
-                orientation: 'horizontal'
-                Button:
-                    text: 'SJF Non-Preemptive'
-                    on_press:
-                        root.cpu_type = 2
-                        root.load_form()
-                        root.manager.transition.direction = 'left'
-                        root.manager.current = 'cpu2'
-                Button:
-                    text: 'SJF Preemptive'
-                    on_press:
-                        root.cpu_type = 3
-                        root.load_form()
-                        root.manager.transition.direction = 'left'
-                        root.manager.current = 'cpu2'
-            Button:
-                text: 'Back'
-                on_press:
-                    root.manager.transition.direction = 'right'
-                    root.manager.current = 'menu'
-
-<CPUInputScreen_old>:
-    layout: layout
-    type_text: type_text
-    BoxLayout:
-        orientation: 'vertical'
-        BoxLayout:
-            size_hint_y: 0.1
-            id: type_text
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint_y: 0.2
-            Label:
-                text: 'Sno.'
-            Label:
-                text: 'Processes'
-            Label:
-                text: 'Arrival time (ms)'
-            Label:
-                text: 'CPU burst time (ms)'
-        BoxLayout:
-            orientation: 'vertical'
-            id: layout
-        GridLayout:
-            size_hint_y: 0.2
-            cols: 2
-            Button:
-                text: 'Back'
-                on_press:
-                    root.manager.transition.direction = 'right'
-                    root.manager.current = 'cpu1'
-            Button:
-                text: 'Submit'
-                on_press:
-                    #root.calculate_schedule()
-                    root.manager.transition.direction = 'left'
-                    root.manager.current = 'cpu_output'
 
 <CPUInputScreen>:
     on_pre_enter: root.bind_height(); root.bind_spinner()
@@ -272,3 +182,63 @@
             Button:
                 text: 'Exit'
                 on_press: root.stop()
+
+<DeadlockAvoidanceInputScreen>:
+    num_processes: num_processes
+    num_resource_types: num_resource_types
+    form: form
+    request_form: request_form
+    request_process: request_process
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 20
+            size_hint_y: 0.13
+            pos_hint: {'top': 1}
+            Label:
+                size_hint_x: 0.25
+                text: 'No. of processes:'
+            TextInput:
+                size_hint_x: 0.125
+                id: num_processes
+                multiline: 'False'
+            Label:
+                padding: 10,0
+                size_hint_x: 0.3
+                halign: 'center'
+                valign: 'middle'
+                text: 'No. of resource types:'
+                text_size: self.size
+            TextInput:
+                size_hint_x: 0.125
+                id: num_resource_types
+                multiline: 'False'
+            Label:
+                size_hint_x: 0.05
+            Button:
+                size_hint_x: 0.15
+                text: 'Load form'
+                on_release: root.load_form()
+        BoxLayout:
+            orientation: 'vertical'
+            #size_hint_y: 0.7
+            id: form
+        BoxLayout:
+            size_hint_y: 0.3
+            padding: 15
+            orientation: 'vertical'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: 0.3
+                Label:
+                    text: 'Information about the request -'
+                Label:
+                    text: 'Process making the request:'
+                TextInput:
+                    id: request_process
+                    multiline: 'False'
+            BoxLayout:
+                orientation: 'vertical'
+                size_hint_y: 0.7
+                id: request_form
