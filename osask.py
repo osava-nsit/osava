@@ -347,7 +347,7 @@ class DeadlockAvoidanceInputScreen(Screen):
         form.clear_widgets()
         if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
             self.num_processes.text = "4"
-        if (self.num_resource_types.text == "" or int(self.num_resource_types) < 1):
+        if (self.num_resource_types.text == "" or int(self.num_resource_types.text) < 1):
             self.num_resource_types.text = "4"
 
         # Number of processes
