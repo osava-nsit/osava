@@ -205,7 +205,7 @@
                 multiline: 'False'
             Label:
                 padding: 10,0
-                size_hint_x: 0.3
+                size_hint_x: 0.25
                 halign: 'center'
                 valign: 'middle'
                 text: 'No. of resource types:'
@@ -214,12 +214,18 @@
                 size_hint_x: 0.125
                 id: num_resource_types
                 multiline: 'False'
-            Label:
-                size_hint_x: 0.05
+            #Label:
+                #size_hint_x: 0.05
             Button:
                 size_hint_x: 0.15
                 text: 'Load form'
                 on_release: root.load_form()
+            Button:
+                size_hint_x: 0.1
+                text: 'Visualize'
+                on_release: 
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'da_output'
         BoxLayout:
             orientation: 'vertical'
             #size_hint_y: 0.7
@@ -242,3 +248,19 @@
                 orientation: 'vertical'
                 size_hint_y: 0.7
                 id: request_form
+
+<DeadlockAvoidanceOutputScreen>:
+    on_enter: root.calculate()
+    layout: layout
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint_y: 0.8
+            id: layout
+        Button:
+            text: 'Back'
+            size_hint_y: 0.2
+            on_release:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'da_form'

@@ -14,7 +14,7 @@ from kivy.graphics import Color, Rectangle, Line
 from functools import partial
 from random import random
 # OS Algorithms
-import cpu_scheduling
+import cpu_scheduling, deadlock
 
 Builder.load_file('layout.kv')
 
@@ -56,26 +56,18 @@ def cpu_on_aging(instace, value):
 def da_on_available(instace, value, i):
     if (value == ''):
         value = 5
-    data_da['available'+str(i)] = value
+    data_da['available'][i] = value
 def da_on_request(instance, value, i):
     if (value == ''):
         value = 0
-    data_da['request'+str(i)] = value
+    data_da['request'][i] = value
 def da_on_max(instance, value, i, j):
     if (value == ''):
-        value = 10
-    if 'max' not in data_da:
-        data_da['max'] = dict()
-    if i not in data_da['max']:
-        data_da['max'][i] = dict()
+        value = 8
     data_da['max'][i][j] = value
 def da_on_allocation(instance, value, i, j):
     if (value == ''):
-        value = 10
-    if 'allocation' not in data_da:
-        data_da['allocation'] = dict()
-    if i not in data_da['allocation']:
-        data_da['allocation'][i] = dict()
+        value = 4
     data_da['allocation'][i][j] = value
 
 # Main Menu Screen with options to choose an OS Algorithm
@@ -355,6 +347,14 @@ class DeadlockAvoidanceInputScreen(Screen):
         # Number of resource types
         m = int(self.num_resource_types.text)
 
+        # Initialize the global data_da dictionary
+        data_da['num_processes'] = n
+        data_da['num_resource_types'] = m
+        data_da['available'] = [5] * data_da['num_resource_types']
+        data_da['request'] = [0] * data_da['num_resource_types']
+        data_da['max'] = [[10 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
+        data_da['allocation'] = [[4 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
+
         # Add form labels for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
         box.add_widget(Label(text='Available:'))
@@ -429,12 +429,32 @@ class DeadlockAvoidanceInputScreen(Screen):
             box.add_widget(inp)
         request_form.add_widget(box)
 
+class DeadlockAvoidanceOutputScreen(Screen):
+    def calculate(self, *args):
+        available = data_da['available']
+        maximum = data_da['max']
+        allocation = data_da['allocation']
+        request = data_da['request']
+        safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
+
+        layout = self.manager.get_screen('da_output').layout
+        layout.clear_widgets()
+        if safe:
+            layout.add_widget(Label(text='The state is safe. The processes can be scheduled as follows:'))
+            for i in range(len(schedule)):
+                layout.add_widget(Label(text='P'+str(i+1)))
+        else:
+            layout.add_widget(Label(text='The state is unsafe and will result in a deadlock.'))
+
+
+
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
 sm.add_widget(CPUInputScreen(name='cpu_form'))
 sm.add_widget(CPUOutputScreen(name='cpu_output'))
 sm.add_widget(DeadlockAvoidanceInputScreen(name='da_form'))
+sm.add_widget(DeadlockAvoidanceOutputScreen(name='da_output'))
 
 class OSASK(App):
     def build(self):
