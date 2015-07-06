@@ -1,7 +1,17 @@
 <MainMenuScreen>:
+    title: title
+    on_enter: root.load_ribbon()
     FloatLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.6
+            Rectangle:
+                size: self.size
+                pos: self.pos
     	Label:
-            text: 'Operating Systems Algorithm Visualization'
+            id: title
+            background_color: (1, 1, 1, 1)
+            text: 'OS - Algo Visualization App'
             size_hint: 0.173, 0.07
             pos_hint: {'x': .42, 'y': 0.94}
         Button:
@@ -39,9 +49,9 @@
             size_hint: 0.2, 0.2
             pos_hint: {'x': .4, 'y': .1}
         Label:
-            text: 'Developed By -\nUdit Arora\nRohit Takhar\nAdvisor -\nDr. Pinaki Chakraborthy'
+            text: 'Developers: Udit Arora and Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
             size_hint: 0.6, 0.06
-            pos_hint: {'x': .5, 'y': .15}
+            pos_hint: {'x': .2, 'y': .02}
 
 <CPUInputScreen>:
     on_pre_enter: root.bind_height(); root.bind_spinner()

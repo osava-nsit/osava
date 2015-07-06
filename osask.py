@@ -72,7 +72,12 @@ def da_on_allocation(instance, value, i, j):
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
-    pass
+    def load_ribbon(self, *args):
+        title = self.manager.get_screen('menu').title
+        with title.canvas:
+            Color(1, 0, 0, 0.4, mode='rgba')
+            Rectangle(pos=(0,1100), size=(1600,100))
+        # title.add_widget(Label(text='OS - Algo Visualization App'))
 
 # Input Screen for CPU Scheduling Algorithms
 class CPUInputScreen(Screen):
