@@ -1,7 +1,9 @@
 # Kivy libraries
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.widget import Widget
@@ -82,11 +84,13 @@ class MainMenuScreen(Screen):
 # Input Screen for CPU Scheduling Algorithms
 class CPUInputScreen(Screen):
     layout = ObjectProperty(None)
+    layout_form = ObjectProperty(None)
     cpu_type = 0
     preemptive_flag = False
     def bind_height(self, *args):
-        layout = self.manager.get_screen('cpu_form').layout
-        self.layout.bind(minimum_height=self.layout.setter('height'))
+        #layout = self.manager.get_screen('cpu_form').layout
+        #self.layout.bind(minimum_height=self.layout.setter('height'))
+        return
 
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinner(self, *args):
@@ -139,14 +143,21 @@ class CPUInputScreen(Screen):
     # Load the appropriate form inputs according to the CPU Scheduling algorithm selected
     def load_form(self, *args):
         # Layout is the area where the form is placed on the screen
-        layout = self.manager.get_screen('cpu_form').layout
-        layout.clear_widgets()
+        layout_form = self.manager.get_screen('cpu_form').layout_form
+        layout_form.clear_widgets()
         if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
             self.num_processes.text = "5"
         data_cpu['num_processes'] = int(self.num_processes.text)
 
+        layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        layout.bind(minimum_height=layout.setter('height'))
+
+        # Fixed height of form rows within scroll view
+        form_row_height = '40dp'
+
         # Add input labels
-        box = BoxLayout(orientation='horizontal')
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         label = Label(text='Sno.')
         box.add_widget(label)
         label = Label(text='Process name')
@@ -164,7 +175,7 @@ class CPUInputScreen(Screen):
         layout.add_widget(box)
 
         for i in range(int(self.num_processes.text)):
-            box = BoxLayout(orientation='horizontal', padding=(50,0))
+            box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
             sno_label = Label(text=str(i+1))
             box.add_widget(sno_label)
 
@@ -191,7 +202,7 @@ class CPUInputScreen(Screen):
 
         # If Round Robin scheduling selected
         if self.cpu_type == 1:
-            box = BoxLayout(orientation='horizontal', padding=(50,0))
+            box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
             inp = TextInput(id='quantum')
             inp.bind(text=cpu_on_quantum)
             # inp.font_size = inp.size[1]
@@ -201,7 +212,7 @@ class CPUInputScreen(Screen):
             layout.add_widget(box)
         # If Priority scheduling selected
         elif self.cpu_type == 4 or self.cpu_type == 5:
-            box = BoxLayout(orientation='horizontal', padding=(50,0))
+            box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
             inp = TextInput(id='aging')
             inp.bind(text=cpu_on_aging)
             # inp.font_size = inp.size[1]
@@ -210,6 +221,12 @@ class CPUInputScreen(Screen):
             box.add_widget(label)
             box.add_widget(inp)
             layout.add_widget(box)
+
+        # Add ScrollView
+        # sv = ScrollView(size_hint=(None, None), size=(400, 400))
+        sv = ScrollView(size=self.size)
+        sv.add_widget(layout)
+        layout_form.add_widget(sv)
 
 # Output Screen for CPU Scheduling algorithms
 class CPUOutputScreen(Screen):
