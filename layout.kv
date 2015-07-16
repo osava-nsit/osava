@@ -10,7 +10,8 @@
                 pos: self.pos
     	Label:
             id: title
-            background_color: (1, 1, 1, 1)
+            color: (0, 0.3, 0.8, 1)
+            font_size: '24sp'
             text: 'OS - Algo Visualization App'
             size_hint: 0.173, 0.07
             pos_hint: {'x': .42, 'y': 0.94}
@@ -59,36 +60,52 @@
     layout_form: layout_form
     num_processes: num_processes
     algo_spinner: algo_spinner
+    variant_spinner: variant_spinner
     BoxLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            padding: 10
-            size_hint_y: 0.2
+            padding: 20, 10
+            size_hint_y: 0.15
+            size_hint_x: 0.5
             pos_hint: {'top': 1}
             Label:
                 text: 'Number of processes: '
+                size_hint_x: 0.3
                 on_text: root.load_form()
             TextInput:
                 id: num_processes
                 multiline: 'False'
+                size_hint_x: 0.2
             Label:
                 size_hint_x: 0.05
                 text: ''
             Button:
-                size_hint_x: 0.3
+                size_hint_x: 0.2
                 size_hint_y: 0.8
                 halign: 'center'
                 valign: 'middle'
                 text: 'Load form'
                 on_release: root.load_form()
+        Label:
+            text: 'Information about the scheduling algorithm -'
+            size_hint_y: 0.1
+            text_size: self.size
+            padding: 20, 0
+            halign: 'left'
         BoxLayout:
             orientation: 'horizontal'
             padding: 10, 40
-            size_hint_x: 0.8
+            size_hint_x: 0.6
             size_hint_y: 0.2
             Label:
-                text: 'Information about the scheduling algorithm -'
+                text: 'Algorithm -'
                 size_hint_x: 0.4
                 text_size: self.size
                 #pos_hint: {'top': 1}
@@ -102,44 +119,51 @@
         BoxLayout:
             orientation: 'horizontal'
             size_hint_y: 0.2
+            size_hint_x: 0.5
             padding: 10, 10
             Label:
                 text: 'Variant -'
-                size_hint_x: 0.2
+                size_hint_x: 0.4
                 text_size: self.size
-                padding: 10, 10
-                pos_hint: {'top': 1}
-            ToggleButton:
-                group: 'variant'
-                text: 'Preemptive'
-                size_hint_y: None
+                padding: 10, 0
+            #ToggleButton:
+                #group: 'variant'
+                #text: 'Preemptive'
+                #size_hint_y: None
+                #height: '40dp'
+                #size_hint_x: 0.3
+                #text_size: self.size
+                #halign: 'center'
+                #valign: 'middle'
+                #on_release: root.preemptive_flag = True; root.update_cpu_type(True)
+            #ToggleButton:
+                #id: variant_toggle
+                #group: 'variant'
+                #text: 'Non-Preemptive'
+                #size_hint_y: None
+                #eight: '40dp'
+                #size_hint_x: 0.3
+                #text_size: self.size
+                #halign: 'center'
+                #valign: 'middle'
+                #on_release: root.preemptive_flag = False; root.update_cpu_type(False)
+            Spinner:
+                id: variant_spinner
+                text:'-'
+                size_hint_y: 'None'
                 height: '40dp'
-                size_hint_x: 0.2
-                text_size: self.size
-                halign: 'center'
-                valign: 'middle'
-                on_release: root.preemptive_flag = True; root.update_cpu_type(True)
-            ToggleButton:
-                group: 'variant'
-                text: 'Non-Preemptive'
-                size_hint_y: None
-                height: '40dp'
-                size_hint_x: 0.2
-                text_size: self.size
-                halign: 'center'
-                valign: 'middle'
-                on_release: root.preemptive_flag = False; root.update_cpu_type(False)
+                values: ('Preemptive', 'Non-Preemptive')
             Label:
                 text: ''
                 size_hint_x: 0.05
-            Button:
-                text: 'Visualize'
-                size_hint_x: 0.2
-                size_hint_y: None
-                height: '40dp'
-                on_release: 
-                    root.manager.transition.direction = 'left'
-                    root.manager.current = 'cpu_output'
+            #Button:
+                #text: 'Visualize'
+                #size_hint_x: 0.2
+                #size_hint_y: None
+                #height: '40dp'
+                #on_release: 
+                    #root.manager.transition.direction = 'left'
+                    #root.manager.current = 'cpu_output'
         # For adding scroll view directly from KV file (also need to call bind function)
         #ScrollView
            #size: self.size
@@ -151,6 +175,15 @@
         BoxLayout:
             id: layout_form
             orientation: 'vertical'
+        #BoxLayout:
+            #Button:
+                #text: 'Visualize'
+                #size_hint_x: 0.2
+                #size_hint_y: None
+                #height: '40dp'
+                #on_release: 
+                    #root.manager.transition.direction = 'left'
+                    #root.manager.current = 'cpu_output'
 
 <CPUOutputScreen>:
     layout: layout
@@ -161,8 +194,25 @@
     BoxLayout:
         orientation: 'vertical'
         Label:
-            text: 'The processes will be scheduled as follows:'
-            size_hint_y: 0.1
+            size_hint_y: 0.07
+            text: 'Visualization results -'
+            #padding: 100, 0
+            #text_size: self.size
+            #halign: 'left'
+        BoxLayout:
+            size_hint_y: 0.3
+            orientation: 'horizontal'
+            id: gantt
+        BoxLayout:
+            size_hint_y: 0.07
+            orientation: 'horizontal'
+            id: time
+        Label:
+            text: 'Timeline -'
+            size_hint_y: 0.07
+            #padding: 100, 0
+            #text_size: self.size
+            #halign: 'left'
         BoxLayout:
             size_hint_y: 0.1
             orientation: 'horizontal'
@@ -173,17 +223,9 @@
             Label:
                 text: 'Suspend/Termination time'
         BoxLayout:
-            size_hint_y: 0.4
+            size_hint_y: 0.5
             orientation: 'vertical'
             id: layout
-        BoxLayout:
-            size_hint_y: 0.3
-            orientation: 'horizontal'
-            id: gantt
-        BoxLayout:
-            size_hint_y: 0.1
-            orientation: 'horizontal'
-            id: time
         GridLayout:
             size_hint_y: 0.1
             cols: 2

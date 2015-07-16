@@ -43,7 +43,7 @@ def cpu_on_burst(instace, value, i):
     data_cpu['burst'+str(i)] = value
 def cpu_on_priority(instace, value, i):
     if value == '':
-        value = 0
+        value = 10
     data_cpu['priority'+str(i)] = value
 def cpu_on_quantum(instace, value):
     if value == '':
@@ -96,6 +96,8 @@ class CPUInputScreen(Screen):
     def bind_spinner(self, *args):
         spinner = self.manager.get_screen('cpu_form').algo_spinner
         spinner.bind(text=self.show_selected_value)
+        variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
+        variant_spinner.bind(text=self.show_variant)
 
     # Call set_cpu_type method with appropriate index of scheduling algorithm
     def show_selected_value(self, spinner, text, *args):
@@ -108,23 +110,35 @@ class CPUInputScreen(Screen):
         elif text == 'Round Robin':
             self.set_cpu_type(1)
 
+    def show_variant(self, spinner, text, *args):
+        if text == 'Preemptive':
+            self.preemptive_flag = True
+            self.update_cpu_type(True)
+        elif text == 'Non-Preemptive':
+            self.preemptive_flag = False
+            self.update_cpu_type(False)
+
     # Called when a new value is chosen from spinner. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
     def set_cpu_type(self, new_cpu_type, *args):
         global cpu_scheduling_type
         cpu_scheduling_type = new_cpu_type
         self.cpu_type = new_cpu_type
+        # variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
         # If FCFS or RR
         if new_cpu_type == 0 or new_cpu_type == 1:
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
+            # variant_spinner.disabled = True
         elif self.preemptive_flag == True and new_cpu_type%2 == 0:
             new_cpu_type += 1
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
+            # variant_spinner.disabled = False
         elif self.preemptive_flag == False and new_cpu_type%2 != 0:
             new_cpu_type -= 1
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
+            # variant_spinner.disabled = False
         self.load_form()
 
     # Called when preemptive or non-preemtive option is clicked. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
@@ -158,8 +172,8 @@ class CPUInputScreen(Screen):
 
         # Add input labels
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        label = Label(text='Sno.')
-        box.add_widget(label)
+        # label = Label(text='Sno.')
+        # box.add_widget(label)
         label = Label(text='Process name')
         box.add_widget(label)
         label = Label(text='Arrival time (ms)')
@@ -169,20 +183,26 @@ class CPUInputScreen(Screen):
 
         # If Priority scheduling selected
         if self.cpu_type == 4 or self.cpu_type == 5:
-            label = Label(text='Priority (Highest = 0)')
+            label = Label(text='Priority (0 being highest)')
             box.add_widget(label)
 
         layout.add_widget(box)
 
         for i in range(int(self.num_processes.text)):
             box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
-            sno_label = Label(text=str(i+1))
-            box.add_widget(sno_label)
+
+            # sno_label = Label(text=str(i+1))
+            # box.add_widget(sno_label)
 
             # process names
-            inp = TextInput(id='name'+str(i))
-            inp.bind(text=partial(cpu_on_name, i=i))
-            box.add_widget(inp)
+            # inp = TextInput(id='name'+str(i))
+            # inp.bind(text=partial(cpu_on_name, i=i))
+            # box.add_widget(inp)
+            # Fixed process names
+            pname = Label(text='P'+str(i+1))
+            box.add_widget(pname)
+            data_cpu['name'+str(i)] = 'P'+str(i+1)
+
             # arrival times
             inp = TextInput(id='arrival'+str(i))
             inp.bind(text=partial(cpu_on_arrival, i=i))
@@ -206,17 +226,17 @@ class CPUInputScreen(Screen):
             inp = TextInput(id='quantum')
             inp.bind(text=cpu_on_quantum)
             # inp.font_size = inp.size[1]
-            label = Label(text='Time quantum')
+            label = Label(text='Time quantum (ms)')
             box.add_widget(label)
             box.add_widget(inp)
             layout.add_widget(box)
         # If Priority scheduling selected
         elif self.cpu_type == 4 or self.cpu_type == 5:
             box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
-            inp = TextInput(id='aging')
+            inp = TextInput(id='aging', size_hint_x=0.3)
             inp.bind(text=cpu_on_aging)
             # inp.font_size = inp.size[1]
-            label = Label(text='Aging - Promote priority by 1 unit after time: ')
+            label = Label(text='Aging: Promote priority by 1 unit each time after waiting (ms) - ', size_hint_x=0.7)
             # label.text_size = label.size
             box.add_widget(label)
             box.add_widget(inp)
@@ -227,6 +247,22 @@ class CPUInputScreen(Screen):
         sv = ScrollView(size=self.size)
         sv.add_widget(layout)
         layout_form.add_widget(sv)
+
+        # Add Visualize and back button at the end of form
+        box = BoxLayout(orientation='horizontal', size_hint_y=0.2, padding=(0, 10))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
+        layout_form.add_widget(box)
+        
+
+    def switch_to_cpu_output(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'cpu_output'
+
+    def switch_to_main_menu(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'menu'
+
 
 # Output Screen for CPU Scheduling algorithms
 class CPUOutputScreen(Screen):
