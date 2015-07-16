@@ -6,6 +6,7 @@ def fcfs(data):
     process_chart = []
     curr_time = 0
     wait_time = 0
+    resp_time = 0
     turn_time = 0
     sum_time = 0
     details_process = {}
@@ -27,6 +28,7 @@ def fcfs(data):
         temp_process['turn_time'] = curr_time - process['arrival']
         temp_process['resp_time'] = chart_details['start'] - process['arrival']
         turn_time += temp_process['turn_time']
+        resp_time += temp_process['resp_time']
         sum_time += process['burst']
         details_process[process['name']] = temp_process
 
@@ -49,6 +51,7 @@ def fcfs(data):
     stats = {}
     stats['sum_time'] = sum_time
     stats['wait_time'] = float(wait_time)/len(processes)
+    stats['resp_time'] = float(resp_time)/len(processes)
     stats['turn_time'] = float(turn_time)/len(processes)
     stats['throughput'] = len(processes)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
@@ -58,6 +61,7 @@ def round_robin(data,max_quanta=4):
     all_processes = sorted(data, key=itemgetter('arrival'))
     time_present = 0
     wait_time = 0
+    resp_time = 0
     turn_time = 0
     sum_time = 0
     count = 0
@@ -169,6 +173,7 @@ def round_robin(data,max_quanta=4):
         process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
         process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
         wait_time += process_details[data['name']]['wait_time']
+        resp_time += process_details[data['name']]['resp_time']
         turn_time += process_details[data['name']]['turn_time']
         sum_time += data['burst']
 
@@ -176,6 +181,7 @@ def round_robin(data,max_quanta=4):
     stats = {}
     stats['sum_time'] = sum_time
     stats['wait_time'] = float(wait_time)/len(details_process)
+    stats['resp_time'] = float(resp_time)/len(details_process)
     stats['turn_time'] = float(turn_time)/len(details_process)
     stats['throughput'] = len(details_process)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
@@ -188,6 +194,7 @@ def shortest_job_non_prempted(data):
     var = 0
     wait_time = 0
     turn_time = 0
+    resp_time = 0
     sum_time = 0
     completed_processes = list()
     process_chart = list()
@@ -249,6 +256,7 @@ def shortest_job_non_prempted(data):
         process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
         process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
         wait_time += process_details[data['name']]['wait_time']
+        resp_time += process_details[data['name']]['resp_time']
         turn_time += process_details[data['name']]['turn_time']
         sum_time += data['burst']
 
@@ -256,6 +264,7 @@ def shortest_job_non_prempted(data):
     stats = {}
     stats['sum_time'] = sum_time
     stats['wait_time'] = float(wait_time)/len(data_process)
+    stats['resp_time'] = float(resp_time)/len(data_process)
     stats['turn_time'] = float(turn_time)/len(data_process)
     stats['throughput'] = len(data_process)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
@@ -265,7 +274,8 @@ def shortest_job_non_prempted(data):
 def shortest_job_prempted(data):
     all_processes = sorted(data, key=itemgetter('burst'))
     time_present = 0
-    wait_time = 0 
+    wait_time = 0
+    resp_time = 0
     turn_time = 0 
     sum_time = 0
     var = 0
@@ -348,6 +358,7 @@ def shortest_job_prempted(data):
         process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
         process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
         wait_time += process_details[data['name']]['wait_time']
+        resp_time += process_details[data['name']]['resp_time']
         turn_time += process_details[data['name']]['turn_time']
         sum_time += data['burst']
 
@@ -355,6 +366,7 @@ def shortest_job_prempted(data):
     stats = {}
     stats['sum_time'] = sum_time
     stats['wait_time'] = float(wait_time)/len(details_process)
+    stats['resp_time'] = float(resp_time)/len(details_process)
     stats['turn_time'] = float(turn_time)/len(details_process)
     stats['throughput'] = len(details_process)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
@@ -365,7 +377,8 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
     all_processes = sorted(data, key=itemgetter('priority'))
     time_present = 0 
     var = 0
-    wait_time = 0 
+    wait_time = 0
+    resp_time = 0
     turn_time = 0 
     sum_time = 0
     completed_processes = list()
@@ -438,6 +451,7 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
         process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
         process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
         wait_time += process_details[data['name']]['wait_time']
+        resp_time += process_details[data['name']]['resp_time']
         turn_time += process_details[data['name']]['turn_time']
         sum_time += data['burst']
 
@@ -445,6 +459,7 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
     stats = {}
     stats['sum_time'] = sum_time
     stats['wait_time'] = float(wait_time)/len(data_process)
+    stats['resp_time'] = float(resp_time)/len(data_process)
     stats['turn_time'] = float(turn_time)/len(data_process)
     stats['throughput'] = len(data_process)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
@@ -454,7 +469,8 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
 def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0):
     all_processes = sorted(data, key=itemgetter('priority'))
     time_present = 0
-    wait_time = 0 
+    wait_time = 0
+    resp_time = 0
     turn_time = 0 
     sum_time = 0
     var = 0
@@ -548,6 +564,7 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
         process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
         process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
         wait_time += process_details[data['name']]['wait_time']
+        resp_time += process_details[data['name']]['resp_time']
         turn_time += process_details[data['name']]['turn_time']
         sum_time += data['burst']
 
@@ -555,6 +572,7 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
     stats = {}
     stats['sum_time'] = sum_time
     stats['wait_time'] = float(wait_time)/len(details_process)
+    stats['resp_time'] = float(resp_time)/len(details_process)
     stats['turn_time'] = float(turn_time)/len(details_process)
     stats['throughput'] = len(details_process)*1000/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
@@ -564,47 +582,47 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 
 ###### Test code ######
 
-list_process_round_robin = list()
-# list_process_shortest_job_non_prempted = list()
-# list_process_shortest_job_prempted = list()
+# list_process_round_robin = list()
+# # list_process_shortest_job_non_prempted = list()
+# # list_process_shortest_job_prempted = list()
 
-# # Test case for round robin
+# # # Test case for round robin
 
-process = {}
-process['name'] = 1
-process['burst'] = 5
-process['arrival'] = 0
-process['priority'] = 1
-process['wait_time'] = 0
-list_process_round_robin += [process]
-process = {}
-process['name'] = 2
-process['burst'] = 9
-process['arrival'] = 0
-process['priority'] = 2
-process['wait_time'] = 0
-list_process_round_robin += [process]
-process = {}
-process['name'] = 3
-process['burst'] = 4
-process['arrival'] = 0
-process['priority'] = 3 
-process['wait_time'] = 0
-list_process_round_robin += [process]
-process = {}
-process['name'] = 4
-process['burst'] = 7
-process['arrival'] = 0
-process['priority'] = 4
-process['wait_time'] = 0
-list_process_round_robin += [process]
-process = {}
-process['name'] = 5
-process['burst'] = 3
-process['arrival'] = 0
-process['priority'] = 5
-process['wait_time'] = 0
-list_process_round_robin += [process]
+# process = {}
+# process['name'] = 1
+# process['burst'] = 5
+# process['arrival'] = 0
+# process['priority'] = 1
+# process['wait_time'] = 0
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 2
+# process['burst'] = 9
+# process['arrival'] = 0
+# process['priority'] = 2
+# process['wait_time'] = 0
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 3
+# process['burst'] = 4
+# process['arrival'] = 0
+# process['priority'] = 3 
+# process['wait_time'] = 0
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 4
+# process['burst'] = 7
+# process['arrival'] = 0
+# process['priority'] = 4
+# process['wait_time'] = 0
+# list_process_round_robin += [process]
+# process = {}
+# process['name'] = 5
+# process['burst'] = 3
+# process['arrival'] = 0
+# process['priority'] = 5
+# process['wait_time'] = 0
+# list_process_round_robin += [process]
 
 
 # process = {}

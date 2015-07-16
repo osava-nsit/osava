@@ -15,6 +15,7 @@ from kivy.graphics import Color, Rectangle, Line
 # Python libraries
 from functools import partial
 from random import random
+import copy
 # OS Algorithms
 import cpu_scheduling, deadlock
 
@@ -332,13 +333,15 @@ class CPUOutputScreen(Screen):
             layout.add_widget(box)
 
         # Display statistics
-        label = Label(text='Average waiting time: ' + str(self.stats['wait_time']))
+        label = Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0))
         layout.add_widget(label)
-        label = Label(text='Average turnaround time: ' + str(self.stats['turn_time']))
+        label = Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0))
         layout.add_widget(label)
-        label = Label(text='Throughput: ' + str(self.stats['throughput']))
+        label = Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0))
         layout.add_widget(label)
-        label = Label(text='CPU Utilization: ' + str(self.stats['cpu_utilization'])+' %')
+        label = Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0))
+        layout.add_widget(label)
+        label = Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%')
         layout.add_widget(label)
 
     def draw_gantt(self, *args):
@@ -516,13 +519,52 @@ class DeadlockAvoidanceOutputScreen(Screen):
         allocation = data_da['allocation']
         request = data_da['request']
         safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
+        work = copy.deepcopy(available)
+        finish = ['F'] * len(work)
 
         layout = self.manager.get_screen('da_output').layout
         layout.clear_widgets()
         if safe:
             layout.add_widget(Label(text='The state is safe. The processes can be scheduled as follows:'))
+
+            # Output table labels
+            box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+            box.add_widget(Label(text='Process'))
+            box.add_widget(Label(text='Work'))
+            box.add_widget(Label(text='Finish'))
+            layout.add_widget(box)
+
+            # Display initial work vector
+            box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+            box.add_widget(Label(text='Initial'))
+            work_text = ''
+            for i in range(len(work)):
+                work_text += (str(work[i])+'   ')
+            box.add_widget(Label(text=work_text))
+            finish_text = ''
+            for i in range(len(finish)):
+                finish_text += (finish[i]+'   ')
+            box.add_widget(Label(text=finish_text))
+            layout.add_widget(box)
+
+            # Display step by step changes in work vector according to process scheduled
             for i in range(len(schedule)):
-                layout.add_widget(Label(text='P'+str(i+1)))
+                for j in range(len(work)):
+                    work[j] += allocation[i][j]
+                print str(finish)
+                finish[schedule[i]] = 'T'
+                print str(finish)
+                box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+                box.add_widget(Label(text='P'+str(schedule[i]+1)))
+                work_text = ''
+                for j in range(len(work)):
+                    work_text += (str(work[j])+'   ')
+                box.add_widget(Label(text=work_text))
+                finish_text = ''
+                for j in range(len(finish)):
+                    finish_text += (finish[j]+'   ')
+                box.add_widget(Label(text=finish_text))
+                layout.add_widget(box)
         else:
             layout.add_widget(Label(text='The state is unsafe and will result in a deadlock.'))
 
