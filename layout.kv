@@ -242,26 +242,38 @@
     num_processes: num_processes
     num_resource_types: num_resource_types
     form: form
-    request_form: request_form
-    request_process: request_process
+    #request_form: request_form
+    #request_process: request_process
     BoxLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            padding: 20
-            size_hint_y: 0.13
+            padding: 20, 5
+            size_hint_y: 0.08
+            size_hint_x: 0.3
             pos_hint: {'top': 1}
             Label:
-                size_hint_x: 0.25
+                size_hint_x: 0.6
                 text: 'No. of processes:'
+                text_size: self.size
+                halign: 'left'
             TextInput:
-                size_hint_x: 0.125
+                size_hint_x: 0.4
                 id: num_processes
                 multiline: 'False'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 20, 10
+            size_hint_y: 0.08
+            size_hint_x: 0.7
             Label:
-                padding: 10,0
                 size_hint_x: 0.25
-                halign: 'center'
                 valign: 'middle'
                 text: 'No. of resource types:'
                 text_size: self.size
@@ -269,40 +281,36 @@
                 size_hint_x: 0.125
                 id: num_resource_types
                 multiline: 'False'
-            #Label:
-                #size_hint_x: 0.05
+            Label:
+                size_hint_x: 0.3
             Button:
                 size_hint_x: 0.15
                 text: 'Load form'
                 on_release: root.load_form()
-            Button:
-                size_hint_x: 0.1
-                text: 'Visualize'
-                on_release: 
-                    root.manager.transition.direction = 'left'
-                    root.manager.current = 'da_output'
+        Label:
+            text: 'Information about the current state -'
+            size_hint_y: 0.07
         BoxLayout:
             orientation: 'vertical'
-            #size_hint_y: 0.7
             id: form
-        BoxLayout:
-            size_hint_y: 0.3
-            padding: 15
-            orientation: 'vertical'
-            BoxLayout:
-                orientation: 'horizontal'
-                size_hint_y: 0.3
-                Label:
-                    text: 'Information about the request -'
-                Label:
-                    text: 'Process making the request:'
-                TextInput:
-                    id: request_process
-                    multiline: 'False'
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_y: 0.7
-                id: request_form
+        #BoxLayout:
+            #size_hint_y: 0.3
+            #padding: 15
+            #orientation: 'vertical'
+            #BoxLayout:
+                #orientation: 'horizontal'
+                #size_hint_y: 0.3
+                #Label:
+                #    text: 'Information about the request -'
+                #Label:
+                #    text: 'Process making the request:'
+                #TextInput:
+                #    id: request_process
+                #    multiline: 'False'
+            #BoxLayout:
+                #orientation: 'vertical'
+                #size_hint_y: 0.7
+                #id: request_form
 
 <DeadlockAvoidanceOutputScreen>:
     on_enter: root.calculate()
@@ -311,11 +319,11 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'vertical'
-            size_hint_y: 0.8
+            size_hint_y: 0.9
             id: layout
         Button:
             text: 'Back'
-            size_hint_y: 0.2
+            size_hint_y: 0.1
             on_release:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'da_form'

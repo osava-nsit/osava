@@ -58,19 +58,19 @@ def cpu_on_aging(instace, value):
 def da_on_available(instace, value, i):
     if (value == ''):
         value = 5
-    data_da['available'][i] = value
+    data_da['available'][i] = int(value)
 def da_on_request(instance, value, i):
     if (value == ''):
         value = 0
-    data_da['request'][i] = value
+    data_da['request'][i] = int(value)
 def da_on_max(instance, value, i, j):
     if (value == ''):
         value = 8
-    data_da['max'][i][j] = value
+    data_da['max'][i][j] = int(value)
 def da_on_allocation(instance, value, i, j):
     if (value == ''):
         value = 4
-    data_da['allocation'][i][j] = value
+    data_da['allocation'][i][j] = int(value)
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -413,79 +413,101 @@ class DeadlockAvoidanceInputScreen(Screen):
         data_da['max'] = [[10 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
         data_da['allocation'] = [[4 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
 
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+        # Fixed height of form rows within scroll view
+        form_row_height = '40dp'
+
         # Add form labels for Available array (n)
-        box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Available:'))
         for i in range(m):
             box.add_widget(Label(text=chr(ord('A')+i)))
-        form.add_widget(box)
+        grid.add_widget(box)
 
         # Add input fields for Available array (n)
-        box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text=''))
         for i in range(m):
             inp = TextInput(id='available'+str(i))
             inp.bind(text=partial(da_on_available, i=i))
             box.add_widget(inp)
-        form.add_widget(box)
+        grid.add_widget(box)
 
         # Max Matrix (n x m)
         # Add form labels for resource types
-        box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Max:'))
         for i in range(m):
             box.add_widget(Label(text=chr(ord('A')+i)))
-        form.add_widget(box)
+        grid.add_widget(box)
 
         # Add input fields for Max matrix (n x m)
-        vert_box = BoxLayout(orientation='vertical', size_hint_y=0.4)
         for i in range(n):
-            box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='P'+str(i+1)))
             for j in range(m):
                 inp = TextInput(id='max'+str(i)+':'+str(j))
                 inp.bind(text=partial(da_on_max, i=i, j=j))
                 box.add_widget(inp)
-            vert_box.add_widget(box)
-        form.add_widget(vert_box)
+            grid.add_widget(box)
 
         # Allocation Matrix (n x m)
         # Add form labels for resource types
-        box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Allocation:'))
         for i in range(m):
             box.add_widget(Label(text=chr(ord('A')+i)))
-        form.add_widget(box)
+        grid.add_widget(box)
 
-        # Add input fields for Allocation matrix (n x m)
-        vert_box = BoxLayout(orientation='vertical', size_hint_y=0.4)
+        # # Add input fields for Allocation matrix (n x m)
         for i in range(n):
-            box = BoxLayout(orientation='horizontal', size_hint_y=0.07)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='P'+str(i+1)))
             for j in range(m):
                 inp = TextInput(id='allocation'+str(i)+':'+str(j))
                 inp.bind(text=partial(da_on_allocation, i=i, j=j))
                 box.add_widget(inp)
-            vert_box.add_widget(box)
-        form.add_widget(vert_box)
+            grid.add_widget(box)
 
         # Add labels for resource types in request form:
-        request_form = self.manager.get_screen('da_form').request_form
-        request_form.clear_widgets()
-        box = BoxLayout(orientation='horizontal')
-        box.add_widget(Label(text='Request:'))
-        for i in range(m):
-            box.add_widget(Label(text=chr(ord('A')+i)))
-        request_form.add_widget(box)
+        # request_form = self.manager.get_screen('da_form').request_form
+        # request_form.clear_widgets()
+        # box = BoxLayout(orientation='horizontal')
+        # box.add_widget(Label(text='Request:'))
+        # for i in range(m):
+        #     box.add_widget(Label(text=chr(ord('A')+i)))
+        # request_form.add_widget(box)
 
-        # Add input fields for resource form
-        box = BoxLayout(orientation='horizontal')
-        box.add_widget(Label(text=''))
-        for i in range(m):
-            inp = TextInput(id='request'+str(i))
-            inp.bind(text=partial(da_on_request, i=i))
-            box.add_widget(inp)
-        request_form.add_widget(box)
+        # # Add input fields for resource form
+        # box = BoxLayout(orientation='horizontal')
+        # box.add_widget(Label(text=''))
+        # for i in range(m):
+        #     inp = TextInput(id='request'+str(i))
+        #     inp.bind(text=partial(da_on_request, i=i))
+        #     box.add_widget(inp)
+        # request_form.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        form.add_widget(sv)
+
+        # Add Visualize and back button at the end of form
+        box = BoxLayout(orientation='horizontal', size_hint_y=0.1, padding=(0, 10))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_da_output))
+        form.add_widget(box)
+        
+
+    def switch_to_da_output(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'da_output'
+
+    def switch_to_main_menu(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'menu'
 
 class DeadlockAvoidanceOutputScreen(Screen):
     def calculate(self, *args):
