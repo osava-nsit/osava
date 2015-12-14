@@ -54,6 +54,7 @@
             size_hint: 0.6, 0.06
             pos_hint: {'x': .2, 'y': .02}
 
+# Input Screen with partial scrolling. Currently not in use
 <CPUInputScreen>:
     on_pre_enter: root.bind_spinner(); #root.bind_height(); 
     #layout: layout
@@ -126,27 +127,6 @@
                 size_hint_x: 0.4
                 text_size: self.size
                 padding: 10, 0
-            #ToggleButton:
-                #group: 'variant'
-                #text: 'Preemptive'
-                #size_hint_y: None
-                #height: '40dp'
-                #size_hint_x: 0.3
-                #text_size: self.size
-                #halign: 'center'
-                #valign: 'middle'
-                #on_release: root.preemptive_flag = True; root.update_cpu_type(True)
-            #ToggleButton:
-                #id: variant_toggle
-                #group: 'variant'
-                #text: 'Non-Preemptive'
-                #size_hint_y: None
-                #eight: '40dp'
-                #size_hint_x: 0.3
-                #text_size: self.size
-                #halign: 'center'
-                #valign: 'middle'
-                #on_release: root.preemptive_flag = False; root.update_cpu_type(False)
             Spinner:
                 id: variant_spinner
                 text:'-'
@@ -184,6 +164,31 @@
                 #on_release: 
                     #root.manager.transition.direction = 'left'
                     #root.manager.current = 'cpu_output'
+
+<CPUInputScreen2>:
+    #on_pre_enter: root.bind_spinner(); #root.bind_height();
+    on_enter: root.load_layout()
+    layout_fixed: layout_fixed
+    #num_processes: num_processes
+    #algo_spinner: algo_spinner
+    #variant_spinner: variant_spinner
+    BoxLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint_y: 0.1
+            Label:
+                text: 'CPU Scheduling'
+        BoxLayout:
+            id: layout_fixed
+            orientation: 'vertical'
+            size_hint_y: 0.9
 
 <CPUOutputScreen>:
     layout: layout
@@ -287,30 +292,12 @@
                 size_hint_x: 0.15
                 text: 'Load form'
                 on_release: root.load_form()
-        Label:
-            text: 'Information about the current state -'
-            size_hint_y: 0.07
+        #Label:
+            #text: 'Information about the current state -'
+            #size_hint_y: 0.07
         BoxLayout:
             orientation: 'vertical'
             id: form
-        #BoxLayout:
-            #size_hint_y: 0.3
-            #padding: 15
-            #orientation: 'vertical'
-            #BoxLayout:
-                #orientation: 'horizontal'
-                #size_hint_y: 0.3
-                #Label:
-                #    text: 'Information about the request -'
-                #Label:
-                #    text: 'Process making the request:'
-                #TextInput:
-                #    id: request_process
-                #    multiline: 'False'
-            #BoxLayout:
-                #orientation: 'vertical'
-                #size_hint_y: 0.7
-                #id: request_form
 
 <DeadlockAvoidanceOutputScreen>:
     on_enter: root.calculate()
@@ -319,11 +306,11 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'vertical'
-            size_hint_y: 0.9
+            #size_hint_y: 0.9
             id: layout
-        Button:
-            text: 'Back'
-            size_hint_y: 0.1
-            on_release:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'da_form'
+        #Button:
+            #text: 'Back'
+            #size_hint_y: 0.1
+            #on_release:
+                #root.manager.transition.direction = 'right'
+                #root.manager.current = 'da_form'

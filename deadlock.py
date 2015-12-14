@@ -1,13 +1,26 @@
 import copy
 
-def is_safe(available, max, allocation, n, m):
+def check_request(available, maximum, allocation, request, process, n, m):
+    need = [[10 for x in range(m)] for x in range(n)]
+    for i in range(n):
+        for j in range(m):
+            need[i][j] = maximum[i][j] - allocation[i][j]
+    for j in range(m):
+        if request[j] > need[process][j]:
+            return False, "Error: P"+str(process+1)+" requesting more resources than it needs."
+    for j in range(m):
+        if request[j] > available[j]:
+            return False, "Wait: P"+str(process+1)+" requesting more resources than currently available."
+    return True, "Request Granted."
+
+def is_safe(available, maximum, allocation, n, m):
     # Initialize work and finish vectors, and need matrix
     work = copy.deepcopy(available)
     finish = [False] * n
     need = [[10 for x in range(m)] for x in range(n)]
     for i in range(n):
         for j in range(m):
-            need[i][j] = max[i][j] - allocation[i][j]
+            need[i][j] = maximum[i][j] - allocation[i][j]
     num_left = n
     schedule = list()
     # print "Need: "+str(need)
