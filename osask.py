@@ -22,15 +22,18 @@ import cpu_scheduling, deadlock
 
 Builder.load_file('layout.kv')
 
-# Global data for CPU Scheduling agorithms
+# Global data for CPU Scheduling Algorithms
 cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive']
 cpu_scheduling_type = 0
 data_cpu = dict()
 
-# Global data for Deadlock Avoidance algorithms
+# Global data for Deadlock Avoidance Algorithm
 data_da = dict()
 
-# Binder functions for CPU Scheduling algorithms form, to store data in the global 'data_cpu' dictionary
+# Global data for Deadlock Detection Algorithm
+data_dd = dict()
+
+# Binder functions for CPU Scheduling Algorithms form, to store data in the global 'data_cpu' dictionary
 def cpu_on_name(instace, value, i):
     if value == '':
         value = 'P'+str(i+1)
@@ -56,7 +59,7 @@ def cpu_on_aging(instace, value):
         value = 4
     data_cpu['aging'] = int(value)
 
-# Binder functions for Dead Avoidance algorithm form
+# Binder functions for Deadlock Avoidance Algorithm form
 def da_on_available(instace, value, i):
     if (value == ''):
         value = 5
@@ -77,6 +80,21 @@ def da_request_on_process_id(instance, value):
     if (value == ''):
         value = 1
     data_da['request_process'] = int(value)-1
+
+# Binder functions for Deadlock Detection Algorithm form
+def dd_on_available(instance, value, i):
+    if (value == ''):
+        value = 5
+    data_dd['available'][i] = int(value)
+def dd_on_request(instance, value, i, j):
+    if (value == ''):
+        value = 2
+    data_dd['request'][i][j] = int(value)
+def dd_on_allocation(instance, value, i, j):
+    if (value == ''):
+        value = 4
+    data_dd['allocation'][i][j] = int(value)
+
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -746,6 +764,10 @@ class DeadlockAvoidanceOutputScreen(Screen):
         # Fixed height of form rows within scroll view
         form_row_height = '40dp'
 
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        box.add_widget(Label(text="Banker's Algorithm: When a process requests a set of resources,\nthe system must determine whether granting the request will keep the system in a safe state."))
+        grid.add_widget(box)
+
         # Check if the request can be granted or not
         grantable, message = deadlock.check_request(available, maximum, allocation, request, data_da['request_process'], data_da['num_processes'], data_da['num_resource_types'])
 
@@ -756,7 +778,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
             grid.add_widget(box)
 
             for j in range(data_da['num_resource_types']):
-                print "Request["+str(j)+"] = "+str(request[j])
+                # print "Request["+str(j)+"] = "+str(request[j])
                 available[j] -= request[j]
                 allocation[data_da['request_process']][j] += request[j]
 
@@ -791,7 +813,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
 
             safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
             work = copy.deepcopy(available)
-            finish = ['F'] * len(work)
+            finish = ['F'] * data_da['num_processes']
 
             if safe:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -823,7 +845,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
                 # Display step by step changes in work vector according to process scheduled
                 for i in range(len(schedule)):
                     for j in range(len(work)):
-                        work[j] += allocation[i][j]
+                        work[j] += allocation[schedule[i]][j]
                     finish[schedule[i]] = 'T'
                     # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -849,7 +871,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
 
         # Add back button
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_da_form))
         grid.add_widget(box)
 
         # Add ScrollView
@@ -857,10 +879,213 @@ class DeadlockAvoidanceOutputScreen(Screen):
         sv.add_widget(grid)
         layout.add_widget(sv)
 
+    def switch_to_da_form(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'da_form'
+
+# Input Screen for Deadlock Detection algorithm
+class DeadlockDetectionInputScreen(Screen):
+    form = ObjectProperty(None)
+    def load_form(self, *args):
+        form = self.manager.get_screen('dd_form').form
+        form.clear_widgets()
+        if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
+            self.num_processes.text = "4"
+        if (self.num_resource_types.text == "" or int(self.num_resource_types.text) < 1):
+            self.num_resource_types.text = "4"
+
+        # Number of processes
+        n = int(self.num_processes.text)
+        # Number of resource types
+        m = int(self.num_resource_types.text)
+
+        # Initialize the global data_dd dictionary
+        data_dd['num_processes'] = n
+        data_dd['num_resource_types'] = m
+        data_dd['available'] = [5] * data_dd['num_resource_types']
+        data_dd['request'] = [[10 for x in range(data_dd['num_resource_types'])] for x in range(data_dd['num_processes'])]
+        data_dd['allocation'] = [[4 for x in range(data_dd['num_resource_types'])] for x in range(data_dd['num_processes'])]
+
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+        # Fixed height of form rows within scroll view
+        form_row_height = '40dp'
+
+        # Add form labels for Available array (n)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Available:'))
+        for i in range(m):
+            box.add_widget(Label(text=chr(ord('A')+i)))
+        grid.add_widget(box)
+
+        # Add input fields for Available array (n)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text=''))
+        for i in range(m):
+            inp = TextInput(id='available'+str(i))
+            inp.bind(text=partial(dd_on_available, i=i))
+            box.add_widget(inp)
+        grid.add_widget(box)
+
+        # Allocation Matrix (n x m)
+        # Add form labels for resource types
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Allocation:'))
+        for i in range(m):
+            box.add_widget(Label(text=chr(ord('A')+i)))
+        grid.add_widget(box)
+
+        # # Add input fields for Allocation matrix (n x m)
+        for i in range(n):
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='P'+str(i+1)))
+            for j in range(m):
+                inp = TextInput(id='allocation'+str(i)+':'+str(j))
+                inp.bind(text=partial(dd_on_allocation, i=i, j=j))
+                box.add_widget(inp)
+            grid.add_widget(box)
+
+        # Request Matrix (n x m)
+        # Add form labels for resource types
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Request:'))
+        for i in range(m):
+            box.add_widget(Label(text=chr(ord('A')+i)))
+        grid.add_widget(box)
+
+        # Add input fields for Request matrix (n x m)
+        for i in range(n):
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='P'+str(i+1)))
+            for j in range(m):
+                inp = TextInput(id='request'+str(i)+':'+str(j))
+                inp.bind(text=partial(dd_on_request, i=i, j=j))
+                box.add_widget(inp)
+            grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        form.add_widget(sv)
+
+        # Add Visualize and back button at the end of form
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_dd_output))
+        form.add_widget(box)
+        
+
+    def switch_to_dd_output(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'dd_output'
+
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
+class DeadlockDetectionOutputScreen(Screen):
+    def calculate(self, *args):
+        available = data_dd['available']
+        allocation = data_dd['allocation']
+        request = data_dd['request']
+
+        layout = self.manager.get_screen('dd_output').layout
+        layout.clear_widgets()
+
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+        # Fixed height of form rows within scroll view
+        form_row_height = '40dp'
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        box.add_widget(Label(text='Deadlock Detection Algorithm: This algorithm examines the state\nof the system and determines whether a deadlock has occurred.'))
+        grid.add_widget(box)
+
+        # Check if the system is deadlocked
+        deadlock_safe, schedule = deadlock.detect(available, allocation, request, data_dd['num_processes'], data_dd['num_resource_types'])
+
+        work = copy.deepcopy(available)
+        finish = ['F'] * data_dd['num_processes']
+
+        # Display schedule
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='The processes can be scheduled as follows: '))
+        grid.add_widget(box)
+
+        # Output table labels
+        # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Process'))
+        box.add_widget(Label(text='Work'))
+        box.add_widget(Label(text='Finish'))
+        grid.add_widget(box)
+
+        # Display initial work vector
+        # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Initial'))
+        work_text = ''
+        for i in range(len(work)):
+            work_text += (str(work[i])+'   ')
+        box.add_widget(Label(text=work_text))
+        finish_text = ''
+        for i in range(len(finish)):
+            finish_text += (finish[i]+'   ')
+        box.add_widget(Label(text=finish_text))
+        grid.add_widget(box)
+
+        # Display step by step changes in work vector according to process scheduled
+        for i in range(len(schedule)):
+            for j in range(len(work)):
+                work[j] += allocation[schedule[i]][j]
+            # print "Schedule["+str(i)+"] = "+str(schedule[i])
+            finish[schedule[i]] = 'T'
+            # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='P'+str(schedule[i]+1)))
+            work_text = ''
+            for j in range(len(work)):
+                work_text += (str(work[j])+'   ')
+            box.add_widget(Label(text=work_text))
+            finish_text = ''
+            for j in range(len(finish)):
+                finish_text += (finish[j]+'   ')
+            box.add_widget(Label(text=finish_text))
+            grid.add_widget(box)
+
+        # Not deadlocked
+        if deadlock_safe:
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='No deadlocked detected.'))
+            grid.add_widget(box)
+        else:
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='Deadlock Detected. Deadlocked processes: '))
+            grid.add_widget(box)
+            processes_string = ''
+            for j in range(data_dd['num_processes']):
+                if finish[j] == 'F':
+                    processes_string += "P"+str(j+1)+", "
+            processes_string = processes_string[:-2]
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text=processes_string))
+            grid.add_widget(box)
+
+        # Add back button
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_dd_form))
+        grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        layout.add_widget(sv)
+
+    def switch_to_dd_form(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'dd_form'
 
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
@@ -869,6 +1094,8 @@ sm.add_widget(CPUInputScreen2(name='cpu_form'))
 sm.add_widget(CPUOutputScreen(name='cpu_output'))
 sm.add_widget(DeadlockAvoidanceInputScreen(name='da_form'))
 sm.add_widget(DeadlockAvoidanceOutputScreen(name='da_output'))
+sm.add_widget(DeadlockDetectionInputScreen(name='dd_form'))
+sm.add_widget(DeadlockDetectionOutputScreen(name='dd_output'))
 
 class OSASK(App):
     def build(self):
