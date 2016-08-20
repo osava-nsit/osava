@@ -33,6 +33,9 @@ data_da = dict()
 # Global data for Deadlock Detection Algorithm
 data_dd = dict()
 
+# Global data for Contiguous Memory Allocation Strategies
+data_mem = dict()
+
 # Binder functions for CPU Scheduling Algorithms form, to store data in the global 'data_cpu' dictionary
 def cpu_on_name(instace, value, i):
     if value == '':
@@ -95,6 +98,19 @@ def dd_on_allocation(instance, value, i, j):
         value = 4
     data_dd['allocation'][i][j] = int(value)
 
+# Binder functions for Contiguous Memory Allocation Strategies form
+def mem_on_size(instance, value, i):
+    if (value == ''):
+        value = 128
+    data_mem['size'][i] = value
+def mem_on_arrival(instance, value, i):
+    if (value == ''):
+        value = 0
+    data_mem['arrival'][i] = value
+def mem_on_termination(instance, value, i):
+    if (value == ''):
+        value = 10
+    data_mem['termination'][i] = value
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -974,7 +990,6 @@ class DeadlockDetectionInputScreen(Screen):
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_dd_output))
         form.add_widget(box)
-        
 
     def switch_to_dd_output(self, *args):
         self.manager.transition.direction = 'left'
@@ -984,6 +999,7 @@ class DeadlockDetectionInputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
+# Output screen for Deadlock Detection Algorithm
 class DeadlockDetectionOutputScreen(Screen):
     def calculate(self, *args):
         available = data_dd['available']
@@ -1087,6 +1103,166 @@ class DeadlockDetectionOutputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'dd_form'
 
+# Input screen for Contiguous Memory Allocation Strategies
+class MemoryInputScreen(Screen):
+    strategy_type = NumericProperty(None)
+    form = ObjectProperty(None)
+
+    # Call set_cpu_type method with appropriate index of scheduling algorithm
+    def show_selected_value(self, spinner, text, *args):
+        if text == 'First Fit':
+            self.strategy_type = 0
+        elif text == 'Best Fit':
+            self.strategy_type = 1
+        elif text == 'Worst Fit':
+            self.strategy_type = 2
+        data_mem['algo'] = self.strategy_type
+
+    # Load the input form based on input
+    def load_form(self, *args):
+        form = self.manager.get_screen('mem_form').form
+        form.clear_widgets()
+        if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
+            self.num_processes.text = "4"
+        if (self.mem_size.text == "" or int(self.mem_size.text) < 1):
+            self.mem_size.text = "4"
+
+        # Number of processes
+        n = int(self.num_processes.text)
+        # Number of resource types
+        m = int(self.mem_size.text)
+
+        # Initialize the global data_mem dictionary
+        data_mem['algo'] = 0
+        data_mem['num_processes'] = n
+        data_mem['mem_size'] = m
+        data_mem['size'] = [128] * n
+        data_mem['arrival'] = [0] * n
+        data_mem['termination'] = [10] * n
+
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+        # Fixed height of form rows within scroll view
+        form_row_height = '40dp'
+
+        # Box for algo spinner
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(10,40))
+        box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
+        algo_spinner = Spinner(
+            text='Select an Algorithm',
+            values=('First Fit', 'Best Fit', 'Worst Fit'))
+        algo_spinner.bind(text=self.show_selected_value)
+        box.add_widget(algo_spinner)
+        grid.add_widget(box)
+
+        # Add labels for input
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(10, 0))
+        box.add_widget(Label(text='Process name'))
+        box.add_widget(Label(text='Size (KB)'))
+        box.add_widget(Label(text='Arrival time (ms)'))
+        box.add_widget(Label(text='Termination time (ms)'))
+        grid.add_widget(box)
+
+        # Add inputs
+        for i in range(data_mem['num_processes']):
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(10, 0))
+
+            box.add_widget(Label(text='P'+str(i+1)))
+
+            inp = TextInput(id='size'+str(i))
+            inp.bind(text=partial(mem_on_size, i=i))
+            box.add_widget(inp)
+
+            inp = TextInput(id='arrival'+str(i))
+            inp.bind(text=partial(mem_on_arrival, i=i))
+            box.add_widget(inp)
+
+            inp = TextInput(id='termination'+str(i))
+            inp.bind(text=partial(mem_on_termination, i=i))
+            box.add_widget(inp)
+
+            grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        form.add_widget(sv)
+
+        # Add Visualize and back button at the end of form
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_mem_output))
+        form.add_widget(box)
+
+    def switch_to_main_menu(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'menu'
+
+    def switch_to_mem_output(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'mem_output'
+
+# Output screen for Continuous Memory Allocation Strategies
+class MemoryOutputScreen(Screen):
+    # Stores the colours assigned to each process indexed by name
+    colors = {}
+
+    def calculate(self, *args):
+        formatted_data = []
+        for i in range(data_mem['num_processes']):
+            process = {}
+            process['name'] = 'P'+str(i+1)
+            process['arrival'] = data_mem['arrival'][i]
+            process['size'] = data_mem['size'][i]
+            process['termination'] = data_mem['termination'][i]
+            formatted_data.append(process)
+            self.colors[process['name']] = [random(), random(), random()]
+        self.colors['hole'] = [0.2, 0.2, 0.2]
+
+        # if cpu_scheduling_type == 0:
+        #     self.cpu_schedule, self.stats, self.details = cpu_scheduling.fcfs(formatted_data)
+        # elif cpu_scheduling_type == 1:
+        #     self.cpu_schedule, self.stats, self.details = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
+        # elif cpu_scheduling_type == 2:
+        #     self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_non_prempted(formatted_data)
+
+        layout = self.manager.get_screen('mem_output').layout
+        layout.clear_widgets()
+
+        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+        # Fixed height of form rows within scroll view
+        form_row_height = '40dp'
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        algo_desc = ''
+        if data_mem['algo'] == 0:
+            algo_desc = 'In the First Fit Algorithm, a process is loaded in the first hole that is large enough for the process to be found.'
+        elif data_mem['algo'] == 1:
+            algo_desc = 'In the Best Fit Algorithm, a process is loaded in the smallest hole that is large enough for the process.'
+        else:
+            algo_desc = 'In the Worst Fit Algorithm, a process is loaded in the largest hole.'
+
+        box.add_widget(Label(text=algo_desc))
+        grid.add_widget(box)
+
+
+        # Add back button
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_mem_form))
+        grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        layout.add_widget(sv)
+
+    def switch_to_mem_form(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'mem_form'
+
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
@@ -1096,6 +1272,8 @@ sm.add_widget(DeadlockAvoidanceInputScreen(name='da_form'))
 sm.add_widget(DeadlockAvoidanceOutputScreen(name='da_output'))
 sm.add_widget(DeadlockDetectionInputScreen(name='dd_form'))
 sm.add_widget(DeadlockDetectionOutputScreen(name='dd_output'))
+sm.add_widget(MemoryInputScreen(name='mem_form'))
+sm.add_widget(MemoryOutputScreen(name='mem_output'))
 
 class OSASK(App):
     def build(self):

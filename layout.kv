@@ -40,6 +40,9 @@
         	text: 'Contiguous Memory Allocation Strategies'
             size_hint: 0.6, 0.07
             pos_hint: {'x': .2, 'y': .55}
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'mem_form'
         Button:
             text: 'Page Replacement Algorithms'
             size_hint: 0.6, 0.07
@@ -372,6 +375,64 @@
             id: form
 
 <DeadlockDetectionOutputScreen>:
+    on_enter: root.calculate()
+    layout: layout
+    BoxLayout:
+        orientation: 'vertical'
+        id: layout
+
+<MemoryInputScreen>:
+    num_processes: num_processes
+    mem_size: mem_size
+    form: form
+    BoxLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 20, 5
+            size_hint_y: 0.08
+            size_hint_x: 0.3
+            pos_hint: {'top': 1}
+            Label:
+                size_hint_x: 0.6
+                text: 'No. of processes:'
+                text_size: self.size
+                halign: 'left'
+            TextInput:
+                size_hint_x: 0.4
+                id: num_processes
+                multiline: 'False'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: 20, 10
+            size_hint_y: 0.08
+            size_hint_x: 0.7
+            Label:
+                size_hint_x: 0.25
+                valign: 'middle'
+                text: 'Size of Main Memory (KB):'
+                text_size: self.size
+            TextInput:
+                size_hint_x: 0.125
+                id: mem_size
+                multiline: 'False'
+            Label:
+                size_hint_x: 0.3
+            Button:
+                size_hint_x: 0.15
+                text: 'Load form'
+                on_release: root.load_form()
+        BoxLayout:
+            orientation: 'vertical'
+            id: form
+
+<MemoryOutputScreen>:
     on_enter: root.calculate()
     layout: layout
     BoxLayout:
