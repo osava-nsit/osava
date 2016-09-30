@@ -110,7 +110,7 @@ def mem_on_arrival(instance, value, i):
 def mem_on_termination(instance, value, i):
     if (value == ''):
         value = 10
-    data_mem['termination'][i] = value
+    data_mem['CPU-I/O burst'][i] = value
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -171,7 +171,7 @@ class CPUInputScreen(Screen):
             self.cpu_type = new_cpu_type
             # variant_spinner.disabled = True
         elif self.preemptive_flag == True and new_cpu_type%2 == 0:
-            new_cpu_type += 1
+            new_cpu_type += 10
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
             # variant_spinner.disabled = False
@@ -1138,7 +1138,7 @@ class MemoryInputScreen(Screen):
         data_mem['mem_size'] = m
         data_mem['size'] = [128] * n
         data_mem['arrival'] = [0] * n
-        data_mem['termination'] = [10] * n
+        data_mem['CPU-I/O burst'] = [10] * n
 
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -1161,7 +1161,7 @@ class MemoryInputScreen(Screen):
         box.add_widget(Label(text='Process name'))
         box.add_widget(Label(text='Size (KB)'))
         box.add_widget(Label(text='Arrival time (ms)'))
-        box.add_widget(Label(text='Termination time (ms)'))
+        box.add_widget(Label(text='CPU-I/O burst time (ms)'))
         grid.add_widget(box)
 
         # Add inputs
@@ -1178,7 +1178,7 @@ class MemoryInputScreen(Screen):
             inp.bind(text=partial(mem_on_arrival, i=i))
             box.add_widget(inp)
 
-            inp = TextInput(id='termination'+str(i))
+            inp = TextInput(id='CPU-I/O burst'+str(i))
             inp.bind(text=partial(mem_on_termination, i=i))
             box.add_widget(inp)
 
@@ -1215,7 +1215,7 @@ class MemoryOutputScreen(Screen):
             process['name'] = 'P'+str(i+1)
             process['arrival'] = data_mem['arrival'][i]
             process['size'] = data_mem['size'][i]
-            process['termination'] = data_mem['termination'][i]
+            process['CPU-I/O burst'] = data_mem['CPU-I/O burst'][i]
             formatted_data.append(process)
             self.colors[process['name']] = [random(), random(), random()]
         self.colors['hole'] = [0.2, 0.2, 0.2]
