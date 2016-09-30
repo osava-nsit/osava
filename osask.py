@@ -18,7 +18,7 @@ from functools import partial
 from random import random
 import copy
 # OS Algorithms
-import cpu_scheduling, deadlock
+import cpu_scheduling, deadlock, memory_allocation
 
 Builder.load_file('layout.kv')
 
@@ -1108,7 +1108,7 @@ class MemoryInputScreen(Screen):
     strategy_type = NumericProperty(None)
     form = ObjectProperty(None)
 
-    # Call set_cpu_type method with appropriate index of scheduling algorithm
+    #Set appropriate strategy type according to the chosen algorithm by the user
     def show_selected_value(self, spinner, text, *args):
         if text == 'First Fit':
             self.strategy_type = 0
@@ -1161,7 +1161,7 @@ class MemoryInputScreen(Screen):
         box.add_widget(Label(text='Process name'))
         box.add_widget(Label(text='Size (KB)'))
         box.add_widget(Label(text='Arrival time (ms)'))
-        box.add_widget(Label(text='CPU I/O burst time (ms)'))
+        box.add_widget(Label(text='CPU-I/O burst time (ms)'))
         grid.add_widget(box)
 
         # Add inputs
@@ -1207,7 +1207,7 @@ class MemoryInputScreen(Screen):
 class MemoryOutputScreen(Screen):
     # Stores the colours assigned to each process indexed by name
     colors = {}
-
+    memory_chart={}
     def calculate(self, *args):
         formatted_data = []
         for i in range(data_mem['num_processes']):
@@ -1216,16 +1216,17 @@ class MemoryOutputScreen(Screen):
             process['arrival'] = data_mem['arrival'][i]
             process['size'] = data_mem['size'][i]
             process['burst'] = data_mem['burst'][i]
+            process['mem_size'] = data_mem['mem_size']
             formatted_data.append(process)
             self.colors[process['name']] = [random(), random(), random()]
         self.colors['hole'] = [0.2, 0.2, 0.2]
 
-        # if cpu_scheduling_type == 0:
-        #     self.cpu_schedule, self.stats, self.details = cpu_scheduling.fcfs(formatted_data)
-        # elif cpu_scheduling_type == 1:
-        #     self.cpu_schedule, self.stats, self.details = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
-        # elif cpu_scheduling_type == 2:
-        #     self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_non_prempted(formatted_data)
+        if data_mem['algo'] == 0:
+            self.memory_chart = memory_allocation.first_fit(formatted_data)
+        elif data_mem['algo'] == 1:
+            self.memory_chart = memory_allocation.best_fit(formatted_data)
+        elif cpu_scheduling_type == 2:
+            self.memory_chart = memory_allocation.worst_fit(formatted_data)
 
         layout = self.manager.get_screen('mem_output').layout
         layout.clear_widgets()
