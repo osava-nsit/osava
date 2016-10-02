@@ -80,7 +80,7 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                         memory_allocated.append(new_pair1)
                         # add event of termination
                         pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                        event_list.append(pair);
+                        event_list.append(pair)
                         new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
                         event_list = new_list
                         # delete process from wait queue
@@ -117,7 +117,7 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                         temp_memory['memory_state'] = deepcopy(memory_allocated)
                         #add termination event
                         pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                        event_list.append(pair);
+                        event_list.append(pair)
                         new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
                         event_list = new_list
                         break
@@ -275,7 +275,7 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                             temp_memory['memory_state'] = deepcopy(memory_allocated)
                             #add termination event
                             pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                            event_list.append(pair);
+                            event_list.append(pair)
                             new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
                             event_list = new_list
                             #delete process from wait queue
@@ -300,7 +300,7 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                 temp_memory['memory_state'] = deepcopy(memory_allocated)
                 #add termination event
                 pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                event_list.append(pair);
+                event_list.append(pair)
                 new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
                 event_list = new_list
         temp_memory['processes_waiting'] = deepcopy(wait_queue)        
