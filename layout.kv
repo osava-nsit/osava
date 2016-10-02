@@ -180,31 +180,6 @@
                     #root.manager.transition.direction = 'left'
                     #root.manager.current = 'cpu_output'
 
-<CPUInputScreen2>:
-    #on_pre_enter: root.bind_spinner(); #root.bind_height();
-    on_enter: root.load_layout()
-    layout_fixed: layout_fixed
-    #num_processes: num_processes
-    #algo_spinner: algo_spinner
-    #variant_spinner: variant_spinner
-    BoxLayout:
-        canvas:
-            Color:
-                rgba: 1, 1, 1, 0.5
-            Rectangle:
-                size: self.size
-                pos: self.pos
-        orientation: 'vertical'
-        BoxLayout:
-            orientation: 'horizontal'
-            size_hint_y: 0.1
-            Label:
-                text: 'CPU Scheduling'
-        BoxLayout:
-            id: layout_fixed
-            orientation: 'vertical'
-            size_hint_y: 0.9
-
 <CPUOutputScreen>:
     layout: layout
     gantt: gantt
