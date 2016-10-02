@@ -1125,7 +1125,7 @@ class MemoryInputScreen(Screen):
         if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
             self.num_processes.text = "4"
         if (self.mem_size.text == "" or int(self.mem_size.text) < 1):
-            self.mem_size.text = "4"
+            self.mem_size.text = "200"
 
         # Number of processes
         n = int(self.num_processes.text)
@@ -1213,10 +1213,10 @@ class MemoryOutputScreen(Screen):
         for i in range(data_mem['num_processes']):
             process = {}
             process['name'] = 'P'+str(i+1)
-            process['arrival'] = data_mem['arrival'][i]
-            process['size'] = data_mem['size'][i]
-            process['burst'] = data_mem['burst'][i]
-            process['mem_size'] = data_mem['mem_size']
+            process['arrival'] = int(data_mem['arrival'][i])
+            process['size'] = int(data_mem['size'][i])
+            process['burst'] = int(data_mem['burst'][i])
+            process['mem_size'] = int(data_mem['mem_size'])
             formatted_data.append(process)
             self.colors[process['name']] = [random(), random(), random()]
         self.colors['hole'] = [0.2, 0.2, 0.2]
@@ -1225,7 +1225,7 @@ class MemoryOutputScreen(Screen):
             self.memory_chart = memory_allocation.first_fit(formatted_data)
         elif data_mem['algo'] == 1:
             self.memory_chart = memory_allocation.best_fit(formatted_data)
-        elif cpu_scheduling_type == 2:
+        elif data_mem['algo'] == 2:
             self.memory_chart = memory_allocation.worst_fit(formatted_data)
 
         layout = self.manager.get_screen('mem_output').layout
@@ -1248,6 +1248,61 @@ class MemoryOutputScreen(Screen):
 
         box.add_widget(Label(text=algo_desc))
         grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        # box.add_widget(Label(text='P1 enters'))
+        # grid.add_widget(box)
+        #add no requests for memory slot timeline
+        for temp_memory in self.memory_chart:
+            #print "Temp memory: " + str(temp_memory)
+            memory_state = temp_memory['memory_state']
+            wait_queue = temp_memory['processes_waiting']
+            event_details = temp_memory['event']
+            process_id,arrival_bit,curr_time,burst_time,process_size=event_details
+            print 'Current time: ' + str(curr_time)
+            total_size = formatted_data[0]['mem_size']
+            if(arrival_bit == 1):#new process has arrived
+                print (process_id) + ' requests for a memory slot.'
+            else:# process is leaving
+                print (process_id) + ' has terminated.'
+            print 'Size of the process: ' + str(process_size)
+            #chart details
+            if not memory_state:
+                print '0' + '           free            ' + str(total_size)
+            for i,memory_slot in enumerate(memory_state):
+                process_id1, start1, end1 = memory_slot                
+                if(i == 0 and i == len(memory_state)-1): #only tuple in list
+                    if(start1-0 > 0):
+                        print '0' + '        free          ' 
+                    print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
+                    if(total_size-end1 > 0):
+                        print '         free            ' + str(total_size)
+                elif(i == len(memory_state)-1): #last tuple, more tuples preceded
+                    print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
+                    if(total_size-end1 > 0):
+                        print '         free            ' + str(total_size)
+                else:
+                    process_id2,start2,end2 = memory_state[i+1]
+                    if(i == 0): #first tuple, more tuples follow
+                        if(start1-0 > 0):
+                             print '0' + '          free            '                              
+                    print  str(start1) + '         ' + process_id1 + '          ' + str(end1)
+                    if(start2-end1 > 0):    
+                        print '          free            ' 
+            
+            flag = 0
+            print 'Wait queue : '
+            for process in wait_queue:
+                process_name, process_size,process_burst = process
+                if(process_name == process_id):#will only happen if arrival_bit=1
+                    flag=1 #process was added to wait queue
+                print process_name + '          '
+            if(arrival_bit == 1):
+                if(flag == 1):
+                    print process_id + ' was added to the wait queue due to insufficient memory available.'
+                else: 
+                    print process_id + ' was assigned a slot in the main memory.'
+            else:
+                print process_id + ' has succesfully been deallocated memory.'
 
 
         # Add back button
