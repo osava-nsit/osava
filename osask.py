@@ -304,217 +304,6 @@ class CPUInputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
-# Input Screen 2 for CPU Scheduling Algorithms
-# class CPUInputScreen2(Screen):
-#     layout_fixed = ObjectProperty(None)
-#     layout_form = ObjectProperty(None)
-#     layout = ObjectProperty(None)
-#     cpu_type = NumericProperty(None)
-#     preemptive_flag = False
-#     sv = ScrollView()
-#     num_processes = NumericProperty(None)
-
-#     # Update num_process when text is entered in the text input
-#     # Figure out the parameters required for this
-#     def update_num_processes(self, instance, value, *args):
-#         if value == '':
-#             value = 5
-#         self.num_processes = int(value)
-#         # self.load_form()
-
-#     def load_layout(self, *args):
-#         self.num_processes = 5
-#         if 'num_processes' not in data_cpu:
-#             data_cpu['num_processes'] = 5
-#         layout_fixed = self.manager.get_screen('cpu_form').layout_fixed
-#         layout_fixed.clear_widgets()
-#         self.sv = ScrollView(size=self.size)
-#         self.layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
-#         # Make sure the height is such that there is something to scroll.
-#         self.layout.bind(minimum_height=self.layout.setter('height'))
-        
-#         # Box for number of processes input
-#         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp')
-#         box.add_widget(Label(id='num_processes', text='Number of process: '))
-#         inp = TextInput(multiline=False, text=str(data_cpu['num_processes']))
-#         inp.bind(text=self.update_num_processes)
-#         box.add_widget(inp)
-#         box.add_widget(Button(text='Load Form', halign='center', valign='middle', on_release=self.load_form))
-#         self.layout.add_widget(box)
-
-#         self.layout.add_widget(Label(text='Information about the scheduling algorithm -', size_hint_y=None, height='60dp', padding=(20,40), halign='left'))
-
-#         # Box for algo spinner
-#         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='80dp', padding=(10,40))
-#         box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
-#         algo_spinner = Spinner(
-#             text='Select an Algorithm',
-#             values=('First Come First Serve', 'Shortest Job First', 'Priority', 'Round Robin', 'Multilevel Queue', 'Multilevel Feedback Queue'))
-#         algo_spinner.bind(text=self.show_selected_value)
-#         box.add_widget(algo_spinner)
-#         self.layout.add_widget(box)
-
-#         # Box for variant spinner
-#         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='80dp', padding=(10,40))
-#         box.add_widget(Label(text='Variant - ', padding=(10,10), size_hint_x=0.3))
-#         variant_spinner = Spinner(
-#             text='-',
-#             values=('Preemptive', 'Non-Preemptive'))
-#         variant_spinner.bind(text=self.show_selected_value)
-#         box.add_widget(variant_spinner)
-#         self.layout.add_widget(box)
-
-#         # Adding box for rest of the form
-#         # self.layout_form = BoxLayout(orientation='vertical', height='1000dp')
-#         # self.layout_form.add_widget(Label(text='Lets do this!'))
-#         # self.layout.add_widget(self.layout_form)
-
-#         self.sv.add_widget(self.layout)
-#         layout_fixed.add_widget(self.sv)
-
-#     # Call set_cpu_type method with appropriate index of scheduling algorithm
-#     def show_selected_value(self, spinner, text, *args):
-#         if text == 'First Come First Serve':
-#             self.set_cpu_type(0)
-#         elif text == 'Shortest Job First':
-#             self.set_cpu_type(2)
-#         elif text == 'Priority':
-#             self.set_cpu_type(4)
-#         elif text == 'Round Robin':
-#             self.set_cpu_type(1)
-
-#     def show_variant(self, spinner, text, *args):
-#         if text == 'Preemptive':
-#             self.preemptive_flag = True
-#             self.update_cpu_type(True)
-#         elif text == 'Non-Preemptive':
-#             self.preemptive_flag = False
-#             self.update_cpu_type(False)
-
-#     # Called when a new value is chosen from spinner. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
-#     def set_cpu_type(self, new_cpu_type, *args):
-#         global cpu_scheduling_type
-#         cpu_scheduling_type = new_cpu_type
-#         self.cpu_type = new_cpu_type
-#         # variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
-#         # If FCFS or RR
-#         if new_cpu_type == 0 or new_cpu_type == 1:
-#             cpu_scheduling_type = new_cpu_type
-#             self.cpu_type = new_cpu_type
-#             # variant_spinner.disabled = True
-#         elif self.preemptive_flag == True and new_cpu_type%2 == 0:
-#             new_cpu_type += 1
-#             cpu_scheduling_type = new_cpu_type
-#             self.cpu_type = new_cpu_type
-#             # variant_spinner.disabled = False
-#         elif self.preemptive_flag == False and new_cpu_type%2 != 0:
-#             new_cpu_type -= 1
-#             cpu_scheduling_type = new_cpu_type
-#             self.cpu_type = new_cpu_type
-#             # variant_spinner.disabled = False
-#         self.load_form()
-
-#     # Called when preemptive or non-preemtive option is clicked. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
-#     def update_cpu_type(self, *args):
-#         global cpu_scheduling_type
-#         # If FCFS or RR Scheduling
-#         if self.cpu_type == 0 or self.cpu_type == 1:
-#             pass
-#         elif self.preemptive_flag == True and self.cpu_type%2 == 0:
-#             self.cpu_type += 1
-#             cpu_scheduling_type = self.cpu_type
-#         elif self.preemptive_flag == False and self.cpu_type%2 != 0:
-#             self.cpu_type -= 1
-#             cpu_scheduling_type = self.cpu_type
-
-#     # Load the appropriate form inputs according to the CPU Scheduling algorithm selected
-#     def load_form(self, *args):
-#         self.layout.clear_widgets()
-#         data_cpu['num_processes'] = self.num_processes
-#         self.load_layout()
-#         self.num_processes = data_cpu['num_processes']
-
-#         # Fixed height of form rows within scroll view
-#         form_row_height = '40dp'
-
-#         # Add input labels
-#         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-#         # label = Label(text='Sno.')
-#         # box.add_widget(label)
-#         label = Label(text='Process name')
-#         box.add_widget(label)
-#         label = Label(text='Arrival time (ms)')
-#         box.add_widget(label)
-#         label = Label(text='CPU burst time (ms)')
-#         box.add_widget(label)
-
-#         # If Priority scheduling selected
-#         if self.cpu_type == 4 or self.cpu_type == 5:
-#             label = Label(text='Priority (0 being highest)')
-#             box.add_widget(label)
-
-#         self.layout.add_widget(box)
-
-#         for i in range(data_cpu['num_processes']):
-#             box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
-#             # Fixed process names
-#             pname = Label(text='P'+str(i+1))
-#             box.add_widget(pname)
-#             data_cpu['name'+str(i)] = 'P'+str(i+1)
-
-#             # arrival times
-#             inp = TextInput(id='arrival'+str(i))
-#             inp.bind(text=partial(cpu_on_arrival, i=i))
-#             box.add_widget(inp)
-#             # burst times
-#             inp = TextInput(id='burst'+str(i))
-#             inp.bind(text=partial(cpu_on_burst, i=i))
-#             box.add_widget(inp)
-
-#             # If Priority scheduling selected
-#             if self.cpu_type == 4 or self.cpu_type == 5:
-#                 inp = TextInput(id='priority'+str(i))
-#                 inp.bind(text=partial(cpu_on_priority, i=i))
-#                 box.add_widget(inp)
-
-#             self.layout.add_widget(box)
-
-#         # If Round Robin scheduling selected
-#         if self.cpu_type == 1:
-#             box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
-#             inp = TextInput(id='quantum')
-#             inp.bind(text=cpu_on_quantum)
-#             # inp.font_size = inp.size[1]
-#             label = Label(text='Time quantum (ms)')
-#             box.add_widget(label)
-#             box.add_widget(inp)
-#             self.layout.add_widget(box)
-#         # If Priority scheduling selected
-#         elif self.cpu_type == 4 or self.cpu_type == 5:
-#             box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
-#             inp = TextInput(id='aging', size_hint_x=0.3)
-#             inp.bind(text=cpu_on_aging)
-#             # inp.font_size = inp.size[1]
-#             label = Label(text='Aging: Promote priority by 1 unit each time after waiting (ms) - ', size_hint_x=0.7)
-#             # label.text_size = label.size
-#             box.add_widget(label)
-#             box.add_widget(inp)
-#             self.layout.add_widget(box)
-
-#         # Add Visualize and back button at the end of form
-#         box = BoxLayout(orientation='horizontal', padding=(0, 10), size_hint_y=None, height='50dp')
-#         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-#         box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
-#         self.layout.add_widget(box)        
-
-#     def switch_to_cpu_output(self, *args):
-#         self.manager.transition.direction = 'left'
-#         self.manager.current = 'cpu_output'
-
-#     def switch_to_main_menu(self, *args):
-#         self.manager.transition.direction = 'right'
-#         self.manager.current = 'menu'
-
 # Output Screen for CPU Scheduling algorithms
 class CPUOutputScreen(Screen):
     layout = ObjectProperty(None)
@@ -1207,8 +996,12 @@ class MemoryInputScreen(Screen):
 class MemoryOutputScreen(Screen):
     # Stores the colours assigned to each process indexed by name
     colors = {}
-    memory_chart={}
+
+    # Stores the memory chart generated by algorithm
+    memory_chart = []
+    
     def calculate(self, *args):
+        # Generate formatted data for input to the algo and assign random colours to processes
         formatted_data = []
         for i in range(data_mem['num_processes']):
             process = {}
@@ -1237,6 +1030,7 @@ class MemoryOutputScreen(Screen):
         # Fixed height of form rows within scroll view
         form_row_height = '40dp'
 
+        # Output the algo description
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
         algo_desc = ''
         if data_mem['algo'] == 0:
@@ -1248,61 +1042,78 @@ class MemoryOutputScreen(Screen):
 
         box.add_widget(Label(text=algo_desc))
         grid.add_widget(box)
-        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-        # box.add_widget(Label(text='P1 enters'))
-        # grid.add_widget(box)
-        #add no requests for memory slot timeline
+
+        # Display each element of memroy chart timeline
         for temp_memory in self.memory_chart:
-            #print "Temp memory: " + str(temp_memory)
             memory_state = temp_memory['memory_state']
             wait_queue = temp_memory['processes_waiting']
             event_details = temp_memory['event']
-            process_id,arrival_bit,curr_time,burst_time,process_size=event_details
-            print 'Current time: ' + str(curr_time)
-            total_size = formatted_data[0]['mem_size']
-            if(arrival_bit == 1):#new process has arrived
-                print (process_id) + ' requests for a memory slot.'
-            else:# process is leaving
-                print (process_id) + ' has terminated.'
-            print 'Size of the process: ' + str(process_size)
-            #chart details
-            if not memory_state:
-                print '0' + '           free            ' + str(total_size)
-            for i,memory_slot in enumerate(memory_state):
-                process_id1, start1, end1 = memory_slot                
-                if(i == 0 and i == len(memory_state)-1): #only tuple in list
-                    if(start1-0 > 0):
-                        print '0' + '        free          ' 
-                    print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
-                    if(total_size-end1 > 0):
-                        print '         free            ' + str(total_size)
-                elif(i == len(memory_state)-1): #last tuple, more tuples preceded
-                    print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
-                    if(total_size-end1 > 0):
-                        print '         free            ' + str(total_size)
-                else:
-                    process_id2,start2,end2 = memory_state[i+1]
-                    if(i == 0): #first tuple, more tuples follow
-                        if(start1-0 > 0):
-                             print '0' + '          free            '                              
-                    print  str(start1) + '         ' + process_id1 + '          ' + str(end1)
-                    if(start2-end1 > 0):    
-                        print '          free            ' 
+            process_id,arrival_bit,curr_time,burst_time,process_size = event_details
+
+            if (arrival_bit == 1): # new process has arrived
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='Process '+str(process_id)+' requests for a memory slot.'))
+                grid.add_widget(box)
+            else: # process is leaving
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='Process '+str(process_id)+' leaving memory.'))
+                grid.add_widget(box)
+
+            # Draw the memory state
+            mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+
+
+            # print 'Current time: ' + str(curr_time)
+            # total_size = formatted_data[0]['mem_size']
+            # if(arrival_bit == 1): # new process has arrived
+            #     print (process_id) + ' requests for a memory slot.'
+            #     box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+            #     box.add_widget(Label(text='Process '+str(process_id)+' requests for a memory slot.'))
+            #     grid.add_widget(box)
+            # else:# process is leaving
+            #     print (process_id) + ' has terminated.'
+            #     box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+            #     box.add_widget(Label(text='Process '+str(process_id)+' terminated.'))
+            #     grid.add_widget(box)
+            # print 'Size of the process: ' + str(process_size)
+            # #chart details
+            # if not memory_state:
+            #     print '0' + '           free            ' + str(total_size)
+            # for i,memory_slot in enumerate(memory_state):
+            #     process_id1, start1, end1 = memory_slot                
+            #     if(i == 0 and i == len(memory_state)-1): #only tuple in list
+            #         if(start1-0 > 0):
+            #             print '0' + '        free          ' 
+            #         print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
+            #         if(total_size-end1 > 0):
+            #             print '         free            ' + str(total_size)
+            #     elif(i == len(memory_state)-1): #last tuple, more tuples preceded
+            #         print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
+            #         if(total_size-end1 > 0):
+            #             print '         free            ' + str(total_size)
+            #     else:
+            #         process_id2,start2,end2 = memory_state[i+1]
+            #         if(i == 0): #first tuple, more tuples follow
+            #             if(start1-0 > 0):
+            #                  print '0' + '          free            '                              
+            #         print  str(start1) + '         ' + process_id1 + '          ' + str(end1)
+            #         if(start2-end1 > 0):    
+            #             print '          free            ' 
             
-            flag = 0
-            print 'Wait queue : '
-            for process in wait_queue:
-                process_name, process_size,process_burst = process
-                if(process_name == process_id):#will only happen if arrival_bit=1
-                    flag=1 #process was added to wait queue
-                print process_name + '          '
-            if(arrival_bit == 1):
-                if(flag == 1):
-                    print process_id + ' was added to the wait queue due to insufficient memory available.'
-                else: 
-                    print process_id + ' was assigned a slot in the main memory.'
-            else:
-                print process_id + ' has succesfully been deallocated memory.'
+            # flag = 0
+            # print 'Wait queue : '
+            # for process in wait_queue:
+            #     process_name, process_size,process_burst = process
+            #     if(process_name == process_id):#will only happen if arrival_bit=1
+            #         flag=1 #process was added to wait queue
+            #     print process_name + '          '
+            # if(arrival_bit == 1):
+            #     if(flag == 1):
+            #         print process_id + ' was added to the wait queue due to insufficient memory available.'
+            #     else: 
+            #         print process_id + ' was assigned a slot in the main memory.'
+            # else:
+            #     print process_id + ' has succesfully been deallocated memory.'
 
 
         # Add back button

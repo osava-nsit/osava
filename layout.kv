@@ -66,7 +66,6 @@
     #layout: layout
     layout_form: layout_form
     num_processes: num_processes
-    dispatch_latency: dispatch_latency
     algo_spinner: algo_spinner
     variant_spinner: variant_spinner
     BoxLayout:
@@ -81,7 +80,7 @@
             orientation: 'horizontal'
             padding: 20, 10
             size_hint_y: 0.15
-            #size_hint_x: 0.5
+            size_hint_x: 0.5
             pos_hint: {'top': 1}
             Label:
                 text: 'Number of processes: '
@@ -94,14 +93,6 @@
             Label:
                 size_hint_x: 0.05
                 text: ''
-            Label:
-                text: 'Dispatch Latency: '
-                size_hint_x: 0.3
-                on_text: root.load_form()
-            TextInput:
-                id: dispatch_latency
-                multiline: 'False'
-                size_hint_x: 0.2
             Button:
                 size_hint_x: 0.2
                 size_hint_y: 0.8

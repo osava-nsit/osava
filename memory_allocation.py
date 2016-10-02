@@ -342,18 +342,174 @@ def worst_fit(data):
             memory_chart.append(temp_memory)
     return memory_chart
 
+def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
+        temp_memory = {}
+        if(arrival_time > curr_time):
+            curr_time = arrival_time
+        i = 0
+        flag = 0
+        if not memory_allocated:
+            if(process_size < total_size):
+                start = 0
+                end = process_size
+                new_pair1 = (process_id,start, end)
+                memory_allocated.append(new_pair1)
+                pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
+                event_list.append(pair)
+                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
+                event_list = new_list
+            else:
+                new_pair1 = (process_id,process_size,burst_time)
+                wait_queue.append(new_pair1)     
+            temp_memory['memory_state']=deepcopy(memory_allocated)
+            temp_memory['processes_waiting']=deepcopy(wait_queue)
+            return temp_memory
+            # find free memory block 
+        for pair in memory_allocated:    
+                process_name1,start1,end1=pair
+                min_space = total_size+1
+                min_index = -1
+                #only last pair left to check
+                if(i == len(memory_allocated)-1):
+                    if(total_size-end1 >= process_size):
+                        start = end1
+                        end = end1+process_size
+                        new_pair1 = (process_id,start,end)
+                        memory_allocated.append(new_pair1)
+                        flag=1
+                    break
+                process_name2,start2,end2 = memory_allocated[i+1]
+                i = i+1
+                #if memory available, find smallest slot of unallocated memory
+                if(start2-end1 >= process_size):
+                    if(min_space > start2-end1):
+                        min_space = start2-end1
+                        min_index = i-1
+        #a best fit slot is available      
+        if(flag == 0 and max_ind != -1):
+            flag = 1 
+            # allocate best fit slot to process
+            start = memory_allocated[min_ind][2]
+            end = memory_allocated[min_ind][2]+process_size
+            new_pair1 = (process_id,start,end);
+            memory_allocated.insert(min_ind+1,new_pair1)
+            temp_memory['memory_state'] = deepcopy(memory_allocated)
+        #process is allocated no memory slot
+        elif(flag == 0):
+            new_pair1 = (process_id,process_size,burst_time);
+            wait_queue.append(new_pair1)
+            temp_memory['memory_state'] = deepcopy(memory_allocated)
+        #process has been allocated a worst fit memory slot
+        else:
+            #appending process with termination time in event list
+            pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
+            event_list.append(pair)
+            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
+            event_list = new_list
+            temp_memory['memory_state'] = deepcopy(memory_allocated)
+        temp_memory['processes_waiting'] = deepcopy(wait_queue)
+        return temp_memory
+
+def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
+        temp_memory = {}
+        if(end_time > curr_time):
+            curr_time = end_time
+        for i,pair in enumerate(memory_allocated):
+            process_name,start,end = pair
+            if(process_name == process_id):
+                del memory_allocated[i]
+                temp_memory['memory_state'] = deepcopy(memory_allocated)
+        for i,pair in enumerate(wait_queue):
+            process_name,size,burst_time = pair
+            if not memory_allocated:
+                    if(size < total_size):
+                        start = 0
+                        end = size 
+                        new_pair1 = (process_name,start, end)
+                        memory_allocated.append(new_pair1)
+                        #delete process from wait queue
+                        del wait_queue[i]
+                    temp_memory['memory_state']=deepcopy(memory_allocated)    
+                    temp_memory['processes_waiting']=deepcopy(wait_queue)        
+                    continue 
+            min_index = -1
+            min_space = total_size+1
+            for j, mem_pair in enumerate(memory_allocated):
+                # find free best fit memory block 
+                    process_name1,start1,end1 = mem_pair
+                #only last pair left to check
+                    if(j == len(memory_allocated)-1):
+                        if(total_size-end1 >= size):
+                            start = end1
+                            end = end1+size
+                            new_pair1 = (process_name,start,end)
+                            memory_allocated.append(new_pair1)
+                            temp_memory['memory_state']=deepcopy(memory_allocated)
+                            #add termination event
+                            pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
+                            event_list.append(pair);
+                            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
+                            event_list = new_list
+                            #delete process from wait queue
+                            del wait_queue[i]
+                        break
+                    process_name2,start2,end2=memory_allocated[j+1]
+                    j=j+1
+                #if memory available, allocate it
+                    if(start2-end1 >= process_size):
+                          if(min_space >= start2-end1):
+                            min_space = start2-end1
+                            min_ind = j-1
+            # a best fit memory slot is available for a waiting process
+            if(min_ind != -1):
+                #delete process from wait queue
+                del wait_queue[i]
+                #allocate the worst fit memory slot to the process
+                start = memory_allocated[min_ind][2]
+                end = memory_allocated[min_ind][2]+size
+                new_pair1 = (process_name,start,end);
+                memory_allocated.insert(min_ind+1,new_pair1)
+                temp_memory['memory_state'] = deepcopy(memory_allocated)
+                #add termination event
+                pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
+                event_list.append(pair);
+                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
+                event_list = new_list
+        temp_memory['processes_waiting'] = deepcopy(wait_queue)        
+        return temp_memory 
+
+          
+def best_fit(data):
+    processes = sorted(data, key=itemgetter('arrival'))
+    total_size = processes[0]['mem_size']
+    memory_chart = []
+    curr_time = 0
+    memory_allocated=[]
+    wait_queue=[]
+    event_list=[]
+    for process in processes:
+        process_id=process['name']
+        arrival_bit=1 #time field indiactes arrival time
+        arrival_time=process['arrival']
+        burst_time=process['burst']
+        process_size=process['size']
+        pair=(process_id,arrival_bit,arrival_time,burst_time,process_size)
+        event_list.append(pair)
+    for event in event_list:
+        process_id,arrival_bit,arrival_time,burst_time,process_size=event
+        if(arrival_bit==1):
+            #new process has arrived
+            temp_memory=add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+            event1=(process_id,arrival_bit,arrival_time,burst_time,process_size)
+            temp_memory['event']=event1
+            memory_chart.append(temp_memory)
+        else:
+            #process has completed its execution
+            #here arrival time=curr_time+burst_time set by add_to_memory function
+            end_time=arrival_time
+            temp_memory=remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+            event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+            temp_memory['event'] = event1
+            memory_chart.append(temp_memory)
+    return memory_chart
         
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
