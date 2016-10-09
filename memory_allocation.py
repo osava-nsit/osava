@@ -190,11 +190,11 @@ def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process
             temp_memory['memory_state'] = deepcopy(memory_allocated)
             temp_memory['processes_waiting'] = deepcopy(wait_queue)
             return temp_memory
-            # find free memory block 
+            # find free memory block
+        max_space = 0
+        max_ind = -1 
         for pair in memory_allocated:    
                 process_name1,start1,end1 = pair
-                max_space = 0
-                max_ind = -1
                 #only last pair left to check
                 if(i == len(memory_allocated)-1):
                     if(total_size-end1 >= process_size):
@@ -365,10 +365,11 @@ def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_
             temp_memory['processes_waiting']=deepcopy(wait_queue)
             return temp_memory
             # find free memory block 
+        min_space = total_size+1
+        min_ind = -1
         for pair in memory_allocated:    
                 process_name1,start1,end1=pair
-                min_space = total_size+1
-                min_index = -1
+                
                 #only last pair left to check
                 if(i == len(memory_allocated)-1):
                     if(total_size-end1 >= process_size):
@@ -384,9 +385,9 @@ def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_
                 if(start2-end1 >= process_size):
                     if(min_space > start2-end1):
                         min_space = start2-end1
-                        min_index = i-1
+                        min_ind = i-1
         #a best fit slot is available      
-        if(flag == 0 and max_ind != -1):
+        if(flag == 0 and min_ind != -1):
             flag = 1 
             # allocate best fit slot to process
             start = memory_allocated[min_ind][2]
@@ -432,7 +433,7 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
                     temp_memory['memory_state']=deepcopy(memory_allocated)    
                     temp_memory['processes_waiting']=deepcopy(wait_queue)        
                     continue 
-            min_index = -1
+            min_ind = -1
             min_space = total_size+1
             for j, mem_pair in enumerate(memory_allocated):
                 # find free best fit memory block 
