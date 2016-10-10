@@ -209,7 +209,7 @@ class CPUInputScreen(Screen):
             self.num_processes.text = "5"
         data_cpu['num_processes'] = int(self.num_processes.text)
 
-        layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        layout = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         layout.bind(minimum_height=layout.setter('height'))
 
@@ -232,7 +232,7 @@ class CPUInputScreen(Screen):
         layout.add_widget(box)
 
         for i in range(int(self.num_processes.text)):
-            box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
+            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
 
             # sno_label = Label(text=str(i+1))
             # box.add_widget(sno_label)
@@ -265,7 +265,7 @@ class CPUInputScreen(Screen):
 
         # If Round Robin scheduling selected
         if self.cpu_type == 1:
-            box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
+            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
             inp = TextInput(id='quantum')
             inp.bind(text=cpu_on_quantum)
             # inp.font_size = inp.size[1]
@@ -275,7 +275,7 @@ class CPUInputScreen(Screen):
             layout.add_widget(box)
         # If Priority scheduling selected
         elif self.cpu_type == 4 or self.cpu_type == 5:
-            box = BoxLayout(orientation='horizontal', padding=(50,0), size_hint_y=None, height=form_row_height)
+            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
             inp = TextInput(id='aging', size_hint_x=0.3)
             inp.bind(text=cpu_on_aging)
             # inp.font_size = inp.size[1]
@@ -286,7 +286,7 @@ class CPUInputScreen(Screen):
             layout.add_widget(box)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', padding=(0, 10), size_hint_y=None, height='50dp')
+        box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
         layout.add_widget(box)
@@ -457,7 +457,7 @@ class DeadlockAvoidanceInputScreen(Screen):
         data_da['max'] = [[10 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
         data_da['allocation'] = [[4 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
 
-        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
@@ -539,7 +539,7 @@ class DeadlockAvoidanceInputScreen(Screen):
         form.add_widget(sv)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_da_output))
         form.add_widget(box)
@@ -563,7 +563,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
         layout = self.manager.get_screen('da_output').layout
         layout.clear_widgets()
 
-        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
@@ -673,7 +673,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
             grid.add_widget(box)
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_da_form))
         grid.add_widget(box)
 
@@ -709,7 +709,7 @@ class DeadlockDetectionInputScreen(Screen):
         data_dd['request'] = [[10 for x in range(data_dd['num_resource_types'])] for x in range(data_dd['num_processes'])]
         data_dd['allocation'] = [[4 for x in range(data_dd['num_resource_types'])] for x in range(data_dd['num_processes'])]
 
-        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
@@ -771,7 +771,7 @@ class DeadlockDetectionInputScreen(Screen):
         form.add_widget(sv)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_dd_output))
         form.add_widget(box)
@@ -794,7 +794,7 @@ class DeadlockDetectionOutputScreen(Screen):
         layout = self.manager.get_screen('dd_output').layout
         layout.clear_widgets()
 
-        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
@@ -873,7 +873,7 @@ class DeadlockDetectionOutputScreen(Screen):
             grid.add_widget(box)
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_dd_form))
         grid.add_widget(box)
 
@@ -923,12 +923,12 @@ class MemoryInputScreen(Screen):
         data_mem['arrival'] = [0] * n
         data_mem['burst'] = [10] * n
 
-        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
         # Box for algo spinner
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(10,40))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
         box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
         algo_spinner = Spinner(
             text='Select an Algorithm',
@@ -938,7 +938,7 @@ class MemoryInputScreen(Screen):
         grid.add_widget(box)
 
         # Add labels for input
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(10, 0))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
         box.add_widget(Label(text='Process name'))
         box.add_widget(Label(text='Size (KB)'))
         box.add_widget(Label(text='Arrival time (ms)'))
@@ -947,7 +947,7 @@ class MemoryInputScreen(Screen):
 
         # Add inputs
         for i in range(data_mem['num_processes']):
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(10, 0))
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
 
             box.add_widget(Label(text='P'+str(i+1)))
 
@@ -971,7 +971,7 @@ class MemoryInputScreen(Screen):
         form.add_widget(sv)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_mem_output))
         form.add_widget(box)
@@ -1028,7 +1028,7 @@ class MemoryOutputScreen(Screen):
         layout = self.manager.get_screen('mem_output').layout
         layout.clear_widgets()
 
-        grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
@@ -1124,7 +1124,7 @@ class MemoryOutputScreen(Screen):
 
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, 10))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_mem_form))
         grid.add_widget(box)
 

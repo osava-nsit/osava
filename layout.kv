@@ -1,3 +1,13 @@
+# To debug screens, uncomment the following lines:
+############
+#<Widget>:
+#    canvas.after:
+#        Line:
+#            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+#            dash_offset: 5
+#            dash_length: 3
+############
+
 <MainMenuScreen>:
     title: title
     on_enter: root.load_ribbon()
