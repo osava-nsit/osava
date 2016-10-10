@@ -14,6 +14,7 @@ from kivy.uix.spinner import Spinner
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty
 from kivy.graphics import Color, Rectangle, Line
+import kivy.metrics
 # Python libraries
 from functools import partial
 from random import random
@@ -22,6 +23,9 @@ import copy
 import cpu_scheduling, deadlock, memory_allocation
 
 Builder.load_file('layout.kv')
+
+# Global fixed height of form rows within scroll view
+form_row_height = '40dp'
 
 # Global data for CPU Scheduling Algorithms
 cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive']
@@ -209,9 +213,6 @@ class CPUInputScreen(Screen):
         # Make sure the height is such that there is something to scroll.
         layout.bind(minimum_height=layout.setter('height'))
 
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
-
         # Add input labels
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         # label = Label(text='Sno.')
@@ -393,8 +394,8 @@ class CPUOutputScreen(Screen):
         gantt.clear_widgets()
         time.clear_widgets()
         # gantt.canvas.clear()
-        margin_left = 250
-        margin_bottom = 100
+        margin_left = kivy.metrics.dp(125)
+        margin_bottom = kivy.metrics.dp(50)
         with chart_wid.canvas:
             # Starting position of rectangle
             pos_x = gantt.pos[0]+margin_left
@@ -459,8 +460,6 @@ class DeadlockAvoidanceInputScreen(Screen):
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
 
         # Add form labels for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -567,8 +566,6 @@ class DeadlockAvoidanceOutputScreen(Screen):
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
         box.add_widget(Label(text="Banker's Algorithm: When a process requests a set of resources,\nthe system must determine whether granting the request will keep the system in a safe state."))
@@ -715,8 +712,6 @@ class DeadlockDetectionInputScreen(Screen):
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
 
         # Add form labels for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -802,8 +797,6 @@ class DeadlockDetectionOutputScreen(Screen):
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
         box.add_widget(Label(text='Deadlock Detection Algorithm: This algorithm examines the state\nof the system and determines whether a deadlock has occurred.'))
@@ -933,8 +926,6 @@ class MemoryInputScreen(Screen):
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
 
         # Box for algo spinner
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(10,40))
@@ -1002,8 +993,8 @@ class MemoryOutputScreen(Screen):
     memory_chart = []
 
     # Margins for memory chart output
-    margin_left = 250
-    margin_bottom = 240
+    margin_left = kivy.metrics.dp(125)
+    margin_bottom = kivy.metrics.dp(120)
 
     # Increment in width per unit size
     inc = 0
@@ -1040,8 +1031,6 @@ class MemoryOutputScreen(Screen):
         grid = GridLayout(cols=1, spacing=10, size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
-        # Fixed height of form rows within scroll view
-        form_row_height = '40dp'
 
         # Output the algo description
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
@@ -1167,7 +1156,6 @@ class MemoryOutputScreen(Screen):
             self.add_process(chart_wid, mem_box, size_box, start_height, 'hole', 0, data_mem['mem_size'])
         else:
             for i,memory_slot in enumerate(memory_state):
-                print "Memory slot: "+str(memory_slot)
                 process_id1, start1, end1 = memory_slot       
 
                 if(len(memory_state) == 1): #only tuple in list
@@ -1209,7 +1197,7 @@ class MemoryOutputScreen(Screen):
             size_box.add_widget(s_label)
 
             Color(self.colors[process_name][0], self.colors[process_name][1], self.colors[process_name][2], 0.4, mode='rgba')
-            Rectangle(pos=(self.margin_left+(mem_start*self.inc), start_height+self.margin_bottom), size=(rect_width*self.inc, 100))
+            Rectangle(pos=(self.margin_left+(mem_start*self.inc), start_height+self.margin_bottom), size=(rect_width*self.inc, kivy.metrics.dp(50)))
 
     def switch_to_mem_form(self, *args):
         self.manager.transition.direction = 'right'
