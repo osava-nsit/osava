@@ -1067,7 +1067,7 @@ class MemoryOutputScreen(Screen):
             grid.add_widget(mem_box)
             grid.add_widget(size_box)
             # TODO: Better tracking of total height
-            start_height = self.get_start_height(idx, len(self.memory_chart), 390)
+            start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(195))
             self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
 
             # print 'Current time: ' + str(curr_time)
