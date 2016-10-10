@@ -119,11 +119,14 @@ def mem_on_termination(instance, value, i):
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
+    ribbon_added = False
     def load_ribbon(self, *args):
         title = self.manager.get_screen('menu').title
-        with title.canvas:
-            Color(1, 0, 0, 0.4, mode='rgba')
-            Rectangle(pos=(0,1100), size=(1600,100))
+        if not self.ribbon_added:
+            with title.canvas:
+                Color(1, 0, 0, 0.4, mode='rgba')
+                Rectangle(pos=(0,Window.height-kivy.metrics.dp(40)), size=(Window.width,kivy.metrics.dp(40)))
+                self.ribbon_added = True
         # title.add_widget(Label(text='OS - Algo Visualization App'))
 
 # Input Screen for CPU Scheduling Algorithms with partial scrolling
