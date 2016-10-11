@@ -1,7 +1,33 @@
 from operator import itemgetter
 from copy import deepcopy
+
+#to check if external fragmentation is present 
+def check_external_frag(memory_allocated, process_size, total_size):
+    flag = 0 #variable to check if external fragmentation is present
+    free_space = 0
+    for i, pair in enumerate(memory_allocated):    
+        process_name1,start1,end1 = pair
+        if(i == len(memory_allocated)-1):
+            free_space += total_size - end1
+            break
+        process_name2,start2,end2 = memory_allocated[i+1]
+        free_space += start2-end1
+    if free_space >= process_size:
+        flag = 1 #external fragmentation present
+        return flag 
+    else:
+        return flag
+
+
+def add_termination_event(event_list, process_id, curr_time, burst_time, process_size):
+    pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
+    event_list.append(pair)
+    new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
+    return new_list
+
 def add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
         temp_memory = {}
+        external_frag = 0
         if(arrival_time>curr_time):
             curr_time = arrival_time
         i = 0
@@ -12,15 +38,14 @@ def add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process
                 end = process_size
                 new_pair1 = (process_id,start, end);
                 memory_allocated.append(new_pair1)
-                pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
-                event_list.append(pair)
-                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                event_list = new_list
+                event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
             else:
                 new_pair1 = (process_id,process_size,burst_time);
                 wait_queue.append(new_pair1)
+                external_frag = check_external_frag(memory_allocated, process_size, total_size)
             temp_memory['memory_state'] = deepcopy(memory_allocated)
             temp_memory['processes_waiting'] = deepcopy(wait_queue)
+            temp_memory['external_fragmentation'] = external_frag
             return temp_memory
             # find free memory block 
         for pair in memory_allocated:    
@@ -49,15 +74,13 @@ def add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process
         if(flag == 0):
             new_pair1 = (process_id,process_size,burst_time);
             wait_queue.append(new_pair1)
-            temp_memory['memory_state'] = deepcopy(memory_allocated)
+            external_frag = check_external_frag(memory_allocated, process_size, total_size)
         #process has been allocated memory
         else:
             #appending process with termination time in event list
-            pair=(process_id,0,curr_time+burst_time,burst_time,process_size);
-            event_list.append(pair);
-            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-            event_list = new_list
-            temp_memory['memory_state'] = deepcopy(memory_allocated)
+            event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
+        temp_memory['memory_state'] = deepcopy(memory_allocated)    
+        temp_memory['external_fragmentation'] = external_frag
         temp_memory['processes_waiting'] = deepcopy(wait_queue)
         return temp_memory
 
@@ -79,10 +102,7 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                         new_pair1 = (process_name,start, end);
                         memory_allocated.append(new_pair1)
                         # add event of termination
-                        pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                        event_list.append(pair)
-                        new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                        event_list = new_list
+                        event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                         # delete process from wait queue
                         del wait_queue[i]
                     temp_memory['memory_state'] = deepcopy(memory_allocated)
@@ -102,6 +122,8 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                             temp_memory['memory_state'] = deepcopy(memory_allocated)
                             #delete process from wait queue
                             del wait_queue[i]
+                            #add termination event
+                            event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                         break
                     process_name2,start2,end2 = memory_allocated[j+1]
                     j = j+1
@@ -116,12 +138,9 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                         #sorted(memory_allocated,key=itemgetter(1))
                         temp_memory['memory_state'] = deepcopy(memory_allocated)
                         #add termination event
-                        pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                        event_list.append(pair)
-                        new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                        event_list = new_list
+                        event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                         break
-        temp_memory['processes_waiting'] = deepcopy(wait_queue)        
+        temp_memory['processes_waiting'] = deepcopy(wait_queue)      
         return temp_memory
 
 def first_fit(data):
@@ -162,6 +181,7 @@ def first_fit(data):
             # print "Removed from memory: " + str(temp_memory)
             event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
             temp_memory['event'] = event1
+            temp_memory['external_fragmentation'] = 0
             memory_chart.append(temp_memory)
             # print "\nMemory chart after removal: " + str(memory_chart)
             # print "-------------------"
@@ -170,6 +190,7 @@ def first_fit(data):
 #Worst Fit Agorithm
 def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
         temp_memory = {}
+        external_frag = 0
         if(arrival_time > curr_time):
             curr_time = arrival_time
         i = 0
@@ -180,13 +201,13 @@ def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process
                 end = process_size
                 new_pair1 = (process_id,start, end);
                 memory_allocated.append(new_pair1)
-                pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
-                event_list.append(pair)
-                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                event_list = new_list
+                event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
+
             else:
                 new_pair1 = (process_id,process_size,burst_time);
-                wait_queue.append(new_pair1)     
+                wait_queue.append(new_pair1)   
+                external_frag = check_external_frag(memory_allocated, process_size, total_size)
+            temp_memory['external_fragmentation'] = external_frag  
             temp_memory['memory_state'] = deepcopy(memory_allocated)
             temp_memory['processes_waiting'] = deepcopy(wait_queue)
             return temp_memory
@@ -219,20 +240,19 @@ def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process
             end = memory_allocated[max_ind][2]+process_size
             new_pair1 = (process_id,start,end);
             memory_allocated.insert(max_ind+1,new_pair1)
-            temp_memory['memory_state'] = deepcopy(memory_allocated)
         #process is allocated no memory slot
         elif(flag == 0):
             new_pair1 = (process_id,process_size,burst_time);
             wait_queue.append(new_pair1)
+            external_frag = check_external_frag(memory_allocated, process_size, total_size)
+            temp_memory['external_fragmentation'] = external_frag
             temp_memory['memory_state'] = deepcopy(memory_allocated)
         #process has been allocated a worst fit memory slot
-        else:
+        if flag == 1:
             #appending process with termination time in event list
-            pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
-            event_list.append(pair)
-            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-            event_list = new_list
+            event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['external_fragmentation'] = 0
         temp_memory['processes_waiting'] = deepcopy(wait_queue)
         return temp_memory
             
@@ -257,6 +277,8 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                         memory_allocated.append(new_pair1)
                         #delete process from wait queue
                         del wait_queue[i]
+                         #add termination event
+                        event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                     temp_memory['memory_state'] = deepcopy(memory_allocated)
                     temp_memory['processes_waiting'] = deepcopy(wait_queue)        
                     continue 
@@ -274,10 +296,7 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                             memory_allocated.append(new_pair1)
                             temp_memory['memory_state'] = deepcopy(memory_allocated)
                             #add termination event
-                            pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                            event_list.append(pair)
-                            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                            event_list = new_list
+                            event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                             #delete process from wait queue
                             del wait_queue[i]
                         break
@@ -299,10 +318,7 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                 memory_allocated.insert(max_ind+1,new_pair1)
                 temp_memory['memory_state'] = deepcopy(memory_allocated)
                 #add termination event
-                pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                event_list.append(pair)
-                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                event_list = new_list
+                event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
         temp_memory['processes_waiting'] = deepcopy(wait_queue)        
         return temp_memory
 
@@ -339,11 +355,13 @@ def worst_fit(data):
             temp_memory = remove_from_memory_worstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
             event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
             temp_memory['event'] = event1
+            temp_memory['external_fragmentation'] = 0
             memory_chart.append(temp_memory)
     return memory_chart
 
 def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
         temp_memory = {}
+        external_frag = 0
         if(arrival_time > curr_time):
             curr_time = arrival_time
         i = 0
@@ -354,13 +372,12 @@ def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_
                 end = process_size
                 new_pair1 = (process_id,start, end)
                 memory_allocated.append(new_pair1)
-                pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
-                event_list.append(pair)
-                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                event_list = new_list
+                event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
             else:
                 new_pair1 = (process_id,process_size,burst_time)
-                wait_queue.append(new_pair1)     
+                wait_queue.append(new_pair1)  
+                external_frag = check_external_frag(memory_allocated, process_size, total_size)
+            temp_memory['external_fragmentation'] = external_frag   
             temp_memory['memory_state']=deepcopy(memory_allocated)
             temp_memory['processes_waiting']=deepcopy(wait_queue)
             return temp_memory
@@ -394,20 +411,19 @@ def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_
             end = memory_allocated[min_ind][2]+process_size
             new_pair1 = (process_id,start,end);
             memory_allocated.insert(min_ind+1,new_pair1)
-            temp_memory['memory_state'] = deepcopy(memory_allocated)
         #process is allocated no memory slot
         elif(flag == 0):
             new_pair1 = (process_id,process_size,burst_time);
             wait_queue.append(new_pair1)
+            external_frag = check_external_frag(memory_allocated, process_size, total_size)
+            temp_memory['external_fragmentation'] = external_frag
             temp_memory['memory_state'] = deepcopy(memory_allocated)
         #process has been allocated a worst fit memory slot
-        else:
+        if flag == 1:
             #appending process with termination time in event list
-            pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
-            event_list.append(pair)
-            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-            event_list = new_list
+            event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['external_fragmentation'] = 0
         temp_memory['processes_waiting'] = deepcopy(wait_queue)
         return temp_memory
 
@@ -430,6 +446,8 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
                         memory_allocated.append(new_pair1)
                         #delete process from wait queue
                         del wait_queue[i]
+                        #add termination event
+                        event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                     temp_memory['memory_state']=deepcopy(memory_allocated)    
                     temp_memory['processes_waiting']=deepcopy(wait_queue)        
                     continue 
@@ -447,10 +465,7 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
                             memory_allocated.append(new_pair1)
                             temp_memory['memory_state']=deepcopy(memory_allocated)
                             #add termination event
-                            pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                            event_list.append(pair);
-                            new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                            event_list = new_list
+                            event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                             #delete process from wait queue
                             del wait_queue[i]
                         break
@@ -472,10 +487,7 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
                 memory_allocated.insert(min_ind+1,new_pair1)
                 temp_memory['memory_state'] = deepcopy(memory_allocated)
                 #add termination event
-                pair=(process_name,0,curr_time+burst_time,burst_time,process_size);
-                event_list.append(pair);
-                new_list = sorted(event_list,key=lambda x: (x[2],x[1]))
-                event_list = new_list
+                event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
         temp_memory['processes_waiting'] = deepcopy(wait_queue)        
         return temp_memory 
 
@@ -511,6 +523,7 @@ def best_fit(data):
             temp_memory=remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
             event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
             temp_memory['event'] = event1
+            temp_memory['external_fragmentation'] = 0
             memory_chart.append(temp_memory)
     return memory_chart
         
