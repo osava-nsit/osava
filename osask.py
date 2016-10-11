@@ -1050,7 +1050,7 @@ class MemoryOutputScreen(Screen):
 
         # Display each element of memroy chart timeline
         for idx,temp_memory in enumerate(self.memory_chart):
-            #print str(temp_memory)
+            # print str(temp_memory)
             wait_queue = temp_memory['processes_waiting']
             event_details = temp_memory['event']
             external_fragmentation = temp_memory['external_fragmentation']
@@ -1079,7 +1079,7 @@ class MemoryOutputScreen(Screen):
             # TODO: Better tracking of total height
             start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(285))
             self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
-            self.draw_waiting_queue(wait_box, status_box, start_height, temp_memory)
+            self.draw_wait_queue(wait_box, status_box, start_height, temp_memory)
             # print 'Current time: ' + str(curr_time)
             # total_size = formatted_data[0]['mem_size']
             # if(arrival_bit == 1): # new process has arrived
@@ -1147,7 +1147,7 @@ class MemoryOutputScreen(Screen):
     def draw_memory_state(self, mem_box, size_box, start_height, temp_memory, *args):
         # Unpack memory state details
         memory_state = temp_memory['memory_state']
-        #wait_queue = temp_memory['processes_waiting']
+        # wait_queue = temp_memory['processes_waiting']
         event_details = temp_memory['event']
         process_id,arrival_bit,curr_time,burst_time,process_size = event_details
 
@@ -1169,7 +1169,7 @@ class MemoryOutputScreen(Screen):
             for i,memory_slot in enumerate(memory_state):
                 process_id1, start1, end1 = memory_slot       
 
-                if(len(memory_state) == 1): #only tuple in list
+                if(len(memory_state) == 1): # only tuple in list
                     if(start1 > 0):
                         self.add_process(chart_wid, mem_box, size_box, start_height, 'hole', 0, start1)
                     self.add_process(chart_wid, mem_box, size_box, start_height, process_id1, start1, (end1-start1))
@@ -1182,7 +1182,7 @@ class MemoryOutputScreen(Screen):
                         self.add_process(chart_wid, mem_box, size_box, start_height, 'hole', end1, (data_mem['mem_size']-end1))
                 else:
                     process_id2,start2,end2 = memory_state[i+1]
-                    if(i == 0): #first tuple, more tuples follow
+                    if(i == 0): # first tuple, more tuples follow
                         if(start1 > 0):
                             self.add_process(chart_wid, mem_box, size_box, start_height, 'hole', 0, start1)
                     self.add_process(chart_wid, mem_box, size_box, start_height, process_id1, start1, (end1-start1))
@@ -1196,13 +1196,13 @@ class MemoryOutputScreen(Screen):
 
         # Add the widget used to draw the meomory state on the screen
         mem_box.add_widget(chart_wid)
-        #Drawing the wait queue
-    def draw_waiting_queue(self, wait_box, status_box, start_height, temp_memory, *args):
+    # Drawing the wait queue
+    def draw_wait_queue(self, wait_box, status_box, start_height, temp_memory, *args):
         wait_queue = temp_memory['processes_waiting']
         event_details = temp_memory['event']
         process_id,arrival_bit,curr_time,burst_time,process_size = event_details
         external_fragmentation = temp_memory['external_fragmentation']
-        flag=0
+        wait_flag=0 # to check whether process was added to the wait queue
         label = Label(text='Wait Queue: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
         label.text_size = label.size
         wait_box.add_widget(label)
@@ -1215,15 +1215,15 @@ class MemoryOutputScreen(Screen):
             wait_box.add_widget(w_label)
         for process in wait_queue:
             process_name, process_s,process_burst = process
-            if(process_name == process_id):#will only happen if arrival_bit=1
-                flag=1 #process was added to wait queue
+            if(process_name == process_id):# will only happen if arrival_bit=1
+                wait_flag=1 # process was added to wait queue
             w_label = Label(text=str(process_name), size_hint_x=None, width='40dp', halign='left', valign='top')
             w_label.text_size = w_label.size
             wait_box.add_widget(w_label)
         if(arrival_bit == 1):
-            if(flag == 1 and external_fragmentation == 1):
+            if(wait_flag == 1 and external_fragmentation == 1):
                 ss_label = Label(text=str(process_id) + ' was added to the wait queue because of external fragmentation though enough free memory is available.', size_hint_x=None, width='800dp', halign='left', valign='top') 
-            elif(flag == 1 and external_fragmentation == 0):
+            elif(wait_flag == 1 and external_fragmentation == 0):
                 ss_label = Label(text=str(process_id) + ' was added to the wait queue due to insufficient memory available.', size_hint_x=None, width='800dp', halign='left', valign='top')       
             else:
                 ss_label = Label(text=str(process_id) + ' was assigned a slot in the main memory.', size_hint_x=None, width='800dp', halign='left', valign='top') 
