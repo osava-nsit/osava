@@ -1222,7 +1222,7 @@ class MemoryOutputScreen(Screen):
             wait_box.add_widget(w_label)
         if(arrival_bit == 1):
             if(flag == 1 and external_fragmentation == 1):
-                ss_label = Label(text=str(process_id) + ' was added to the wait queue due to external fragmentation.', size_hint_x=None, width='800dp', halign='left', valign='top') 
+                ss_label = Label(text=str(process_id) + ' was added to the wait queue because of external fragmentation though enough free memory is available.', size_hint_x=None, width='800dp', halign='left', valign='top') 
             elif(flag == 1 and external_fragmentation == 0):
                 ss_label = Label(text=str(process_id) + ' was added to the wait queue due to insufficient memory available.', size_hint_x=None, width='800dp', halign='left', valign='top')       
             else:
