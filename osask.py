@@ -997,7 +997,7 @@ class MemoryOutputScreen(Screen):
 
     # Margins for memory chart output
     margin_left = kivy.metrics.dp(125)
-    margin_bottom = kivy.metrics.dp(210)
+    margin_bottom = kivy.metrics.dp(255)
 
     # Increment in width per unit size
     inc = 0
@@ -1071,15 +1071,17 @@ class MemoryOutputScreen(Screen):
             size_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             wait_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             status_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            wait_to_memory_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
 
             grid.add_widget(mem_box)
             grid.add_widget(size_box)
             grid.add_widget(wait_box)
             grid.add_widget(status_box)
+            grid.add_widget(wait_to_memory_box)
             # TODO: Better tracking of total height
-            start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(285))
+            start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(330))
             self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
-            self.draw_wait_queue(wait_box, status_box, start_height, temp_memory)
+            self.draw_wait_queue(wait_box, status_box, wait_to_memory_box, start_height, temp_memory)
             # print 'Current time: ' + str(curr_time)
             # total_size = formatted_data[0]['mem_size']
             # if(arrival_bit == 1): # new process has arrived
@@ -1095,7 +1097,7 @@ class MemoryOutputScreen(Screen):
             # print 'Size of the process: ' + str(process_size)
             # #chart details
             # if not memory_state:
-            #     print '0' + '           free            ' + str(total_size)
+            #     print '0' + '           free            ' + str(total_size
             # for i,memory_slot in enumerate(memory_state):
             #     process_id1, start1, end1 = memory_slot                
             #     if(i == 0 and i == len(memory_state)-1): #only tuple in list
@@ -1197,10 +1199,11 @@ class MemoryOutputScreen(Screen):
         # Add the widget used to draw the meomory state on the screen
         mem_box.add_widget(chart_wid)
     # Drawing the wait queue
-    def draw_wait_queue(self, wait_box, status_box, start_height, temp_memory, *args):
+    def draw_wait_queue(self, wait_box, status_box, wait_to_memory_box, start_height, temp_memory, *args):
         wait_queue = temp_memory['processes_waiting']
         event_details = temp_memory['event']
         process_id,arrival_bit,curr_time,burst_time,process_size = event_details
+        wait_to_memory = temp_memory['wait_to_memory']
         external_fragmentation = temp_memory['external_fragmentation']
         wait_flag=0 # to check whether process was added to the wait queue
         label = Label(text='Wait Queue: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
@@ -1209,6 +1212,9 @@ class MemoryOutputScreen(Screen):
         s_label = Label(text='Status: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
         s_label.text_size = s_label.size
         status_box.add_widget(s_label)
+        wm_label = Label(text='Processes loaded into memory from wait queue: ', size_hint_x=None, width=self.margin_left  + kivy.metrics.dp(30), valign='top', halign='center')
+        wm_label.text_size = wm_label.size
+        wait_to_memory_box.add_widget(wm_label)
         if not wait_queue:
             w_label = Label(text='Empty', size_hint_x=None, width='50dp', halign='left', valign='top')
             w_label.text_size = w_label.size
@@ -1222,16 +1228,29 @@ class MemoryOutputScreen(Screen):
             wait_box.add_widget(w_label)
         if(arrival_bit == 1):
             if(wait_flag == 1 and external_fragmentation == 1):
-                ss_label = Label(text=str(process_id) + ' was added to the wait queue because of external fragmentation though enough free memory is available.', size_hint_x=None, width='800dp', halign='left', valign='top') 
+                ss_label = Label(text='Process ' + str(process_id) + ' was added to the wait queue because of external fragmentation though enough free memory is available.', size_hint_x=None, width='800dp', halign='left', valign='top') 
             elif(wait_flag == 1 and external_fragmentation == 0):
-                ss_label = Label(text=str(process_id) + ' was added to the wait queue due to insufficient memory available.', size_hint_x=None, width='800dp', halign='left', valign='top')       
+                ss_label = Label(text='Process ' + str(process_id) + ' was added to the wait queue due to insufficient memory available.', size_hint_x=None, width='800dp', halign='left', valign='top')       
             else:
-                ss_label = Label(text=str(process_id) + ' was assigned a slot in the main memory.', size_hint_x=None, width='800dp', halign='left', valign='top') 
+                ss_label = Label(text='Process ' + str(process_id) + ' was assigned a slot in the main memory.', size_hint_x=None, width='800dp', halign='left', valign='top') 
+            wm_label = Label(text='None', size_hint_x=None, width='50dp', valign='top', halign='left')
+            wm_label.text_size = wm_label.size
+            wait_to_memory_box.add_widget(wm_label)    
         else:
-            ss_label = Label(text=str(process_id) + ' has succesfully been deallocated memory.', size_hint_x=None, width='800dp', halign='left', valign='top') 
+            if not wait_to_memory:
+                ss_label = Label(text='Process ' + str(process_id) + ' has succesfully been deallocated memory.', size_hint_x=None, width='800dp', halign='left', valign='top')
+                wm_label = Label(text='None', size_hint_x=None, width='50dp', valign='top', halign='left')
+                wm_label.text_size = wm_label.size
+                wait_to_memory_box.add_widget(wm_label)    
+            else: 
+                ss_label = Label(text='Process ' + str(process_id) + ' has succesfully been deallocated memory. ', size_hint_x=None, width='800dp', halign='left', valign='top')
+                for processes in wait_to_memory: 
+                    wm_label =  Label(text= str(processes), size_hint_x=None, width='40dp', halign='left', valign='top')
+                    wm_label.text_size = wm_label.size
+                    wait_to_memory_box.add_widget(wm_label)
         ss_label.text_size = ss_label.size
         status_box.add_widget(ss_label)
-        
+
 
     def add_process(self, chart_wid, mem_box, size_box, start_height, process_name, mem_start, rect_width, *args):
         # print "Drawing {} rectangle from {} to {}".format(process_name, mem_start, rect_width)

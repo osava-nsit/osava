@@ -86,6 +86,7 @@ def add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process
 
 def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
     temp_memory = {}
+    wait_to_memory = []
     if(end_time > curr_time):
         curr_time = end_time
     for i,pair in enumerate(memory_allocated):
@@ -93,6 +94,7 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
         if(process_name == process_id):
             del memory_allocated[i]
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
     for i,pair in enumerate(wait_queue):
         process_name,size,burst_time = pair
         if not memory_allocated:
@@ -100,11 +102,13 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                     start = 0
                     end = size 
                     new_pair1 = (process_name,start, end);
+                    wait_to_memory.append(process_name)
                     memory_allocated.append(new_pair1)
                     # add event of termination
                     event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                     # delete process from wait queue
                     del wait_queue[i]
+                temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
                 temp_memory['memory_state'] = deepcopy(memory_allocated)
                 temp_memory['processes_waiting'] = deepcopy(wait_queue)        
                 continue 
@@ -118,7 +122,9 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                         start = end1
                         end = end1 + size
                         new_pair1 = (process_name,start,end);
+                        wait_to_memory.append(process_name)
                         memory_allocated.append(new_pair1)
+                        temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
                         temp_memory['memory_state'] = deepcopy(memory_allocated)
                         #delete process from wait queue
                         del wait_queue[i]
@@ -132,10 +138,12 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
                     start = end1
                     end = end1 + size
                     new_pair1 = (process_name,start,end);
+                    wait_to_memory.append(process_name)
                     memory_allocated.insert(j+1,new_pair1)
                     #delete process from wait queue
                     del wait_queue[i]
                     #sorted(memory_allocated,key=itemgetter(1))
+                    temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
                     temp_memory['memory_state'] = deepcopy(memory_allocated)
                     #add termination event
                     event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
@@ -151,6 +159,7 @@ def first_fit(data):
     memory_allocated = []
     wait_queue = []
     event_list = []
+    wait_to_memory = [] #processes added from wait queue to memory
     for process in processes:
         #total_size=process['mem_size']
         process_id = process['name']
@@ -169,6 +178,7 @@ def first_fit(data):
             # print "Added to memory: " + str(temp_memory)
             event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
             temp_memory['event'] = event1
+            temp_memory['wait_to_memory'] = wait_to_memory
             memory_chart.append(temp_memory)
             # print "\nMemory chart after addition: " + str(memory_chart)
             # print "-------------------"
@@ -259,6 +269,7 @@ def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process
 
 def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
     temp_memory = {}
+    wait_to_memory = []
     if(end_time>curr_time):
         curr_time = end_time
     for i,pair in enumerate(memory_allocated):
@@ -267,6 +278,7 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
         if(process_name == process_id):
             del memory_allocated[i]
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
     for i,pair in enumerate(wait_queue):
         process_name,size,burst_time = pair
         if not memory_allocated:
@@ -274,12 +286,14 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                     start = 0
                     end = size 
                     new_pair1 = (process_name,start, end);
+                    wait_to_memory +=process_name
                     memory_allocated.append(new_pair1)
                     #delete process from wait queue
                     del wait_queue[i]
                      #add termination event
                     event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                 temp_memory['memory_state'] = deepcopy(memory_allocated)
+                temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
                 temp_memory['processes_waiting'] = deepcopy(wait_queue)        
                 continue 
         max_ind = -1
@@ -293,8 +307,10 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                         start = end1
                         end = end1+size
                         new_pair1 = (process_name,start,end);
+                        wait_to_memory.append(process_name)
                         memory_allocated.append(new_pair1)
                         temp_memory['memory_state'] = deepcopy(memory_allocated)
+                        temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
                         #add termination event
                         event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                         #delete process from wait queue
@@ -315,8 +331,10 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
             start = memory_allocated[max_ind][2]
             end = memory_allocated[max_ind][2]+size
             new_pair1 = (process_name,start,end);
+            wait_to_memory.append(process_name)
             memory_allocated.insert(max_ind+1,new_pair1)
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
             #add termination event
             event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
     temp_memory['processes_waiting'] = deepcopy(wait_queue)        
@@ -330,6 +348,7 @@ def worst_fit(data):
     memory_allocated = []
     wait_queue = []
     event_list = []
+    wait_to_memory = []
     for process in processes:
         #total_size=process['mem_size']
         process_id = process['name']
@@ -343,10 +362,10 @@ def worst_fit(data):
         process_id,arrival_bit,arrival_time,burst_time,process_size=event
         if(arrival_bit == 1):
             #new process has arrived
-
             temp_memory = add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
             event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
             temp_memory['event'] = event1
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
             memory_chart.append(temp_memory)
         else:
             #process has completed its execution
@@ -429,6 +448,7 @@ def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_
 
 def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
     temp_memory = {}
+    wait_to_memory = []
     if(end_time > curr_time):
         curr_time = end_time
     for i,pair in enumerate(memory_allocated):
@@ -436,6 +456,7 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
         if(process_name == process_id):
             del memory_allocated[i]
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
     for i,pair in enumerate(wait_queue):
         process_name,size,burst_time = pair
         if not memory_allocated:
@@ -443,12 +464,14 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
                     start = 0
                     end = size 
                     new_pair1 = (process_name,start, end)
+                    wait_to_memory.append(process_name)
                     memory_allocated.append(new_pair1)
                     #delete process from wait queue
                     del wait_queue[i]
                     #add termination event
                     event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
-                temp_memory['memory_state']=deepcopy(memory_allocated)    
+                temp_memory['memory_state']=deepcopy(memory_allocated)
+                temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)    
                 temp_memory['processes_waiting']=deepcopy(wait_queue)        
                 continue 
         min_ind = -1
@@ -462,8 +485,10 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
                         start = end1
                         end = end1+size
                         new_pair1 = (process_name,start,end)
+                        wait_to_memory.append(process_name)
                         memory_allocated.append(new_pair1)
                         temp_memory['memory_state']=deepcopy(memory_allocated)
+                        temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
                         #add termination event
                         event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
                         #delete process from wait queue
@@ -484,8 +509,10 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
             start = memory_allocated[min_ind][2]
             end = memory_allocated[min_ind][2]+size
             new_pair1 = (process_name,start,end);
+            wait_to_memory.append(process_name)
             memory_allocated.insert(min_ind+1,new_pair1)
             temp_memory['memory_state'] = deepcopy(memory_allocated)
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
             #add termination event
             event_list = add_termination_event(event_list, process_name, curr_time, burst_time, process_size)
     temp_memory['processes_waiting'] = deepcopy(wait_queue)        
@@ -500,6 +527,7 @@ def best_fit(data):
     memory_allocated=[]
     wait_queue=[]
     event_list=[]
+    wait_to_memory = []
     for process in processes:
         process_id=process['name']
         arrival_bit=1 #time field indiactes arrival time
@@ -515,6 +543,7 @@ def best_fit(data):
             temp_memory=add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
             event1=(process_id,arrival_bit,arrival_time,burst_time,process_size)
             temp_memory['event']=event1
+            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
             memory_chart.append(temp_memory)
         else:
             #process has completed its execution
