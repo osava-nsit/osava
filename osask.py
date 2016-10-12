@@ -1212,7 +1212,7 @@ class MemoryOutputScreen(Screen):
         s_label = Label(text='Status: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
         s_label.text_size = s_label.size
         status_box.add_widget(s_label)
-        wm_label = Label(text='Processes loaded into memory from wait queue: ', size_hint_x=None, width=self.margin_left  + kivy.metrics.dp(30), valign='top', halign='center')
+        wm_label = Label(text='Processes loaded into memory from wait queue: ', size_hint_x=None, width=self.margin_left  + kivy.metrics.dp(230), valign='top', halign='center')
         wm_label.text_size = wm_label.size
         wait_to_memory_box.add_widget(wm_label)
         if not wait_queue:
