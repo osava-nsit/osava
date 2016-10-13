@@ -286,7 +286,7 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
                     start = 0
                     end = size 
                     new_pair1 = (process_name,start, end);
-                    wait_to_memory +=process_name
+                    wait_to_memory.append(process_name)
                     memory_allocated.append(new_pair1)
                     #delete process from wait queue
                     del wait_queue[i]
