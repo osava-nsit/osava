@@ -1,4 +1,3 @@
-
 # Kivy libraries
 from kivy.app import App
 from kivy.lang import Builder
@@ -1300,7 +1299,7 @@ class PageInputScreen(Screen):
             self.strategy_type = 5
         elif text == 'Most Frequently Used':
             self.strategy_type = 6
-        data_mem['algo'] = self.strategy_type
+        data_page['algo'] = self.strategy_type
 
     # Load the input form based on input
     def load_form(self, *args):
@@ -1342,7 +1341,7 @@ class PageInputScreen(Screen):
         grid.add_widget(box)
 
         # Add inputs
-        for i in range(data_mem['ref_size']):
+        for i in range(data_page['ref_size']):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
 
             box.add_widget(Label(text='P'+str(i+1)))
@@ -1361,7 +1360,7 @@ class PageInputScreen(Screen):
         # Add Visualize and back button at the end of form
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        box.add_widget(Button(text='Visualize', on_release=self.switch_to_mem_output))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_page_output))
         form.add_widget(box)
 
     def switch_to_main_menu(self, *args):
@@ -1377,7 +1376,6 @@ class PageOutputScreen(Screen):
    def switch_to_page_form(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'page_form'
-
 
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
@@ -1396,29 +1394,6 @@ sm.add_widget(PageOutputScreen(name='page_output'))
 class OSASK(App):
     def build(self):
         return sm
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
 
 if __name__ == '__main__':
     OSASK().run()
