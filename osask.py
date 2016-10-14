@@ -1,3 +1,4 @@
+
 # Kivy libraries
 from kivy.app import App
 from kivy.lang import Builder
@@ -20,7 +21,7 @@ from functools import partial
 from random import random
 import copy
 # OS Algorithms
-import cpu_scheduling, deadlock, memory_allocation
+import cpu_scheduling, deadlock, memory_allocation, page_replacement
 
 Builder.load_file('layout.kv')
 
@@ -40,6 +41,9 @@ data_dd = dict()
 
 # Global data for Contiguous Memory Allocation Strategies
 data_mem = dict()
+
+# Global data for Page Replacement Algorithms
+data_page = dict()
 
 # Binder functions for CPU Scheduling Algorithms form, to store data in the global 'data_cpu' dictionary
 def cpu_on_name(instace, value, i):
@@ -116,6 +120,12 @@ def mem_on_termination(instance, value, i):
     if (value == ''):
         value = 10
     data_mem['burst'][i] = value
+
+# Binder functions for Page Replacement Algorithm form
+def page_on_ref(instance, value, i):
+    if(value == ''):
+        value = 100
+    data_page['ref_str'][i] = value
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -1269,6 +1279,106 @@ class MemoryOutputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'mem_form'
 
+#Input screen for Page Replacement Algorithms
+class PageInputScreen(Screen):
+    strategy_type = NumericProperty(None)
+    form = ObjectProperty(None)
+
+    #Set appropriate strategy type according to the chosen algorithm by the user
+    def show_selected_value(self, spinner, text, *args):
+        if text == 'First In First Out':
+            self.strategy_type = 0
+        elif text == 'Optimal':
+            self.strategy_type = 1
+        elif text == 'Least Recently Used':
+            self.strategy_type = 2
+        elif text == 'Second Chance':
+            self.strategy_type = 3
+        elif text == 'Enhanced Second Chance':
+            self.strategy_type = 4
+        elif text == 'Least Frequently Used':
+            self.strategy_type = 5
+        elif text == 'Most Frequently Used':
+            self.strategy_type = 6
+        data_mem['algo'] = self.strategy_type
+
+    # Load the input form based on input
+    def load_form(self, *args):
+        form = self.manager.get_screen('page_form').form
+        form.clear_widgets()
+        if (self.num_frames.text == "" or int(self.num_frames.text) < 1):
+            self.num_frames.text = "4"
+        if (self.ref_size.text == "" or int(self.ref_size.text) < 1):
+            self.ref_size.text = "100"
+
+        # Number of frames
+        n = int(self.num_frames.text)
+        # Reference String size
+        m = int(self.ref_size.text)
+
+        # Initialize the global data_page dictionary
+        data_page['algo'] = 0
+        data_page['num_frames'] = n
+        data_page['ref_size'] = m
+        data_page['ref_str'] = [100] * m
+
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+
+        # Box for algo spinner
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
+        box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
+        algo_spinner = Spinner(
+            text='Select an Algorithm',
+            values=('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used'))
+        algo_spinner.bind(text=self.show_selected_value)
+        box.add_widget(algo_spinner)
+        grid.add_widget(box)
+
+        # Add labels for input
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
+        box.add_widget(Label(text='Reference String'))
+        grid.add_widget(box)
+
+        # Add inputs
+        for i in range(data_mem['ref_size']):
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
+
+            box.add_widget(Label(text='P'+str(i+1)))
+
+            inp = TextInput(id='ref_str'+str(i))
+            inp.bind(text=partial(page_on_ref, i=i))
+            box.add_widget(inp)
+
+            grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        form.add_widget(sv)
+
+        # Add Visualize and back button at the end of form
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_mem_output))
+        form.add_widget(box)
+
+    def switch_to_main_menu(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'menu'
+
+    def switch_to_page_output(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'page_output'
+
+# Output screen for Page Replacement Algorithms
+class PageOutputScreen(Screen):
+   def switch_to_page_form(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'page_form'
+
+
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
@@ -1280,10 +1390,35 @@ sm.add_widget(DeadlockDetectionInputScreen(name='dd_form'))
 sm.add_widget(DeadlockDetectionOutputScreen(name='dd_output'))
 sm.add_widget(MemoryInputScreen(name='mem_form'))
 sm.add_widget(MemoryOutputScreen(name='mem_output'))
+sm.add_widget(PageInputScreen(name='page_form'))
+sm.add_widget(PageOutputScreen(name='page_output'))
 
 class OSASK(App):
     def build(self):
         return sm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
 
 if __name__ == '__main__':
     OSASK().run()

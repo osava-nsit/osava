@@ -432,3 +432,55 @@
     BoxLayout:
         orientation: 'vertical'
         id: layout
+
+
+<PageInputScreen>:
+    num_frames: num_frames
+    ref_size: ref_size
+    form: form
+    BoxLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: '10dp', '2.5dp'
+            size_hint_y: 0.08
+            size_hint_x: 0.3
+            pos_hint: {'top': 1}
+            Label:
+                size_hint_x: 0.6
+                text: 'No. of frames:'
+                text_size: self.size
+                halign: 'left'
+            TextInput:
+                size_hint_x: 0.4
+                id: num_frames
+                multiline: 'False'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: '10dp', '5dp'
+            size_hint_y: 0.08
+            size_hint_x: 0.7
+            Label:
+                size_hint_x: 0.25
+                valign: 'middle'
+                text: 'Reference String Size'
+                text_size: self.size
+            TextInput:
+                size_hint_x: 0.125
+                id: ref_size
+                multiline: 'False'
+            Label:
+                size_hint_x: 0.3
+            Button:
+                size_hint_x: 0.15
+                text: 'Load form'
+                on_release: root.load_form()
+        BoxLayout:
+            orientation: 'vertical'
+            id: form
