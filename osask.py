@@ -124,7 +124,7 @@ def mem_on_termination(instance, value, i):
 def page_on_ref(instance, value, i):
     if(value == ''):
         value = 100
-    data_page['ref_str'][i] = value
+    data_page['ref_str'] = str(value)
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -1307,19 +1307,14 @@ class PageInputScreen(Screen):
         form.clear_widgets()
         if (self.num_frames.text == "" or int(self.num_frames.text) < 1):
             self.num_frames.text = "4"
-        if (self.ref_size.text == "" or int(self.ref_size.text) < 1):
-            self.ref_size.text = "100"
 
         # Number of frames
         n = int(self.num_frames.text)
-        # Reference String size
-        m = int(self.ref_size.text)
 
         # Initialize the global data_page dictionary
         data_page['algo'] = 0
         data_page['num_frames'] = n
-        data_page['ref_size'] = m
-        data_page['ref_str'] = [100] * m
+        data_page['ref_str'] = ''
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -1334,24 +1329,21 @@ class PageInputScreen(Screen):
         algo_spinner.bind(text=self.show_selected_value)
         box.add_widget(algo_spinner)
         grid.add_widget(box)
-
+        
         # Add labels for input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
         box.add_widget(Label(text='Reference String'))
         grid.add_widget(box)
 
+
         # Add inputs
-        for i in range(data_page['ref_size']):
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
+        inp = TextInput(id='ref_str'+str(0))
+        inp.bind(text=partial(page_on_ref, i=0))
+        box.add_widget(inp)
+        grid.add_widget(box)
 
-            box.add_widget(Label(text='P'+str(i+1)))
-
-            inp = TextInput(id='ref_str'+str(i))
-            inp.bind(text=partial(page_on_ref, i=i))
-            box.add_widget(inp)
-
-            grid.add_widget(box)
-
+        
         # Add ScrollView
         sv = ScrollView(size=self.size)
         sv.add_widget(grid)
@@ -1362,7 +1354,6 @@ class PageInputScreen(Screen):
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_page_output))
         form.add_widget(box)
-
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
@@ -1370,7 +1361,7 @@ class PageInputScreen(Screen):
     def switch_to_page_output(self, *args):
         self.manager.transition.direction = 'left'
         self.manager.current = 'page_output'
-
+    
 # Output screen for Page Replacement Algorithms
 class PageOutputScreen(Screen):
    def switch_to_page_form(self, *args):
