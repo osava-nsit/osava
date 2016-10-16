@@ -471,3 +471,10 @@
         BoxLayout:
             orientation: 'vertical'
             id: form
+<PageOutputScreen>:
+    on_enter: root.calculate()
+    layout: layout
+    BoxLayout:
+        orientation: 'vertical'
+        id: layout
+

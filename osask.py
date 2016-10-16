@@ -123,7 +123,7 @@ def mem_on_termination(instance, value, i):
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value, i):
     if(value == ''):
-        value = 100
+        value = '1, 2, 3, 4, 5, 6, 7, 8, 9' 
     data_page['ref_str'] = str(value)
 
 # Main Menu Screen with options to choose an OS Algorithm
@@ -1364,7 +1364,78 @@ class PageInputScreen(Screen):
     
 # Output screen for Page Replacement Algorithms
 class PageOutputScreen(Screen):
-   def switch_to_page_form(self, *args):
+    
+    memory_chart = []
+    print "In output screen"
+    # Generate formatted data for input to the algo
+    def calculate(self, *args):
+        
+        formatted_data = []
+
+        page = {}
+        page['num_frames'] = int(data_page['num_frames'])
+        page_numbers_data = data_page['ref_str']
+        page_numbers = []
+        if ',' in page_numbers_data: # Comma separated ref_str
+            page_numbers = page_numbers_data.split(",")
+        else: # Space separated ref_str
+            page_numbers = page_numbers_data.split()
+        page['ref_str'] = page_numbers
+        formatted_data.append(page)
+
+
+        if data_page['algo'] == 0:
+            self.memory_chart = page_replacement.fifo(formatted_data)
+        elif data_page['algo'] == 1:
+            self.memory_chart = page_replacement.optimal(formatted_data)
+        elif data_page['algo'] == 2:
+            self.memory_chart = page_replacement.lru(formatted_data)
+        elif data_page['algo'] == 3:
+            self.memory_chart = page_replacement.second_chance(formatted_data)
+        elif data_page['algo'] == 4:
+            self.memory_chart = page_replacement.enhanced_second_chance(formatted_data)
+        elif data_page['algo'] == 5:
+            self.memory_chart = page_replacement.least_recently_used(formatted_data)
+        elif data_page['algo'] == 6:
+            self.memory_chart = page_replacement.most_recently_used(formatted_data)
+
+
+        layout = self.manager.get_screen('page_output').layout
+        layout.clear_widgets()
+
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+
+        # Output the algo description
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        algo_desc = ''
+        if data_page['algo'] == 0:
+            algo_desc = 'fifo'
+        elif data_page['algo'] == 1:
+            algo_desc = ''
+        
+        box.add_widget(Label(text=algo_desc))
+        grid.add_widget(box)
+
+
+
+
+
+
+
+
+
+        # Add back button
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
+        grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        layout.add_widget(sv)
+    def switch_to_page_form(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'page_form'
 
