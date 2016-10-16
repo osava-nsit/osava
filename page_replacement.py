@@ -53,7 +53,7 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
                 frame_to_be_replaced = frame_number
             elif max_pos == last_reference_pos:
                 max_pos = last_reference_pos
-                frame_to_be_replaced =randint(0,len(memory_frames))
+                frame_to_be_replaced =randint(0,len(memory_frames)-1)
 
     memory_frames[frame_to_be_replaced] = page_number
     status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
