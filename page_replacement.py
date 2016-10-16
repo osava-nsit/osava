@@ -1,6 +1,6 @@
 from copy import deepcopy
 import sys
-
+from random import randint
 
 # Utility function to check if referenced page is already in memory
 def page_in_memory(page_number, memory_frames):
@@ -20,7 +20,7 @@ def find_and_replace_page_fifo(page_number, memory_frames, last_replaced_frame):
     status = (last_replaced_frame, deepcopy(memory_frames));
     return status
 
-#Funtion to find and replace a page using optimal algorithm 
+# Funtion to find and replace a page using optimal algorithm 
 def find_and_replace_page_optimal(page_number, memory_frames, reference_string, pos_ref_str):
     # To keep track of page number with farthest future reference
     frame_to_be_replaced = -1
@@ -51,6 +51,9 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
             if max_pos < last_reference_pos:
                 max_pos = last_reference_pos
                 frame_to_be_replaced = frame_number
+            elif max_pos == last_reference_pos:
+                max_pos = last_reference_pos
+                frame_to_be_replaced =randint(0,len(memory_frames))
 
     memory_frames[frame_to_be_replaced] = page_number
     status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
