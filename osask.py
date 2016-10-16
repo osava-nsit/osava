@@ -123,7 +123,7 @@ def mem_on_termination(instance, value, i):
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value, i):
     if(value == ''):
-        value = '1, 2, 3, 4, 5, 6, 7, 8, 9' 
+        value = '1,2,3,4,5,6,7,8,9' 
     data_page['ref_str'] = str(value)
 
 # Main Menu Screen with options to choose an OS Algorithm
@@ -1370,35 +1370,35 @@ class PageOutputScreen(Screen):
     # Generate formatted data for input to the algo
     def calculate(self, *args):
         
-        formatted_data = []
+        formatted_data = {}
 
-        page = {}
-        page['num_frames'] = int(data_page['num_frames'])
+        formatted_data['num_frames'] = int(data_page['num_frames'])
         page_numbers_data = data_page['ref_str']
         page_numbers = []
         if ',' in page_numbers_data: # Comma separated ref_str
             page_numbers = page_numbers_data.split(",")
         else: # Space separated ref_str
             page_numbers = page_numbers_data.split()
-        page['ref_str'] = page_numbers
-        formatted_data.append(page)
+        formatted_data['ref_str'] = page_numbers
+        formatted_data['algo'] = data_page['algo']
 
 
-        if data_page['algo'] == 0:
-            self.memory_chart = page_replacement.fifo(formatted_data)
-        elif data_page['algo'] == 1:
-            self.memory_chart = page_replacement.optimal(formatted_data)
-        elif data_page['algo'] == 2:
-            self.memory_chart = page_replacement.lru(formatted_data)
-        elif data_page['algo'] == 3:
-            self.memory_chart = page_replacement.second_chance(formatted_data)
-        elif data_page['algo'] == 4:
-            self.memory_chart = page_replacement.enhanced_second_chance(formatted_data)
-        elif data_page['algo'] == 5:
-            self.memory_chart = page_replacement.least_recently_used(formatted_data)
-        elif data_page['algo'] == 6:
-            self.memory_chart = page_replacement.most_recently_used(formatted_data)
+        # if data_page['algo'] == 0:
+        #     self.memory_chart = page_replacement.fifo(formatted_data)
+        # elif data_page['algo'] == 1:
+        #     self.memory_chart = page_replacement.optimal(formatted_data)
+        # elif data_page['algo'] == 2:
+        #     self.memory_chart = page_replacement.lru(formatted_data)
+        # elif data_page['algo'] == 3:
+        #     self.memory_chart = page_replacement.second_chance(formatted_data)
+        # elif data_page['algo'] == 4:
+        #     self.memory_chart = page_replacement.enhanced_second_chance(formatted_data)
+        # elif data_page['algo'] == 5:
+        #     self.memory_chart = page_replacement.least_recently_used(formatted_data)
+        # elif data_page['algo'] == 6:
+        #     self.memory_chart = page_replacement.most_recently_used(formatted_data)
 
+        page_replacement.page_replacement(formatted_data)
 
         layout = self.manager.get_screen('page_output').layout
         layout.clear_widgets()
