@@ -124,7 +124,7 @@ def mem_on_termination(instance, value, i):
     data_mem['burst'][i] = value
 
 # Binder functions for Page Replacement Algorithm form
-def page_on_ref(instance, value, i):
+def page_on_ref(instance, value):
     if(value == ''):
         value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1' 
     data_page['ref_str'] = str(value)
@@ -1409,7 +1409,7 @@ class PageInputScreen(Screen):
         # Add inputs
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
         inp = TextInput(id='ref_str'+str(0))
-        inp.bind(text=partial(page_on_ref, i=0))
+        inp.bind(text=page_on_ref)
         box.add_widget(inp)
         grid.add_widget(box)
 
@@ -1436,10 +1436,9 @@ class PageInputScreen(Screen):
 class PageOutputScreen(Screen):
     
     memory_chart = []
-    print "In output screen"
+
     # Generate formatted data for input to the algo
     def calculate(self, *args):
-        
         formatted_data = {}
 
         formatted_data['num_frames'] = int(data_page['num_frames'])
@@ -1451,22 +1450,6 @@ class PageOutputScreen(Screen):
             page_numbers = page_numbers_data.split()
         formatted_data['ref_str'] = page_numbers
         formatted_data['algo'] = data_page['algo']
-
-
-        # if data_page['algo'] == 0:
-        #     self.memory_chart = page_replacement.fifo(formatted_data)
-        # elif data_page['algo'] == 1:
-        #     self.memory_chart = page_replacement.optimal(formatted_data)
-        # elif data_page['algo'] == 2:
-        #     self.memory_chart = page_replacement.lru(formatted_data)
-        # elif data_page['algo'] == 3:
-        #     self.memory_chart = page_replacement.second_chance(formatted_data)
-        # elif data_page['algo'] == 4:
-        #     self.memory_chart = page_replacement.enhanced_second_chance(formatted_data)
-        # elif data_page['algo'] == 5:
-        #     self.memory_chart = page_replacement.least_recently_used(formatted_data)
-        # elif data_page['algo'] == 6:
-        #     self.memory_chart = page_replacement.most_recently_used(formatted_data)
 
         page_replacement.page_replacement(formatted_data)
 
@@ -1487,14 +1470,6 @@ class PageOutputScreen(Screen):
         
         box.add_widget(Label(text=algo_desc))
         grid.add_widget(box)
-
-
-
-
-
-
-
-
 
         # Add back button
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
