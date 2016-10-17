@@ -25,10 +25,11 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
     # To keep track of page number with farthest future reference
     frame_to_be_replaced = -1
     flag = 0 # To check if an empty frame is available
-    last_reference_pos = -1
+    
     future_reference_pos = [] # To keep track of each page's farthest future reference
     for frame_number, page in enumerate(memory_frames):
-        for idx, page_n in enumerate(reference_string):
+        last_reference_pos = -1
+        for idx, page_n in enumerate(reference_string[pos_ref_str:]):
              # Empty frame is available
             if page == -1:
                 frame_to_be_replaced = frame_number
@@ -36,9 +37,10 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
                 break
             elif page == page_n:
                 last_reference_pos = idx
+                break
         if flag == 1:
             break
-        elif last_reference_pos < pos_ref_str :
+        elif last_reference_pos == -1 :
             last_reference_pos = sys.maxint 
         pair =(frame_number, page, last_reference_pos);
         future_reference_pos.append(pair)

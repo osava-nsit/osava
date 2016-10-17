@@ -123,7 +123,7 @@ def mem_on_termination(instance, value, i):
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value, i):
     if(value == ''):
-        value = '1,2,3,4,5,6,7,8,9' 
+        value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1' 
     data_page['ref_str'] = str(value)
 
 # Main Menu Screen with options to choose an OS Algorithm
