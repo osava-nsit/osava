@@ -24,6 +24,9 @@ import cpu_scheduling, deadlock, memory_allocation, page_replacement
 
 Builder.load_file('layout.kv')
 
+# Global flag for debug mode
+DEBUG_MODE = False
+
 # Global fixed height of form rows within scroll view
 form_row_height = '40dp'
 
@@ -145,10 +148,18 @@ class CPUInputScreen(Screen):
     cpu_type = 0
     preemptive_flag = False
 
-    def bind_height(self, *args):
-        #layout = self.manager.get_screen('cpu_form').layout
-        #self.layout.bind(minimum_height=self.layout.setter('height'))
-        return
+    # Called when the number of processes input is changed
+    # (Wrapper function to allow for condition checking if required)
+    def update_form(self, *args):
+        self.load_form()
+
+    # Binder function for number of processes input
+    def bind_num_processes(self, *args):
+        self.num_processes.bind(text=self.update_form)
+
+    # Binder function for dispatch latency input
+    def bind_dispatch_latency(self, *args):
+        self.dispatch_latency.bind(text=self.update_form)
 
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinner(self, *args):
@@ -156,6 +167,12 @@ class CPUInputScreen(Screen):
         spinner.bind(text=self.show_selected_value)
         variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
         variant_spinner.bind(text=self.show_variant)
+
+    # Wrapper function that calls binder functions for the required widgets
+    def bind_widgets(self, *args):
+        self.bind_num_processes()
+        self.bind_dispatch_latency()
+        self.bind_spinner()
 
     # Call set_cpu_type method with appropriate index of scheduling algorithm
     def show_selected_value(self, spinner, text, *args):
@@ -217,9 +234,27 @@ class CPUInputScreen(Screen):
         # Layout is the area where the form is placed on the screen
         layout_form = self.manager.get_screen('cpu_form').layout_form
         layout_form.clear_widgets()
-        if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
-            self.num_processes.text = "5"
-        data_cpu['num_processes'] = int(self.num_processes.text)
+
+        # Update num_processes and set to default value if empty
+        if DEBUG_MODE:
+            if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
+                self.num_processes.text = "5"
+        if (self.num_processes.text == ""):
+            data_cpu['num_processes'] = 0
+        else:
+            data_cpu['num_processes'] = int(self.num_processes.text)
+
+        # If num_processes is zero, stop
+        # TODO: Prompt the user to enter number of processes
+        if data_cpu['num_processes'] == 0:
+            print "Number of processes is zero. Cannot load form."
+            return
+
+        # Update dispatch_latency and set to default value if empty
+        if (self.dispatch_latency.text == ""):
+            data_cpu['dispatch_latency'] = 0
+        else:
+            data_cpu['dispatch_latency'] = int(self.dispatch_latency.text)
 
         layout = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -249,10 +284,11 @@ class CPUInputScreen(Screen):
             # sno_label = Label(text=str(i+1))
             # box.add_widget(sno_label)
 
-            # process names
+            # Inputted process names
             # inp = TextInput(id='name'+str(i))
             # inp.bind(text=partial(cpu_on_name, i=i))
             # box.add_widget(inp)
+
             # Fixed process names
             pname = Label(text='P'+str(i+1))
             box.add_widget(pname)
@@ -350,21 +386,28 @@ class CPUOutputScreen(Screen):
         self.colors['Idle'] = [0.2, 0.2, 0.2]
 
         if cpu_scheduling_type == 0:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.fcfs(formatted_data)
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.fcfs(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 1:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 2:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_non_prempted(formatted_data)
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_non_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 3:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_prempted(formatted_data)
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 4:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 5:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
+
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        # Make sure the height is such that there is something to scroll
+        grid.bind(minimum_height=grid.setter('height'))
+
+        row_height = '30dp'
 
         # Display process schedule details
         for process in self.cpu_schedule:
-            box = BoxLayout(orientation='horizontal')
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='20dp')
+
             label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
             box.add_widget(label_name)
             label = Label(text=str(process['start']))
@@ -372,30 +415,57 @@ class CPUOutputScreen(Screen):
             label = Label(text=str(process['end']))
             box.add_widget(label)
 
+            # Add view details button for each process
+            details_button = Button(text='Details', size_hint_x=None, width='100dp')
+            box.add_widget(details_button)
+
+            # Blank label for padding on right
+            box.add_widget(Label(text='', size_hint_x=None, width='20dp'))
+
             # Popup showing details of process when box is clicked
             if process['name'] != 'Idle':
                 content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
                     "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
                     "Turnaround time: "+str(self.details[process['name']]['turn_time']))
                 content_label = Label(text=content_str)
-                popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(400, 400))
+                popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(kivy.metrics.dp(200), kivy.metrics.dp(200)))
                 label_name.bind(on_ref_press=popup.open)
+                details_button.bind(on_release=popup.open)
                 popup.open()
                 popup.dismiss()
+                print "Bound popup for process: "+str(label_name.text)
 
-            layout.add_widget(box)
+            grid.add_widget(box)
 
         # Display statistics
-        label = Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0))
-        layout.add_widget(label)
-        label = Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0))
-        layout.add_widget(label)
-        label = Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0))
-        layout.add_widget(label)
-        label = Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0))
-        layout.add_widget(label)
-        label = Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%')
-        layout.add_widget(label)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+        box.add_widget(Label(text='Statistics -'))
+        grid.add_widget(box)
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+        box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0)))
+        grid.add_widget(box)
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+        box.add_widget(Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0)))
+        grid.add_widget(box)
+        
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+        box.add_widget(Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0)))
+        grid.add_widget(box)
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+        box.add_widget(Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0)))
+        grid.add_widget(box)
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+        box.add_widget(Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%'))
+        grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        layout.add_widget(sv)
 
     def draw_gantt(self, *args):
         # Area for drawing gantt chart

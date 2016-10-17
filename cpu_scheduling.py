@@ -1,7 +1,7 @@
 from operator import itemgetter
 import Queue
 
-def fcfs(data):
+def fcfs(data, dispatch_latency = 0):
     processes = sorted(data, key=itemgetter('arrival'))
     process_chart = []
     curr_time = 0
@@ -57,7 +57,7 @@ def fcfs(data):
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
     return process_chart, stats, details_process
 
-def round_robin(data,max_quanta=4):
+def round_robin(data, max_quanta = 4, dispatch_latency = 0):
     all_processes = sorted(data, key=itemgetter('arrival'))
     time_present = 0
     wait_time = 0
@@ -188,7 +188,7 @@ def round_robin(data,max_quanta=4):
         
     return process_chart, stats, process_details
 
-def shortest_job_non_prempted(data):
+def shortest_job_non_prempted(data, dispatch_latency = 0):
     all_processes = sorted(data, key=itemgetter('burst'))
     time_present = 0
     var = 0
@@ -271,7 +271,7 @@ def shortest_job_non_prempted(data):
 
     return process_chart, stats, process_details
     
-def shortest_job_prempted(data):
+def shortest_job_prempted(data, dispatch_latency = 0):
     all_processes = sorted(data, key=itemgetter('burst'))
     time_present = 0
     wait_time = 0
@@ -373,7 +373,7 @@ def shortest_job_prempted(data):
 
     return process_chart, stats, process_details
 
-def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority = 0):
+def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
     all_processes = sorted(data, key=itemgetter('priority'))
     time_present = 0 
     var = 0
@@ -466,7 +466,7 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
     
     return process_chart, stats, process_details
     
-def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0):
+def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
     all_processes = sorted(data, key=itemgetter('priority'))
     time_present = 0
     wait_time = 0
@@ -578,97 +578,3 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
     stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
     return process_chart, stats, process_details
-
-
-###### Test code ######
-
-# list_process_round_robin = list()
-# # list_process_shortest_job_non_prempted = list()
-# # list_process_shortest_job_prempted = list()
-
-# # # Test case for round robin
-
-# process = {}
-# process['name'] = 1
-# process['burst'] = 5
-# process['arrival'] = 0
-# process['priority'] = 1
-# process['wait_time'] = 0
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 2
-# process['burst'] = 9
-# process['arrival'] = 0
-# process['priority'] = 2
-# process['wait_time'] = 0
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 3
-# process['burst'] = 4
-# process['arrival'] = 0
-# process['priority'] = 3 
-# process['wait_time'] = 0
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 4
-# process['burst'] = 7
-# process['arrival'] = 0
-# process['priority'] = 4
-# process['wait_time'] = 0
-# list_process_round_robin += [process]
-# process = {}
-# process['name'] = 5
-# process['burst'] = 3
-# process['arrival'] = 0
-# process['priority'] = 5
-# process['wait_time'] = 0
-# list_process_round_robin += [process]
-
-
-# process = {}
-# process['name'] = 1
-# process['burst'] = 7
-# process['arrival'] = 0
-# list_process_shortest_job_non_prempted += [process]
-# process = {}
-# process['name'] = 2
-# process['burst'] = 10
-# process['arrival'] = 0
-# list_process_shortest_job_non_prempted += [process]
-# process = {}
-# process['name'] = 3
-# process['burst'] = 5
-# process['arrival'] = 0
-# list_process_shortest_job_non_prempted += [process]
-# process = {}
-# process['name'] = 4
-# process['burst'] = 7
-# process['arrival'] = 0
-# list_process_shortest_job_non_prempted += [process]
-
-
-# process = {}
-# process['name'] = 1
-# process['burst'] = 7
-# process['arrival'] = 0
-# list_process_shortest_job_prempted += [process]
-# process = {}
-# process['name'] = 2
-# process['burst'] = 4
-# process['arrival'] = 4
-# list_process_shortest_job_prempted += [process]
-# process = {}
-# process['name'] = 3
-# process['burst'] = 5
-# process['arrival'] = 1
-# list_process_shortest_job_prempted += [process]
-# process = {}
-# process['name'] = 4
-# process['burst'] = 2
-# process['arrival'] = 5
-# list_process_shortest_job_prempted += [process]
-# #val = shortest_job_non_prempted(list_process_shortest_job_non_prempted)
-# val = shortest_job_prempted(list_process_shortest_job_prempted)
-#xyz,p,xxx= priority_preemptive(list_process_round_robin)
-#for p in xxx:
-#   print str(p['name']) + " " +str(p['turn_time']) + " " + str(p['wait_time']) + " " + str(p['resp_time'])

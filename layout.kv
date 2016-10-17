@@ -69,14 +69,13 @@
             size_hint: 0.2, 0.2
             pos_hint: {'x': .4, 'y': .1}
         Label:
-            text: 'Developers: Udit Arora and Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
+            text: 'Developers: Udit Arora, Rohit Takhar, Namrata Mukhija, Priyanka Singhla\nAdvisor: Dr. Pinaki Chakraborty'
             size_hint: 0.6, 0.06
             pos_hint: {'x': .2, 'y': .02}
 
 # Input Screen with partial scrolling. Currently not in use
 <CPUInputScreen>:
-    on_pre_enter: root.bind_spinner(); #root.bind_height(); 
-    #layout: layout
+    on_pre_enter: root.bind_widgets()
     layout_form: layout_form
     num_processes: num_processes
     dispatch_latency: dispatch_latency
@@ -99,7 +98,6 @@
             Label:
                 text: 'Number of processes: '
                 size_hint_x: 0.3
-                on_text: root.load_form()
             TextInput:
                 id: num_processes
                 multiline: 'False'
@@ -110,11 +108,13 @@
             Label:
                 text: 'Dispatch Latency: '
                 size_hint_x: 0.3
-                on_text: root.load_form()
             TextInput:
                 id: dispatch_latency
                 multiline: 'False'
                 size_hint_x: 0.2
+            Label:
+                size_hint_x: 0.05
+                text: ''
             Button:
                 size_hint_x: 0.2
                 size_hint_y: 0.8
@@ -230,6 +230,8 @@
                 text: 'Start/Resume time'
             Label:
                 text: 'Suspend/Termination time'
+            Label:
+                text: ''
         BoxLayout:
             size_hint_y: 0.5
             orientation: 'vertical'
