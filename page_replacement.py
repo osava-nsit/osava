@@ -45,9 +45,10 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
         pair =(frame_number, page, last_reference_pos);
         future_reference_pos.append(pair)
 
-     # To find page with farthest reference in future
-    max_pos = -1
+     
     if flag == 0:
+        # To find page with farthest reference in future
+        max_pos = -1
         for pair in future_reference_pos:
             frame_number, page, last_reference_pos = pair
             if max_pos < last_reference_pos:
@@ -83,9 +84,10 @@ def find_and_replace_page_lru(page_number, memory_frames, reference_string, pos_
         pair =(frame_number, page, last_reference_pos);
         past_reference_pos.append(pair)
 
-     # To find page with farthest reference in past
-    min_pos = pos_ref_str
+    
     if flag == 0:
+        # To find page with farthest reference in past
+        min_pos = sys.maxint
         for pair in past_reference_pos:
             frame_number, page, last_reference_pos = pair
             if min_pos > last_reference_pos:
@@ -109,7 +111,7 @@ def find_and_replace_page_least_frequently_used(page_number, memory_frames, refe
     for frame_number, page in enumerate(memory_frames):
         num_reference_pos = 0
         for idx, page_n in enumerate(reference_string[0:pos_ref_str]):
-             # Empty frame is available
+            # Empty frame is available
             if page == -1:
                 frame_to_be_replaced = frame_number
                 flag = 1
@@ -121,9 +123,10 @@ def find_and_replace_page_least_frequently_used(page_number, memory_frames, refe
         pair =(frame_number, page, num_reference_pos);
         freq_reference_pos.append(pair)
 
-     # To find page with minimum reference in past
-    min_pos = pos_ref_str
+     
     if flag == 0:
+        # To find page with minimum reference in past
+        min_pos = sys.maxint
         for pair in freq_reference_pos:
             frame_number, page, num_reference_pos = pair
             if min_pos > num_reference_pos:
@@ -159,9 +162,10 @@ def find_and_replace_page_most_frequently_used(page_number, memory_frames, refer
         pair =(frame_number, page, num_reference_pos);
         freq_reference_pos.append(pair)
 
-     # To find page with maximum reference in past
-    max_pos = -1
+     
     if flag == 0:
+        # To find page with maximum reference in past
+        max_pos = -1
         for pair in freq_reference_pos:
             frame_number, page, num_reference_pos = pair
             if max_pos < num_reference_pos:
