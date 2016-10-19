@@ -8,6 +8,20 @@
 #            dash_length: 3
 ############
 
+<WhiteBorderedLabel>:
+    canvas.after:
+        Color:
+            rgb: 1,1,1
+        Line:
+            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+
+<ColoredBorderedLabel>:
+    canvas.after:
+        Color:
+            rgb: 0.6,0.6,0.6
+        Line:
+            rectangle: self.x+1,self.y+1,self.width-1,self.height-1
+
 <MainMenuScreen>:
     title: title
     on_enter: root.load_ribbon()
@@ -69,7 +83,7 @@
             size_hint: 0.2, 0.2
             pos_hint: {'x': .4, 'y': .1}
         Label:
-            text: 'Developers: Udit Arora, Rohit Takhar, Namrata Mukhija, Priyanka Singhla\nAdvisor: Dr. Pinaki Chakraborty'
+            text: 'Developers: Udit Arora, Rohit Takhar, Namrata Mukhija, Priyanka Singla\nAdvisor: Dr. Pinaki Chakraborty'
             size_hint: 0.6, 0.06
             pos_hint: {'x': .2, 'y': .02}
 
@@ -440,6 +454,7 @@
 
 
 <PageInputScreen>:
+    on_enter: root.bind_widgets(); root.load_form()
     num_frames: num_frames
     form: form
     BoxLayout:
@@ -464,12 +479,6 @@
                 size_hint_x: 0.125
                 id: num_frames
                 multiline: 'False'
-            Label:
-                size_hint_x: 0.3
-            Button:
-                size_hint_x: 0.15
-                text: 'Load form'
-                on_release: root.load_form()
         BoxLayout:
             orientation: 'vertical'
             id: form

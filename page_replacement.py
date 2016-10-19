@@ -208,7 +208,6 @@ def page_replacement(data):
             temp_memory['memory_frames'] = deepcopy(memory_frames)
             temp_memory['page_fault'] = 0
             temp_memory['page_fault_count'] = page_fault_count
-            print str(temp_memory) + '\n'
             memory_chart.append(temp_memory)
         else:
             temp_memory['page_number'] = page_number
@@ -232,6 +231,5 @@ def page_replacement(data):
             temp_memory['page_fault'] = 1
             page_fault_count += 1
             temp_memory['page_fault_count'] = page_fault_count
-            print str(temp_memory) + '\n'
             memory_chart.append(temp_memory)
     return memory_chart

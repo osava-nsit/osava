@@ -19,7 +19,7 @@ import kivy.metrics
 # Python libraries
 from functools import partial
 from random import random
-import copy
+from copy import deepcopy
 # OS Algorithms
 import cpu_scheduling, deadlock, memory_allocation, page_replacement
 
@@ -129,6 +129,12 @@ def page_on_ref(instance, value):
     if(value == ''):
         value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1' 
     data_page['ref_str'] = str(value)
+
+class WhiteBorderedLabel(Label):
+    pass
+
+class ColoredBorderedLabel(Label):
+    pass
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
@@ -240,7 +246,8 @@ class CPUInputScreen(Screen):
         if DEBUG_MODE:
             if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
                 self.num_processes.text = "5"
-        if (self.num_processes.text == ""):
+        if not self.num_processes.text.isdigit():
+            print "Invalid number of processes. Please enter valid input."
             data_cpu['num_processes'] = 0
         else:
             data_cpu['num_processes'] = int(self.num_processes.text)
@@ -698,7 +705,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
                 grid.add_widget(box)
 
             safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
-            work = copy.deepcopy(available)
+            work = deepcopy(available)
             finish = ['F'] * data_da['num_processes']
 
             if safe:
@@ -888,7 +895,7 @@ class DeadlockDetectionOutputScreen(Screen):
         # Check if the system is deadlocked
         deadlock_safe, schedule = deadlock.detect(available, allocation, request, data_dd['num_processes'], data_dd['num_resource_types'])
 
-        work = copy.deepcopy(available)
+        work = deepcopy(available)
         finish = ['F'] * data_dd['num_processes']
 
         # Display schedule
@@ -1162,59 +1169,6 @@ class MemoryOutputScreen(Screen):
             start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(330))
             self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
             self.draw_wait_queue(wait_box, status_box, wait_to_memory_box, start_height, temp_memory)
-            # print 'Current time: ' + str(curr_time)
-            # total_size = formatted_data[0]['mem_size']
-            # if(arrival_bit == 1): # new process has arrived
-            #     print (process_id) + ' requests for a memory slot.'
-            #     box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-            #     box.add_widget(Label(text='Process '+str(process_id)+' requests for a memory slot.'))
-            #     grid.add_widget(box)
-            # else:# process is leaving
-            #     print (process_id) + ' has terminated.'
-            #     box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-            #     box.add_widget(Label(text='Process '+str(process_id)+' terminated.'))
-            #     grid.add_widget(box)
-            # print 'Size of the process: ' + str(process_size)
-            # #chart details
-            # if not memory_state:
-            #     print '0' + '           free            ' + str(total_size
-            # for i,memory_slot in enumerate(memory_state):
-            #     process_id1, start1, end1 = memory_slot                
-            #     if(i == 0 and i == len(memory_state)-1): #only tuple in list
-            #         if(start1-0 > 0):
-            #             print '0' + '        free          ' 
-            #         print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
-            #         if(total_size-end1 > 0):
-            #             print '         free            ' + str(total_size)
-            #     elif(i == len(memory_state)-1): #last tuple, more tuples preceded
-            #         print str(start1) + '         ' + (process_id1) + '          ' + str(end1)
-            #         if(total_size-end1 > 0):
-            #             print '         free            ' + str(total_size)
-            #     else:
-            #         process_id2,start2,end2 = memory_state[i+1]
-            #         if(i == 0): #first tuple, more tuples follow
-            #             if(start1-0 > 0):
-            #                  print '0' + '          free            '                              
-            #         print  str(start1) + '         ' + process_id1 + '          ' + str(end1)
-            #         if(start2-end1 > 0):    
-            #             print '          free            ' 
-            
-            # flag = 0
-            # print 'Wait queue : '
-            # if not wait_queue: print 'Empty'
-            # for process in wait_queue:
-            #     process_name, process_size,process_burst = process
-            #     if(process_name == process_id):#will only happen if arrival_bit=1
-            #         flag=1 #process was added to wait queue
-            #     print process_name + '          '
-            # if(arrival_bit == 1):
-            #     if(flag == 1):
-            #         print process_id + ' was added to the wait queue due to insufficient memory available.'
-            #     else: 
-            #         print process_id + ' was assigned a slot in the main memory.'
-            # else:
-            #     print process_id + ' has been succesfully deallocated memory.'
-
 
         # Add back button
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
@@ -1285,20 +1239,26 @@ class MemoryOutputScreen(Screen):
         process_id,arrival_bit,curr_time,burst_time,process_size = event_details
         wait_to_memory = temp_memory['wait_to_memory']
         external_fragmentation = temp_memory['external_fragmentation']
+
         wait_flag=0 # to check whether process was added to the wait queue
+
         label = Label(text='Wait Queue: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
         label.text_size = label.size
         wait_box.add_widget(label)
+
         s_label = Label(text='Status: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
         s_label.text_size = s_label.size
         status_box.add_widget(s_label)
+
         wm_label = Label(text='Processes loaded into memory from wait queue: ', size_hint_x=None, width=self.margin_left  + kivy.metrics.dp(230), valign='top', halign='center')
         wm_label.text_size = wm_label.size
         wait_to_memory_box.add_widget(wm_label)
+
         if not wait_queue:
             w_label = Label(text='Empty', size_hint_x=None, width='50dp', halign='left', valign='top')
             w_label.text_size = w_label.size
             wait_box.add_widget(w_label)
+
         for process in wait_queue:
             process_name, process_s,process_burst = process
             if(process_name == process_id):# will only happen if arrival_bit=1
@@ -1306,6 +1266,7 @@ class MemoryOutputScreen(Screen):
             w_label = Label(text=str(process_name), size_hint_x=None, width='40dp', halign='left', valign='top')
             w_label.text_size = w_label.size
             wait_box.add_widget(w_label)
+
         if(arrival_bit == 1):
             if(wait_flag == 1 and external_fragmentation == 1):
                 ss_label = Label(text='Process ' + str(process_id) + ' was added to the wait queue because of external fragmentation though enough free memory is available.', size_hint_x=None, width='800dp', halign='left', valign='top') 
@@ -1313,6 +1274,7 @@ class MemoryOutputScreen(Screen):
                 ss_label = Label(text='Process ' + str(process_id) + ' was added to the wait queue due to insufficient memory available.', size_hint_x=None, width='800dp', halign='left', valign='top')       
             else:
                 ss_label = Label(text='Process ' + str(process_id) + ' was assigned a slot in the main memory.', size_hint_x=None, width='800dp', halign='left', valign='top') 
+
             wm_label = Label(text='None', size_hint_x=None, width='50dp', valign='top', halign='left')
             wm_label.text_size = wm_label.size
             wait_to_memory_box.add_widget(wm_label)    
@@ -1328,6 +1290,7 @@ class MemoryOutputScreen(Screen):
                     wm_label =  Label(text= str(processes), size_hint_x=None, width='40dp', halign='left', valign='top')
                     wm_label.text_size = wm_label.size
                     wait_to_memory_box.add_widget(wm_label)
+
         ss_label.text_size = ss_label.size
         status_box.add_widget(ss_label)
 
@@ -1354,6 +1317,20 @@ class PageInputScreen(Screen):
     strategy_type = NumericProperty(None)
     form = ObjectProperty(None)
 
+    # Called when num_frames input is changed
+    def update_num_frames(self, *args):
+        if not self.num_frames.text.isdigit():
+            data_page['num_frames'] = 0
+        else:
+            data_page['num_frames'] = int(self.num_frames.text)
+
+    # Binder function for number of processes input
+    def bind_num_frames(self, *args):
+        self.num_frames.bind(text=self.update_num_frames)
+
+    def bind_widgets(self, *args):
+        self.bind_num_frames()
+
     #Set appropriate strategy type according to the chosen algorithm by the user
     def show_selected_value(self, spinner, text, *args):
         if text == 'First In First Out':
@@ -1376,6 +1353,7 @@ class PageInputScreen(Screen):
     def load_form(self, *args):
         form = self.manager.get_screen('page_form').form
         form.clear_widgets()
+
         if (self.num_frames.text == "" or int(self.num_frames.text) < 1):
             self.num_frames.text = "4"
 
@@ -1425,11 +1403,15 @@ class PageInputScreen(Screen):
         box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         box.add_widget(Button(text='Visualize', on_release=self.switch_to_page_output))
         form.add_widget(box)
+
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
     def switch_to_page_output(self, *args):
+        if (data_page['num_frames'] == 0):
+            print "Invalid number of frames. Enter valid input."
+            return
         self.manager.transition.direction = 'left'
         self.manager.current = 'page_output'
     
@@ -1446,9 +1428,13 @@ class PageOutputScreen(Screen):
     # Increment in width per unit size
     inc = 0
 
-    def get_start_height(self, idx, total, height):
-        pos = (total-idx-1)*height
-        return pos
+    def get_description(self, *args):
+        if data_page['algo'] == 0:
+            return 'FIFO: First In First Out'
+        elif data_page['algo'] == 1:
+            return 'Optimal Page Replacement'
+        else:
+            return 'TBA'
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
@@ -1474,12 +1460,8 @@ class PageOutputScreen(Screen):
         grid.bind(minimum_height=grid.setter('height'))
 
         # Output the algo description
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='150dp')
-        algo_desc = ''
-        if data_page['algo'] == 0:
-            algo_desc = 'FIFO: First In First Out'
-        elif data_page['algo'] == 1:
-            algo_desc = ''
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        algo_desc = self.get_description()
         
         box.add_widget(Label(text=algo_desc))
         grid.add_widget(box)
@@ -1487,12 +1469,12 @@ class PageOutputScreen(Screen):
         # To add frame labels
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         grid.add_widget(box)
-        frames_label = Label(text='', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(100), valign='top', halign='right')
+        frames_label = Label(text='', size_hint_x=None, width=self.margin_left+kivy.metrics.dp(100), valign='middle', halign='right')
         frames_label.text_size = frames_label.size
         box.add_widget(frames_label)
 
         for i in range(formatted_data['num_frames']):
-            frames_label = Label(text='Frame' + str(i+1), size_hint_x=None, width=self.margin_left, valign='top', halign='right')
+            frames_label = Label(text='Frame' + str(i+1), size_hint_x=None, width=self.margin_left, valign='middle', halign='right')
             frames_label.text_size = frames_label.size
             box.add_widget(frames_label)
 
@@ -1504,10 +1486,10 @@ class PageOutputScreen(Screen):
 
             # Add page referenced label
             page_ref_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            page_label = Label(text='Page number referenced:  ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(110), valign='top', halign='center')
+            page_label = Label(text='Page number referenced:  ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(110), valign='middle', halign='center')
             page_label.text_size = page_label.size
             page_ref_box.add_widget(page_label)
-            page_label = Label(text=str(page_number), size_hint_x=None, width=self.margin_left, valign='top', halign='left')
+            page_label = Label(text=str(page_number), size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
             page_label.text_size = page_label.size
             page_ref_box.add_widget(page_label)
             grid.add_widget(page_ref_box)
@@ -1519,9 +1501,7 @@ class PageOutputScreen(Screen):
             grid.add_widget(mem_box)
             grid.add_widget(page_fault_box)
 
-            # TODO: Better tracking of total height
-            start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(330))
-            self.draw_memory_state(mem_box, page_fault_box, start_height, temp_memory)
+            self.draw_memory_state(mem_box, page_fault_box, temp_memory)
         
         # Add total number of page faults   
         temp = self.memory_chart[-1]
@@ -1546,16 +1526,16 @@ class PageOutputScreen(Screen):
         sv.add_widget(grid)
         layout.add_widget(sv)
 
-    def draw_memory_state(self, mem_box, page_fault_box, start_height, temp_memory, *args):
+    def draw_memory_state(self, mem_box, page_fault_box, temp_memory, *args):
         page_number = temp_memory['page_number']
         page_fault = temp_memory['page_fault']
         allocated_frame = temp_memory['frame_number']
         memory_state = temp_memory['memory_frames']
 
-        mem_label = Label(text='', size_hint_x=None, width=self.margin_left - kivy.metrics.dp(25), valign='top', halign='center')
+        mem_label = Label(text='', size_hint_x=None, width=self.margin_left - kivy.metrics.dp(25), valign='middle', halign='center')
         mem_label.text_size = mem_label.size
         mem_box.add_widget(mem_label)
-        mem_label = Label(text='Memory State: ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(35), valign='top', halign='left')
+        mem_label = Label(text='Memory State: ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(35), valign='middle', halign='left')
         mem_label.text_size = mem_label.size
         mem_box.add_widget(mem_label)
 
@@ -1563,24 +1543,29 @@ class PageOutputScreen(Screen):
             if state == -1:
                 state = 'X'
             if allocated_frame - 1 == idx and page_fault == 1:
-                mem_label = Label(text='[b][color=ff3353]'+str(state)+'[/color][/b]', markup=True, size_hint_x=None, width=self.margin_left, valign='top', halign='center')
+                mem_label = ColoredBorderedLabel(text='[b][color=ff0b3c]'+str(state)+'[/color][/b]', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
             else:
-                mem_label = Label(text=str(state), size_hint_x=None, width=self.margin_left, valign='top', halign='center')
+                mem_label = WhiteBorderedLabel(text=str(state), size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
+
             mem_label.text_size = mem_label.size
             mem_box.add_widget(mem_label)
+
         # To add page fault (Y/N)
-        page_f_label = Label(text='', size_hint_x=None, width=self.margin_left - kivy.metrics.dp(25), valign='top', halign='center')
+        page_f_label = Label(text='', size_hint_x=None, width=self.margin_left - kivy.metrics.dp(25), valign='middle', halign='center')
         page_f_label.text_size = page_f_label.size
         page_fault_box.add_widget(page_f_label)
-        page_f_label = Label(text='Page Fault: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
+
+        page_f_label = Label(text='Page Fault: ', size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
         page_f_label.text_size = page_f_label.size
         page_fault_box.add_widget(page_f_label)
+
         if page_fault == 1:
-            page_f_label = Label(text='Yes', size_hint_x=None, width=self.margin_left, valign='top', halign='left')
+            page_f_label = Label(text='[color=ff0b3c]Yes[/color]', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
         else:
-            page_f_label = Label(text='No', size_hint_x=None, width=self.margin_left, valign='top', halign='left')
+            page_f_label = Label(text='No', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
         page_f_label.text_size = page_f_label.size
         page_fault_box.add_widget(page_f_label)
+
     def switch_to_page_form(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'page_form'
