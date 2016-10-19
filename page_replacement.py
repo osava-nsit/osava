@@ -68,10 +68,10 @@ def find_and_replace_page_lru(page_number, memory_frames, reference_string, pos_
     frame_to_be_replaced = -1
     flag = 0 # To check if an empty frame is available
     
-    past_reference_pos = [] # To keep track of each page's nearest past reference
+    past_reference_pos = [] # To keep track of each page's farthest past reference
     for frame_number, page in enumerate(memory_frames):
         last_reference_pos = -1
-        for idx, page_n in enumerate(reference_string[0:pos_ref_str]):
+        for idx, page_n in enumerate(reference_string[0:pos_ref_str+1]):
              # Empty frame is available
             if page == -1:
                 frame_to_be_replaced = frame_number
@@ -96,7 +96,6 @@ def find_and_replace_page_lru(page_number, memory_frames, reference_string, pos_
             elif min_pos == last_reference_pos:
                 min_pos = last_reference_pos
                 frame_to_be_replaced =randint(0,len(memory_frames)-1)
-
     memory_frames[frame_to_be_replaced] = page_number
     status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
     return status
@@ -110,7 +109,7 @@ def find_and_replace_page_least_frequently_used(page_number, memory_frames, refe
     freq_reference_pos = [] # To keep track of each page's number of references
     for frame_number, page in enumerate(memory_frames):
         num_reference_pos = 0
-        for idx, page_n in enumerate(reference_string[0:pos_ref_str]):
+        for idx, page_n in enumerate(reference_string[0:pos_ref_str+1]):
             # Empty frame is available
             if page == -1:
                 frame_to_be_replaced = frame_number
@@ -149,7 +148,7 @@ def find_and_replace_page_most_frequently_used(page_number, memory_frames, refer
     freq_reference_pos = [] # To keep track of each page's number of references
     for frame_number, page in enumerate(memory_frames):
         num_reference_pos = 0
-        for idx, page_n in enumerate(reference_string[0:pos_ref_str]):
+        for idx, page_n in enumerate(reference_string[0:pos_ref_str+1]):
              # Empty frame is available
             if page == -1:
                 frame_to_be_replaced = frame_number
