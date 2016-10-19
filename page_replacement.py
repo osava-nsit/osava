@@ -7,7 +7,7 @@ def page_in_memory(page_number, memory_frames):
     for frame_number, page_n in enumerate(memory_frames):
         # If page is already in memory, return frame_number and set in_memory bit
         if page_n == page_number:
-            status = (frame_number+1, 1);
+            status = (frame_number, 1);
             return status
     # If page is not already in memory 
     status = (-1, 0);
@@ -16,7 +16,7 @@ def page_in_memory(page_number, memory_frames):
 # Funtion to find and replace a page using fifo algorithm 
 def find_and_replace_page_fifo(page_number, memory_frames, last_replaced_frame):
     last_replaced_frame = (last_replaced_frame + 1) % len(memory_frames)
-    memory_frames[last_replaced_frame-1] = page_number
+    memory_frames[last_replaced_frame] = page_number
     status = (last_replaced_frame, deepcopy(memory_frames));
     return status
 
@@ -56,10 +56,10 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
                 frame_to_be_replaced = frame_number
             elif max_pos == last_reference_pos:
                 max_pos = last_reference_pos
-                frame_to_be_replaced =randint(0,len(memory_frames)-1)
+                frame_to_be_replaced =randint(frame_to_be_replaced,frame_number)
 
     memory_frames[frame_to_be_replaced] = page_number
-    status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
+    status = (frame_to_be_replaced, deepcopy(memory_frames));
     return status
 
 # Funtion to find and replace a page using lru algorithm 
@@ -95,9 +95,9 @@ def find_and_replace_page_lru(page_number, memory_frames, reference_string, pos_
                 frame_to_be_replaced = frame_number
             elif min_pos == last_reference_pos:
                 min_pos = last_reference_pos
-                frame_to_be_replaced =randint(0,len(memory_frames)-1)
+                frame_to_be_replaced =randint(frame_to_be_replaced,frame_number)
     memory_frames[frame_to_be_replaced] = page_number
-    status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
+    status = (frame_to_be_replaced, deepcopy(memory_frames));
     return status
 
 # Funtion to find and replace a page using lfu algorithm 
@@ -133,10 +133,10 @@ def find_and_replace_page_least_frequently_used(page_number, memory_frames, refe
                 frame_to_be_replaced = frame_number
             elif min_pos == num_reference_pos:
                 min_pos = num_reference_pos
-                frame_to_be_replaced =randint(0,len(memory_frames)-1)
+                frame_to_be_replaced =randint(frame_to_be_replaced,frame_number)
 
     memory_frames[frame_to_be_replaced] = page_number
-    status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
+    status = (frame_to_be_replaced, deepcopy(memory_frames));
     return status
 
 # Funtion to find and replace a page using mfu algorithm 
@@ -172,10 +172,10 @@ def find_and_replace_page_most_frequently_used(page_number, memory_frames, refer
                 frame_to_be_replaced = frame_number
             elif max_pos == num_reference_pos:
                 max_pos = num_reference_pos
-                frame_to_be_replaced =randint(0,len(memory_frames)-1)
+                frame_to_be_replaced =randint(frame_to_be_replaced,frame_number)
 
     memory_frames[frame_to_be_replaced] = page_number
-    status = (frame_to_be_replaced + 1 , deepcopy(memory_frames));
+    status = (frame_to_be_replaced, deepcopy(memory_frames));
     return status
 
 
@@ -193,7 +193,7 @@ def page_replacement(data):
     page_fault_count = 0
 
      # variable for FIFO Algorithmn
-    last_replaced_frame = 0 # to track which page was allocated memory first
+    last_replaced_frame = -1 # to track which page was allocated memory first
 
     # Intialising all frames to empty 
     for i in range(frames_number):
@@ -204,7 +204,7 @@ def page_replacement(data):
         frame_number, in_memory = page_in_memory(page_number, memory_frames) 
         if in_memory:
             temp_memory['page_number'] = page_number
-            temp_memory['frame_number'] = frame_number
+            temp_memory['frame_number'] = frame_number + 1 # To start frame numbers from 1 instead of 0 
             temp_memory['memory_frames'] = deepcopy(memory_frames)
             temp_memory['page_fault'] = 0
             temp_memory['page_fault_count'] = page_fault_count
@@ -227,7 +227,7 @@ def page_replacement(data):
                 allocated_frame, new_memory_frames = find_and_replace_page_least_frequently_used(page_number, memory_frames, page_numbers, pos)
             elif data['algo'] == 6:
                 allocated_frame, new_memory_frames = find_and_replace_page_most_frequently_used(page_number, memory_frames, page_numbers, pos)
-            temp_memory['frame_number'] = allocated_frame
+            temp_memory['frame_number'] = allocated_frame + 1 # To start frame numbers from 1 instead of 0 
             temp_memory['memory_frames'] = new_memory_frames
             temp_memory['page_fault'] = 1
             page_fault_count += 1
