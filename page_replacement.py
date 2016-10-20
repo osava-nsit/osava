@@ -103,16 +103,15 @@ def find_and_replace_page_lru(page_number, memory_frames, reference_string, pos_
 # Funtion to find and replace a page using second chance algorithm 
 def find_and_replace_page_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit):
 
-    flag = False 
+    flag = False # to find a frame that is to be replaced
     while(flag==False):
         last_replaced_frame = (last_replaced_frame + 1) % len(memory_frames)
-        if reference_bit[last_replaced_frame] == '1':
-            reference_bit[last_replaced_frame] = '0'
+        if reference_bit[last_replaced_frame] == 1:
+            reference_bit[last_replaced_frame] = 0
             continue
         memory_frames[last_replaced_frame] = page_number
-        reference_bit[last_replaced_frame] = '1'
         flag = True
-    status = (last_replaced_frame, deepcopy(memory_frames), deepcopy(reference_bit));
+    status = (last_replaced_frame, deepcopy(memory_frames));
     return status
 
 # Funtion to find and replace a page using lfu algorithm 
@@ -209,7 +208,7 @@ def page_replacement(data):
     # Intialising all frames to empty 
     for i in range(frames_number):
         memory_frames.append(-1)
-        reference_bit.append(1)
+        reference_bit.append(0)
 
     for pos, page_number in enumerate(page_numbers):
         temp_memory = {}
@@ -221,6 +220,9 @@ def page_replacement(data):
             temp_memory['page_fault'] = 0
             temp_memory['page_fault_count'] = page_fault_count
             memory_chart.append(temp_memory)
+            if data['algo'] == 3:
+                reference_bit[frame_number] = 1
+                print reference_bit
         else:
             temp_memory['page_number'] = page_number
             if data['algo'] == 0:
@@ -231,7 +233,7 @@ def page_replacement(data):
             elif data['algo'] == 2:
                 allocated_frame, new_memory_frames = find_and_replace_page_lru(page_number, memory_frames, page_numbers, pos)
             elif data['algo'] == 3:
-                allocated_frame, new_memory_frames, reference_bit = find_and_replace_page_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit)
+                allocated_frame, new_memory_frames = find_and_replace_page_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit)
                 last_replaced_frame = allocated_frame
             elif data['algo'] == 4:
                 allocated_frame, new_memory_frames = find_and_replace_page_enhanced_second_chance(page_number, memory_frames)
@@ -244,5 +246,6 @@ def page_replacement(data):
             temp_memory['page_fault'] = 1
             page_fault_count += 1
             temp_memory['page_fault_count'] = page_fault_count
+            print reference_bit
             memory_chart.append(temp_memory)
     return memory_chart
