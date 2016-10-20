@@ -222,7 +222,6 @@ def page_replacement(data):
             memory_chart.append(temp_memory)
             if data['algo'] == 3:
                 reference_bit[frame_number] = 1
-                print reference_bit
         else:
             temp_memory['page_number'] = page_number
             if data['algo'] == 0:
@@ -246,6 +245,5 @@ def page_replacement(data):
             temp_memory['page_fault'] = 1
             page_fault_count += 1
             temp_memory['page_fault_count'] = page_fault_count
-            print reference_bit
             memory_chart.append(temp_memory)
     return memory_chart
