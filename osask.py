@@ -127,8 +127,12 @@ def mem_on_termination(instance, value, i):
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value):
     if(value == ''):
-        value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1' 
+        value = '0,1,3,6,2,4,5,2,5,0,3,1,2,5,4,1,0' 
     data_page['ref_str'] = str(value)
+def page_on_modify(instance, value):
+    if value == '':
+        value = '0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1'
+    data_page['modify_bit'] = str(value)
 
 class WhiteBorderedLabel(Label):
     pass
@@ -1316,46 +1320,64 @@ class MemoryOutputScreen(Screen):
 class PageInputScreen(Screen):
     strategy_type = NumericProperty(None)
     form = ObjectProperty(None)
+    algo_type = 0
 
-    # Called when num_frames input is changed
-    def update_num_frames(self, *args):
-        if not self.num_frames.text.isdigit():
-            data_page['num_frames'] = 0
-        else:
-            data_page['num_frames'] = int(self.num_frames.text)
+    def update_form(self, *args):
+        self.load_form()
 
     # Binder function for number of processes input
     def bind_num_frames(self, *args):
-        self.num_frames.bind(text=self.update_num_frames)
+        self.num_frames.bind(text=self.update_form)
+
+        # Binder function for algorithm type selection from Spinner (Dropdown)
+    def bind_spinner(self, *args):
+        spinner = self.manager.get_screen('page_form').algo_spinner
+        spinner.bind(text=self.show_selected_value)
 
     def bind_widgets(self, *args):
         self.bind_num_frames()
+        self.bind_spinner()
 
     #Set appropriate strategy type according to the chosen algorithm by the user
     def show_selected_value(self, spinner, text, *args):
         if text == 'First In First Out':
             self.strategy_type = 0
+            self.algo_type = 0
         elif text == 'Optimal':
             self.strategy_type = 1
+            self.algo_type = 1
         elif text == 'Least Recently Used':
             self.strategy_type = 2
+            self.algo_type = 2
         elif text == 'Second Chance':
             self.strategy_type = 3
+            self.algo_type = 3
         elif text == 'Enhanced Second Chance':
             self.strategy_type = 4
+            self.algo_type = 4
         elif text == 'Least Frequently Used':
             self.strategy_type = 5
+            self.algo_type = 5
         elif text == 'Most Frequently Used':
             self.strategy_type = 6
+            self.algo_type = 6
         data_page['algo'] = self.strategy_type
+        self.load_form()
+
 
     # Load the input form based on input
     def load_form(self, *args):
         form = self.manager.get_screen('page_form').form
         form.clear_widgets()
 
-        if (self.num_frames.text == "" or int(self.num_frames.text) < 1):
-            self.num_frames.text = "4"
+        if DEBUG_MODE:
+            if (self.num_frames.text == "" or int(self.num_frames.text) == 0):
+                self.num_frames.text = "4"
+        if not self.num_frames.text.isdigit():
+            print "Invalid number of frames. Please enter valid input."
+            data_page['num_frames'] = 0
+        else:
+            data_page['num_frames'] = int(self.num_frames.text)
 
         # Number of frames
         n = int(self.num_frames.text)
@@ -1364,35 +1386,47 @@ class PageInputScreen(Screen):
         data_page['algo'] = 0
         data_page['num_frames'] = n
         data_page['ref_str'] = ''
+        data_page['modify_bit'] = ''
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
         # Box for algo spinner
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
-        box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
-        algo_spinner = Spinner(
-            text='Select an Algorithm',
-            values=('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used'))
-        algo_spinner.bind(text=self.show_selected_value)
-        box.add_widget(algo_spinner)
-        grid.add_widget(box)
-        
+        #box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
+        #box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
+        #algo_spinner = Spinner(
+        #    text='Select an Algorithm',
+        #    values=('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used'))
+        #algo_spinner.bind(text=self.show_selected_value)
+        #box.add_widget(algo_spinner)
+        #grid.add_widget(box)
+
         # Add labels for input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
         box.add_widget(Label(text='Reference String'))
         grid.add_widget(box)
 
-
-        # Add inputs
+        # Add input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
         inp = TextInput(id='ref_str'+str(0))
         inp.bind(text=page_on_ref)
         box.add_widget(inp)
         grid.add_widget(box)
 
-        
+        # Modify bit for enhanced second chance algo
+        if self.algo_type == 4:
+            print ('in algo 4')
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
+            box.add_widget(Label(text='Modify Bit String '))
+            grid.add_widget(box)
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
+            inp = TextInput(id='modify_bit'+str(0))
+            inp.bind(text=page_on_modify)
+            box.add_widget(inp)
+            grid.add_widget(box)
+
         # Add ScrollView
         sv = ScrollView(size=self.size)
         sv.add_widget(grid)

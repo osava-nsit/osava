@@ -454,9 +454,10 @@
 
 
 <PageInputScreen>:
-    on_enter: root.bind_widgets(); root.load_form()
+    on_pre_enter: root.bind_widgets()
     num_frames: num_frames
     form: form
+    algo_spinner: algo_spinner
     BoxLayout:
         canvas:
             Color:
@@ -467,7 +468,7 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '10dp', '5dp'
+            padding: '30dp', '5dp'
             size_hint_y: 0.08
             size_hint_x: 0.7
             Label:
@@ -480,12 +481,29 @@
                 id: num_frames
                 multiline: 'False'
         BoxLayout:
+            orientation: 'horizontal'
+            padding: '5dp', '20dp'
+            size_hint_y: None
+            height: '100dp'
+            Label:
+                text: 'Algorithm -'
+                size_hint_x: 0.3
+                text_size: self.size
+                #pos_hint: {'top': 1}
+                padding: '10dp', '10dp'
+            Spinner:
+                id: algo_spinner
+                text:'Select an Algorithm'
+                size_hint_y: 'None'
+                height: '40dp'
+                values: ('First Come First Serve', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used')
+        BoxLayout:
             orientation: 'vertical'
             id: form
+
 <PageOutputScreen>:
     on_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
         id: layout
-
