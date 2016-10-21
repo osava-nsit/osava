@@ -127,11 +127,11 @@ def mem_on_termination(instance, value, i):
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value):
     if(value == ''):
-        value = '0,1,3,6,2,4,5,2,5,0,3,1,2,5,4,1,0' 
+        value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1' 
     data_page['ref_str'] = str(value)
 def page_on_modify(instance, value):
     if value == '':
-        value = '0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1'
+        value = '0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1'
     data_page['modify_bit'] = str(value)
 
 class WhiteBorderedLabel(Label):
@@ -1416,7 +1416,6 @@ class PageInputScreen(Screen):
 
         # Modify bit for enhanced second chance algo
         if self.algo_type == 4:
-            print ('in algo 4')
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
             box.add_widget(Label(text='Modify Bit String '))
             grid.add_widget(box)

@@ -114,6 +114,66 @@ def find_and_replace_page_second_chance(page_number, memory_frames, last_replace
     status = (last_replaced_frame, deepcopy(memory_frames));
     return status
 
+# Funtion to find and replace a page using enhanced second chance algorithm 
+def find_and_replace_page_enhanced_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit, modify_bit,pos,modify_bit_string):
+    last_replaced_frame = (last_replaced_frame + 1) % len(reference_bit)
+    flag = False # to find a frame that is to be replaced
+    while (flag==False):
+        # If an empty frame is available in memory
+        for idx in range(len(reference_bit)):
+            frame_number = (last_replaced_frame + idx) % len(reference_bit)
+            if memory_frames[frame_number] == -1:
+                last_replaced_frame = frame_number
+                flag = True
+                break
+        if flag == True:
+            break
+        # Select frame to be replaced if reference bit and modify bit are both 0
+        for idx in range(len(reference_bit)):
+            frame_number = (last_replaced_frame + idx) % len(reference_bit )
+            if reference_bit[frame_number] == 0 and modify_bit[frame_number] == 0:
+                last_replaced_frame = frame_number
+                flag = True
+                break
+        if flag == True:
+            break
+        # Select frame to be replaced if reference bit is 0 and modify bit is 1
+        for idx in range(len(reference_bit)):
+            frame_number = (last_replaced_frame + idx) % len(reference_bit )
+            if reference_bit[frame_number] == 0 and modify_bit[frame_number] == 1:
+                last_replaced_frame = frame_number
+                flag = True
+                break
+        if flag == True:
+            break
+        # Select frame to be replaced if reference bit is 1 and modify bit is 0
+        for idx in range(len(reference_bit)):
+            frame_number = (last_replaced_frame + idx) % len(reference_bit )
+            if reference_bit[frame_number] == 1 and modify_bit[frame_number] == 0:
+                last_replaced_frame = frame_number
+                flag = True
+                break
+        if flag == True:
+            break
+        # Select frame to be replaced if reference bit and modify bit are both 1
+        for idx in range(len(reference_bit)):
+            frame_number = (last_replaced_frame + idx) % len(reference_bit )
+            if reference_bit[frame_number] == 1 and modify_bit[frame_number] == 1:
+                last_replaced_frame = frame_number
+                flag = True
+                break
+
+    if modify_bit_string[pos] == 1:
+        reference_bit[last_replaced_frame] = 1
+        modify_bit[last_replaced_frame] = 0
+    else:
+        reference_bit[last_replaced_frame] = 0
+        modify_bit[last_replaced_frame] = 1  
+
+    memory_frames[last_replaced_frame] = page_number
+    status = (last_replaced_frame, deepcopy(memory_frames));
+    return status
+
 # Funtion to find and replace a page using lfu algorithm 
 def find_and_replace_page_least_frequently_used(page_number, memory_frames, reference_string, pos_ref_str):
     # To keep track of page number with minimum reference in past
@@ -201,6 +261,13 @@ def page_replacement(data):
     memory_frames = []
     page_fault_count = 0
     reference_bit = []
+    if data['algo'] == 4:
+        modify_bit_string = data['modify_bit'] 
+        #modify_bit_string = [0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1]
+        modify_bit = []
+        if len(modify_bit_string) != len(page_numbers):
+            print('Length of Modify Bit String did not match the length of Reference String')
+            return memory_chart
 
      # variable for FIFO Algorithmn
     last_replaced_frame = -1 # to track which page was allocated memory first
@@ -209,6 +276,8 @@ def page_replacement(data):
     for i in range(frames_number):
         memory_frames.append(-1)
         reference_bit.append(0)
+        if data['algo'] == 4:
+            modify_bit.append(0)
 
     for pos, page_number in enumerate(page_numbers):
         temp_memory = {}
@@ -222,6 +291,14 @@ def page_replacement(data):
             memory_chart.append(temp_memory)
             if data['algo'] == 3:
                 reference_bit[frame_number] = 1
+            if data['algo'] == 4:
+                if modify_bit_string[pos] == 1:
+                    reference_bit[frame_number] = 1
+                else:
+                    modify_bit[frame_number] = 1
+
+
+                
         else:
             temp_memory['page_number'] = page_number
             if data['algo'] == 0:
@@ -235,7 +312,8 @@ def page_replacement(data):
                 allocated_frame, new_memory_frames = find_and_replace_page_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit)
                 last_replaced_frame = allocated_frame
             elif data['algo'] == 4:
-                allocated_frame, new_memory_frames = find_and_replace_page_enhanced_second_chance(page_number, memory_frames)
+                allocated_frame, new_memory_frames = find_and_replace_page_enhanced_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit, modify_bit,pos,modify_bit_string)
+                last_replaced_frame = allocated_frame
             elif data['algo'] == 5:
                 allocated_frame, new_memory_frames = find_and_replace_page_least_frequently_used(page_number, memory_frames, page_numbers, pos)
             elif data['algo'] == 6:
