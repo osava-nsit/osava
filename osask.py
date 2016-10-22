@@ -1482,6 +1482,14 @@ class PageOutputScreen(Screen):
             page_numbers = page_numbers_data.split()
         formatted_data['ref_str'] = page_numbers
         formatted_data['algo'] = data_page['algo']
+        if data_page['algo'] == 4:
+            modify_bits = []
+            modify_bits_data = data_page['modify_bit']
+            if ',' in page_numbers_data: # Comma separated ref_str
+                modify_bits = modify_bits_data.split(",")
+            else: # Space separated ref_str
+                modify_bits = modify_bits_data.split()
+            formatted_data['modify_bits'] = modify_bits
 
         self.memory_chart = page_replacement.page_replacement(formatted_data)
 

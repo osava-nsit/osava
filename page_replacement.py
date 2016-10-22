@@ -260,22 +260,23 @@ def page_replacement(data):
     page_numbers = data['ref_str']
     memory_frames = []
     page_fault_count = 0
-    reference_bit = []
+    if data['algo'] == 3 or data['algo'] == 4:
+        reference_bit = []
     if data['algo'] == 4:
-        modify_bit_string = data['modify_bit'] 
-        #modify_bit_string = [0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1]
+        modify_bit_string = data['modify_bits'] 
         modify_bit = []
         if len(modify_bit_string) != len(page_numbers):
-            print('Length of Modify Bit String did not match the length of Reference String')
+            print 'Length of the Modify Bit String did not match the length of the Reference String'
             return memory_chart
 
-     # variable for FIFO Algorithmn
+    # variable for FIFO, Second Chance and Enhanced Second Chance Algorithmn
     last_replaced_frame = -1 # to track which page was allocated memory first
 
     # Intialising all frames to empty 
     for i in range(frames_number):
         memory_frames.append(-1)
-        reference_bit.append(0)
+        if data['algo'] == 3 or data['algo'] == 4:
+            reference_bit.append(0)
         if data['algo'] == 4:
             modify_bit.append(0)
 
@@ -296,9 +297,6 @@ def page_replacement(data):
                     reference_bit[frame_number] = 1
                 else:
                     modify_bit[frame_number] = 1
-
-
-                
         else:
             temp_memory['page_number'] = page_number
             if data['algo'] == 0:
