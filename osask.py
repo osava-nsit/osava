@@ -1365,6 +1365,7 @@ class PageInputScreen(Screen):
         self.load_form()
 
 
+
     # Load the input form based on input
     def load_form(self, *args):
         form = self.manager.get_screen('page_form').form
@@ -1383,7 +1384,7 @@ class PageInputScreen(Screen):
         n = int(self.num_frames.text)
 
         # Initialize the global data_page dictionary
-        data_page['algo'] = 0
+        #data_page['algo'] = 0
         data_page['num_frames'] = n
         data_page['ref_str'] = ''
         data_page['modify_bit'] = ''
@@ -1500,72 +1501,85 @@ class PageOutputScreen(Screen):
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
-        # Output the algo description
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-        algo_desc = self.get_description()
-        
-        box.add_widget(Label(text=algo_desc))
-        grid.add_widget(box)
 
-        # To add frame labels
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        grid.add_widget(box)
-        frames_label = Label(text='', size_hint_x=None, width=self.margin_left+kivy.metrics.dp(100), valign='middle', halign='right')
-        frames_label.text_size = frames_label.size
-        box.add_widget(frames_label)
+        if not self.memory_chart:
+            # Add back button
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+            box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
+            grid.add_widget(box)
 
-        for i in range(formatted_data['num_frames']):
-            frames_label = Label(text='Frame' + str(i+1), size_hint_x=None, width=self.margin_left, valign='middle', halign='right')
+            # Add ScrollView
+            sv = ScrollView(size=self.size)
+            sv.add_widget(grid)
+            layout.add_widget(sv)
+
+        else:
+            # Output the algo description
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+            algo_desc = self.get_description()
+            
+            box.add_widget(Label(text=algo_desc))
+            grid.add_widget(box)
+
+            # To add frame labels
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            grid.add_widget(box)
+            frames_label = Label(text='', size_hint_x=None, width=self.margin_left+kivy.metrics.dp(100), valign='middle', halign='right')
             frames_label.text_size = frames_label.size
             box.add_widget(frames_label)
 
-        for idx, temp_memory in enumerate(self.memory_chart):
-            page_number = temp_memory['page_number']
-            page_fault = temp_memory['page_fault']
-            allocated_frame = temp_memory['frame_number']
-            memory_state = temp_memory['memory_frames']
+            for i in range(formatted_data['num_frames']):
+                frames_label = Label(text='Frame' + str(i+1), size_hint_x=None, width=self.margin_left, valign='middle', halign='right')
+                frames_label.text_size = frames_label.size
+                box.add_widget(frames_label)
 
-            # Add page referenced label
-            page_ref_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            page_label = Label(text='Page number referenced:  ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(110), valign='middle', halign='center')
-            page_label.text_size = page_label.size
-            page_ref_box.add_widget(page_label)
-            page_label = Label(text=str(page_number), size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
-            page_label.text_size = page_label.size
-            page_ref_box.add_widget(page_label)
-            grid.add_widget(page_ref_box)
+            for idx, temp_memory in enumerate(self.memory_chart):
+                page_number = temp_memory['page_number']
+                page_fault = temp_memory['page_fault']
+                allocated_frame = temp_memory['frame_number']
+                memory_state = temp_memory['memory_frames']
 
-            # Draw the memory chart
-            mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp')
-            page_fault_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                # Add page referenced label
+                page_ref_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                page_label = Label(text='Page number referenced:  ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(110), valign='middle', halign='center')
+                page_label.text_size = page_label.size
+                page_ref_box.add_widget(page_label)
+                page_label = Label(text=str(page_number), size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
+                page_label.text_size = page_label.size
+                page_ref_box.add_widget(page_label)
+                grid.add_widget(page_ref_box)
+
+                # Draw the memory chart
+                mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp')
+                page_fault_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                
+                grid.add_widget(mem_box)
+                grid.add_widget(page_fault_box)
+
+                self.draw_memory_state(mem_box, page_fault_box, temp_memory)
             
-            grid.add_widget(mem_box)
-            grid.add_widget(page_fault_box)
+            # Add total number of page faults   
+            temp = self.memory_chart[-1]
+            total_page_fault_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            total_page_fault_box.add_widget(Label(text='Total number of page faults: '+ str(temp['page_fault_count'])))
+            grid.add_widget(total_page_fault_box) 
 
-            self.draw_memory_state(mem_box, page_fault_box, temp_memory)
-        
-        # Add total number of page faults   
-        temp = self.memory_chart[-1]
-        total_page_fault_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        total_page_fault_box.add_widget(Label(text='Total number of page faults: '+ str(temp['page_fault_count'])))
-        grid.add_widget(total_page_fault_box) 
+            # Add page fault ratio
+            total_hits = len(page_numbers) - temp['page_fault_count'] 
+            output = Decimal(float(temp_memory['page_fault_count'])/len(page_numbers))
+            page_fault_ratio_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            page_fault_ratio_box.add_widget(Label(text='Page fault ratio: '+ str(round(output, 3))))
+            grid.add_widget(page_fault_ratio_box) 
 
-        # Add page fault ratio
-        total_hits = len(page_numbers) - temp['page_fault_count'] 
-        output = Decimal(float(temp_memory['page_fault_count'])/len(page_numbers))
-        page_fault_ratio_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        page_fault_ratio_box.add_widget(Label(text='Page fault ratio: '+ str(round(output, 3))))
-        grid.add_widget(page_fault_ratio_box) 
+            # Add back button
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+            box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
+            grid.add_widget(box)
 
-        # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
-        grid.add_widget(box)
-
-        # Add ScrollView
-        sv = ScrollView(size=self.size)
-        sv.add_widget(grid)
-        layout.add_widget(sv)
+            # Add ScrollView
+            sv = ScrollView(size=self.size)
+            sv.add_widget(grid)
+            layout.add_widget(sv)
 
     def draw_memory_state(self, mem_box, page_fault_box, temp_memory, *args):
         page_number = temp_memory['page_number']

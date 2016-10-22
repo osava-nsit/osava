@@ -265,9 +265,6 @@ def page_replacement(data):
     if data['algo'] == 4:
         modify_bit_string = data['modify_bits'] 
         modify_bit = []
-        if len(modify_bit_string) != len(page_numbers):
-            print 'Length of the Modify Bit String did not match the length of the Reference String'
-            return memory_chart
 
     # variable for FIFO, Second Chance and Enhanced Second Chance Algorithmn
     last_replaced_frame = -1 # to track which page was allocated memory first
