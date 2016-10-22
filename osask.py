@@ -48,6 +48,9 @@ data_mem = dict()
 # Global data for Page Replacement Algorithms
 data_page = dict()
 
+# Global data for Disk Scheduling Algorithms
+data_disk = dict()
+
 # Binder functions for CPU Scheduling Algorithms form, to store data in the global 'data_cpu' dictionary
 def cpu_on_name(instace, value, i):
     if value == '':
@@ -133,6 +136,12 @@ def page_on_modify(instance, value):
     if value == '':
         value = '0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1'
     data_page['modify_bit'] = str(value)
+
+# Binder functions for Disk Scheduling Algorithms
+def disk_on_queue(instance, value):
+    if(value == ''):
+        value = '98,183,37,122,14,124,65,67'
+    data_disk['disk_queue'] = str(value)
 
 class WhiteBorderedLabel(Label):
     pass
@@ -1625,6 +1634,148 @@ class PageOutputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'page_form'
 
+# Input Screen for Disk Scheduling Algorithms
+class DiskInputScreen(Screen):
+    strategy_type = NumericProperty(None)
+    direction_type = NumericProperty(None)
+    form = ObjectProperty(None)
+    algo_type = 0
+
+    def update_form(self, *args):
+        self.load_form()
+
+    # Binder function for number of cylinders input
+    def bind_num_cylinders(self, *args):
+        self.num_cylinders.bind(text=self.update_form)
+
+    # Binder function for current position of head
+    def bind_pos_head(self, *args):
+        self.pos_head.bind(text=self.update_form)
+
+    # Binder function for algorithm type selection from Spinner (Dropdown)
+    def bind_spinner(self, *args):
+        spinner = self.manager.get_screen('disk_form').algo_spinner
+        spinner.bind(text=self.show_selected_value)
+        spinner.bind(text=self.show_direction)
+
+    def bind_widgets(self, *args):
+        self.bind_num_cylinders()
+        self.bind_pos_head()
+        self.bind_spinner()
+
+    #Set appropriate strategy type according to the chosen algorithm by the user
+    def show_selected_value(self, spinner, text, *args):
+        if text == 'First Come First Serve':
+            self.strategy_type = 0
+            self.algo_type = 0
+        elif text == 'Shortest Seek Time First':
+            self.strategy_type = 1
+            self.algo_type = 1
+        elif text == 'Scan (Elevator Algorithm)':
+            self.strategy_type = 2
+            self.algo_type = 2
+        elif text == 'Circular-Scan':
+            self.strategy_type = 3
+            self.algo_type = 3
+        elif text == 'Look':
+            self.strategy_type = 4
+            self.algo_type = 4
+        elif text == 'Circular-Look':
+            self.strategy_type = 5
+            self.algo_type = 5
+        data_disk['algo'] = self.strategy_type
+        self.load_form()
+
+    #Set appropriate direction type according to the chosen algorithm
+    def show_direction(self, spinner, text, *args):
+        if text == 'Inward':
+            self.direction_type = 0
+        elif text == 'Outward':
+            self.direction_type = 1
+        data_disk['direction'] = self.direction_type
+
+    # Load the input form based on input
+    def load_form(self, *args):
+        form = self.manager.get_screen('disk_form').form
+        form.clear_widgets()
+
+        # Update number of cylinders and set to default value if empty
+        if DEBUG_MODE:
+            if (self.num_cylinders.text == "" or int(self.num_cylinders.text) == 0):
+                self.num_cylinders.text = "200"
+        if not self.num_cylinders.text.isdigit():
+            print "Invalid number of cylinders. Please enter valid input."
+            data_page['num_cylinders'] = 0
+        else:
+            data_page['num_cylinders'] = int(self.num_cylinders.text)
+
+       
+        # Update current position of head and set to default value if empty
+        if (self.pos_head.text == ""):
+            data_disk['pos_head'] = 53
+        else:
+            data_disk['pos_head'] = int(self.pos_head.text)
+
+        # Initialize the global data_disk dictionary
+         # Number of cylinders
+        n = int(self.num_cylinders.text)
+        m = int(self.pos_head.text)
+        data_disk['num_cylinders'] = n
+        data_disk['pos_head'] = m
+        data_disk['disk_queue'] = ''
+
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        # Make sure the height is such that there is something to scroll.
+        grid.bind(minimum_height=grid.setter('height'))
+
+        # Add labels for input
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
+        box.add_widget(Label(text='Disk Queue'))
+        grid.add_widget(box)
+
+        # Add input
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
+        inp = TextInput(id='disk_queue'+str(0))
+        inp.bind(text=disk_on_queue)
+        box.add_widget(inp)
+        grid.add_widget(box)
+
+        if self.algo_type !=0 and self.algo_type != 1:
+            # Box for direction spinner 
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5),0))
+            box.add_widget(Label(text='Current direction of movement of read/write head:'))
+            direction_spinner = Spinner(
+                text='-',
+                values=('Inward','Outward'))
+            direction_spinner.bind(text=self.show_direction)
+            box.add_widget(direction_spinner)
+            grid.add_widget(box)
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        form.add_widget(sv)
+
+        # Add Visualize and back button at the end of form
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        box.add_widget(Button(text='Visualize', on_release=self.switch_to_disk_output))
+        form.add_widget(box)
+
+    def switch_to_main_menu(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'menu'
+
+    def switch_to_disk_output(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'disk_output'
+
+# Output Screen for Disk Scheduling Algorithms
+class DiskOutputScreen(Screen):
+    def switch_to_disk_form(self, *args):
+        self.manager.transition.direction = 'right'
+        self.manager.current = 'disk_form'
+
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
@@ -1638,6 +1789,8 @@ sm.add_widget(MemoryInputScreen(name='mem_form'))
 sm.add_widget(MemoryOutputScreen(name='mem_output'))
 sm.add_widget(PageInputScreen(name='page_form'))
 sm.add_widget(PageOutputScreen(name='page_output'))
+sm.add_widget(DiskInputScreen(name='disk_form'))
+sm.add_widget(DiskOutputScreen(name='disk_output'))
 
 class OSASK(App):
     def build(self):

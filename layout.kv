@@ -78,6 +78,9 @@
             text: 'Disk Scheduling Algorithms'
             size_hint: 0.6, 0.07
             pos_hint: {'x': .2, 'y': .35}
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'disk_form'
         Image:
             source: "images/nsit_logo.png"
             size_hint: 0.2, 0.2
@@ -507,3 +510,71 @@
     BoxLayout:
         orientation: 'vertical'
         id: layout
+
+
+<DiskInputScreen>:
+    on_pre_enter: root.bind_widgets()
+    num_cylinders: num_cylinders
+    form: form
+    pos_head: pos_head
+    algo_spinner: algo_spinner
+    BoxLayout:
+        canvas:
+            Color:
+                rgba: 1, 1, 1, 0.5
+            Rectangle:
+                size: self.size
+                pos: self.pos
+        orientation: 'vertical'
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: '10dp', '5dp'
+            size_hint_y: 0.15
+            #size_hint_x: 0.5
+            pos_hint: {'top': 1}
+            Label:
+                text: 'Number of cylinders in disk: '
+                size_hint_x: 0.3
+            TextInput:
+                id: num_cylinders
+                multiline: 'False'
+                size_hint_x: 0.2
+            Label:
+                size_hint_x: 0.05
+                text: ''
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: '10dp', '5dp'
+            size_hint_y: 0.15
+            #size_hint_x: 0.5
+            pos_hint: {'top': 1}
+            Label:
+                text: 'Current Position of read/write head: '
+                size_hint_x: 0.3
+            TextInput:
+                id: pos_head
+                multiline: 'False'
+                size_hint_x: 0.2
+            Label:
+                size_hint_x: 0.05
+                text: ''
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: '5dp', '20dp'
+            height: '100dp'
+            size_hint_y: None
+            Label:
+                text: 'Algorithm -'
+                size_hint_x: 0.3
+                text_size: self.size
+                #pos_hint: {'top': 1}
+                padding: '10dp', '10dp'
+            Spinner:
+                id: algo_spinner
+                text:'Select an Algorithm'
+                size_hint_y: 'None'
+                height: '40dp'
+                values: ('First Come First Serve', 'Shortest Seek Time First', 'Scan (Elevator Algorithm)', 'Circular-Scan', 'Look', 'Circular-Look')
+        BoxLayout:
+            id: form
+            orientation: 'vertical'
