@@ -578,3 +578,11 @@
         BoxLayout:
             id: form
             orientation: 'vertical'
+
+<DiskOutputScreen>:
+    on_enter: root.calculate()
+    layout: layout
+    BoxLayout:
+        orientation: 'vertical'
+        id: layout
+
