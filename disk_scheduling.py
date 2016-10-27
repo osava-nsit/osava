@@ -15,7 +15,6 @@ def c_scan_or_c_look(curr_head_pos, num_cylinders, disk_queue, next_larger_pos, 
 	total_head_movements = 0 # To keep track of the total number of read/write head movements
 	memory_state = [] # To keep track of the order in which cylinders are visited
 	memory_state.append(curr_head_pos)
-	print "next larger pos: " + str(next_larger_pos)
 	if(direction == 0): # Inward direction
 		start_idx = next_larger_pos - 1
 		for i in range(next_larger_pos):
@@ -24,7 +23,6 @@ def c_scan_or_c_look(curr_head_pos, num_cylinders, disk_queue, next_larger_pos, 
 			memory_state.append(chosen_cylinder)
 			difference = abs(int(chosen_cylinder) - curr_head_pos)
 			total_head_movements += difference
-			print str(total_head_movements) + '\n'
 			curr_head_pos = int(chosen_cylinder)
 		if(algo == 3):
 			chosen_cylinder = 0
@@ -39,7 +37,6 @@ def c_scan_or_c_look(curr_head_pos, num_cylinders, disk_queue, next_larger_pos, 
 			memory_state.append(cylinder)
 			difference = abs(int(cylinder) - curr_head_pos)
 			total_head_movements += difference
-			print str(total_head_movements) + '\n'
 			curr_head_pos = int(cylinder)
 	else: # Outward direction
 		for i, cylinder in enumerate(disk_queue[next_larger_pos:]):
@@ -181,20 +178,10 @@ def disk_scheduling(data):
 	
 		new_disk_queue=list(map(int, disk_queue))
 		disk_queue = sorted(new_disk_queue)
-		#disk_queue = sorted(new_disk_queue)
-		print "New disk queue: " + str(disk_queue)
 		for idx, cylinder in enumerate(disk_queue):
 			if(int(cylinder) > curr_head_pos):
 				larger = idx 
 				break
-		# disk_queue_small = []
-		# for i in range(larger): 
-		# 	disk_queue_small.append(new_disk_queue[larger-i-1])
-		# disk_queue_large = []
-		# k = 0
-		# for i, cylinder in enumerate(new_disk_queue[idx:]):
-		# 	disk_queue_large.append(cylinder)
-		# 	k = k+1
 		if data['algo'] == 2 or data['algo'] == 4:
 			secondary_storage_memory, total_head_movements = scan_or_look(curr_head_pos, num_cylinders, disk_queue, larger, direction, data['algo'])
 		elif data['algo'] == 3 or data['algo'] == 5:
