@@ -376,6 +376,7 @@ class CPUInputScreen(Screen):
         self.manager.current = 'menu'
 
 # Output Screen for CPU Scheduling algorithms
+
 class CPUOutputScreen(Screen):
     layout = ObjectProperty(None)
     gantt = ObjectProperty(None)
@@ -1623,7 +1624,8 @@ class PageOutputScreen(Screen):
         if page_fault == 1:
             page_f_label = Label(text='[color=ff0b3c]Yes[/color]', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
         else:
-            page_f_label = Label(text='No', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
+            page_f_label = Label(text='No', markup=True, size_hint_x=None
+                , width=self.margin_left, valign='middle', halign='left')
         page_f_label.text_size = page_f_label.size
         page_fault_box.add_widget(page_f_label)
 
@@ -1774,9 +1776,9 @@ class DiskOutputScreen(Screen):
     secondary_memory_chart = {}
 
     def get_description(self, *args):
-        if data_page['algo'] == 0:
+        if data_disk['algo'] == 0:
             return 'FCFS'
-        elif data_page['algo'] == 1:
+        elif data_disk['algo'] == 1:
             return 'Shortest Seek Time First'
         else:
             return 'TBA'
@@ -1784,7 +1786,6 @@ class DiskOutputScreen(Screen):
     # Generate formatted data for input to the algo
     def calculate(self, *args):
         formatted_data = {}
-        print str(data_disk)
         formatted_data['curr_pos'] = int(data_disk['pos_head'])
         formatted_data['total_cylinders']= int(data_disk['num_cylinders'])
         formatted_data['algo'] = data_disk['algo']
@@ -1795,7 +1796,9 @@ class DiskOutputScreen(Screen):
         else: # Space separated disk_queue
             disk_queue = disk_queue_data.split()
         formatted_data['disk_queue'] = disk_queue
-        self.memory_chart = disk_scheduling.disk_scheduling(formatted_data)
+        if data_disk['algo'] != 0 and data_disk['algo'] != 1:
+            formatted_data['direction'] = data_disk['direction']
+        self.secondary_memory_chart = disk_scheduling.disk_scheduling(formatted_data)
 
         layout = self.manager.get_screen('disk_output').layout
         layout.clear_widgets()
@@ -1804,16 +1807,59 @@ class DiskOutputScreen(Screen):
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
+        if not self.secondary_memory_chart:
+            # Add back button
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+            box.add_widget(Button(text='Back', on_release=self.switch_to_disk_form))
+            grid.add_widget(box)
 
-        # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_disk_form))
-        grid.add_widget(box)
+            # Add ScrollView
+            sv = ScrollView(size=self.size)
+            sv.add_widget(grid)
+            layout.add_widget(sv)
+        else:
+            # Output the algo description
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+            algo_desc = self.get_description()
+            box.add_widget(Label(text=algo_desc))
+            grid.add_widget(box)
 
-        # Add ScrollView
-        sv = ScrollView(size=self.size)
-        sv.add_widget(grid)
-        layout.add_widget(sv)
+            # To add path of head
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='Path of the read/write head: '))
+            grid.add_widget(box)
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None)
+            grid.add_widget(box)
+            temp = self.secondary_memory_chart
+            for i in range(len(temp['memory_state'])):
+                if temp['memory_state'][i] == 0 or temp['memory_state'][i] == data_disk['num_cylinders']-1:
+                    if temp['memory_state'][i] in formatted_data['disk_queue'] or temp['memory_state'][i] == data_disk['pos_head']:
+                        box.add_widget(Label(text=str(temp['memory_state'][i])))
+                    else:
+                        box_label = Label(text='[color=ff0b3c]'+str(temp['memory_state'][i])+'[/color]', markup=True)
+                        box.add_widget(box_label)
+                    if i != len(temp['memory_state'])-1:
+                        box.add_widget(Label(text='---->'))
+                    continue
+                box.add_widget(Label(text=str(temp['memory_state'][i])))
+                if i != len(temp['memory_state'])-1:
+                    box.add_widget(Label(text='---->'))
+  
+            # Add total number of cylinders traversed   
+            total_cylinders = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            total_cylinders.add_widget(Label(text='Total number of cylinders traversed: '+ str(temp['total_head_moves'])))
+            grid.add_widget(total_cylinders)
+
+            # Add back button
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+            box.add_widget(Button(text='Back', on_release=self.switch_to_disk_form))
+            grid.add_widget(box)
+
+            # Add ScrollView
+            sv = ScrollView(size=self.size)
+            sv.add_widget(grid)
+            layout.add_widget(sv)
 
     def switch_to_disk_form(self, *args):
         self.manager.transition.direction = 'right'
