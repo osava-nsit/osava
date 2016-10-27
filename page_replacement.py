@@ -1,5 +1,5 @@
 from copy import deepcopy
-import sys
+from sys import maxint
 from random import randint
 
 # Utility function to check if referenced page is already in memory
@@ -41,7 +41,7 @@ def find_and_replace_page_optimal(page_number, memory_frames, reference_string, 
         if flag == 1:
             break
         elif last_reference_pos == -1 :
-            last_reference_pos = sys.maxint 
+            last_reference_pos = maxint 
         pair =(frame_number, page, last_reference_pos);
         future_reference_pos.append(pair)
 
@@ -87,7 +87,7 @@ def find_and_replace_page_lru(page_number, memory_frames, reference_string, pos_
     
     if flag == 0:
         # To find page with farthest reference in past
-        min_pos = sys.maxint
+        min_pos = maxint
         for pair in past_reference_pos:
             frame_number, page, last_reference_pos = pair
             if min_pos > last_reference_pos:
@@ -199,7 +199,7 @@ def find_and_replace_page_least_frequently_used(page_number, memory_frames, refe
      
     if flag == 0:
         # To find page with minimum reference in past
-        min_pos = sys.maxint
+        min_pos = maxint
         for pair in freq_reference_pos:
             frame_number, page, num_reference_pos = pair
             if min_pos > num_reference_pos:
