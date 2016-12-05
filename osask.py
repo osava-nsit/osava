@@ -1873,12 +1873,12 @@ class DiskOutputScreen(Screen):
         path_box.add_widget(path_label)
         grid.add_widget(path_box)
 
-        mem_box = BoxLayout(orientation='horizontal', size_hint_y=None)
+        mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         grid.add_widget(mem_box)
 
-        inc = Window.width/(int(data_disk['num_cylinders'])*1.1)
-        temp = self.secondary_memory_chart
-        new_heads = list(map(int, temp['memory_state']))
+        self.inc = Window.width/(int(data_disk['num_cylinders'])*1.1)
+        movement_list = self.secondary_memory_chart['memory_state']
+        new_heads = list(map(int, movement_list))
         sorted_heads=sorted(new_heads)
 
         # Inserting cylinder 0 and cylinder (total number of cylinders-1) in sorted_heads to facilitate printing of the path of read/write head 
@@ -1886,54 +1886,52 @@ class DiskOutputScreen(Screen):
             sorted_heads.insert(0,0)
         if(sorted_heads[len(sorted_heads)-1]!=data_disk['num_cylinders']-1):
             sorted_heads.insert(len(sorted_heads), data_disk['num_cylinders']-1)
-        # To start printing the path of read/write head from cylinder 0    
-        cylinder_label = Label(text=str(0),size_hint_x=None, width=self.margin_left , valign='top', halign='center')
+
+        # To start printing the path of read/write head from cylinder 0
+        cylinder_label = Label(text=str(0),size_hint_x=None, width=self.margin_left , valign='bottom', halign='right', font_size='12sp')
+
+        cylinder_label.text_size = (None, cylinder_label.height)
+        cylinder_label.texture_update()
+        cylinder_label.text_size = (max(cylinder_label._label.content_width, self.margin_left), kivy.metrics.dp(30))
+
         mem_box.add_widget(cylinder_label)
 
-        # To calaculate coordinates of arrows 
-        width_list=[]
-        # To create width_list and print path of read/ write head
-        for i,cylinder in enumerate(sorted_heads[1:]):
+        # To print path of read/ write head
+        for i, cylinder in enumerate(sorted_heads[1:]):
             # To get right value of index
-            i = i+1
-            width = kivy.metrics.dp((inc*(int(cylinder) - int(sorted_heads[i-1]))))
-            cylinder_label = Label(text=str(cylinder),size_hint_x=None, width=width, valign='top', halign='left')
+            i = i + 1
+            width = self.inc*(cylinder - sorted_heads[i-1])
+            # print "width = {} * ({} - {})".format(self.inc, cylinder, sorted_heads[i-1])
+            cylinder_label = Label(text=str(cylinder), size_hint_x=None, width=width, halign='right', font_size='12sp')
+            
+            # Alternate valign for better visibility
+            if (i%2):
+                cylinder_label.valign = 'top'
+            else:
+                cylinder_label.valign = 'bottom'
+
+            cylinder_label.text_size = (None, cylinder_label.height)
+            cylinder_label.texture_update()
+            cylinder_label.text_size = (max(cylinder_label._label.content_width, width), kivy.metrics.dp(30))
+
             mem_box.add_widget(cylinder_label)
-            start = cylinder
-            end = sorted_heads[i-1]
-            wid = width
-            tup = (start,end,wid);
-            width_list.append(tup)
 
-        # To calculate the  
-        def get_start_height(self, idx, total, height):
-        pos = (total-idx-1)*height
-        return pos
+        # Initial height of head
+        y1 = kivy.metrics.dp(370)
 
-        # Intialising coordinates for arrows    
-        x1 = self.margin_left 
-        y1 = -10000
-        y2 = y1+20
-        # Calculating coordinates for arrows and displaying them
-        for i,cylinder in enumerate(temp['memory_state']):
-            # Calculations for start and end x-coordinates of arrows
-            start,end,wid = width_list[0]
-            j = 0
-            x1 = x1 + wid
-            while int(cylinder)!=start:
-                start,end,wid = width_list[j]
-                j = j + 1
-                x1 += wid
-            start,end,wid = width_list[j]
-            x2 = x1 + wid
-            self.add_arrow(x1,x2,y1,y2)
+        for i in range(len(movement_list)-1):
+            x1 = self.scale_x(movement_list[i])
+            x2 = self.scale_x(movement_list[i+1])
+            y2 = y1 - kivy.metrics.dp(30)
+            self.add_arrow(x1, y1, x2, y2)
             y1 = y2
-            y2 += 15
 
+    def scale_x(self, x, *args):
+        return self.margin_left + int(self.inc*float(x))
 
-    def add_arrow(self,x1,y1,x2,y2,*args):
+    def add_arrow(self, x1, y1, x2, y2, *args):
         with self.arrows_widget.canvas:
-            Line(points=[x1,y1,x2,y2], width=1.0)  
+            Line(points=[x1,y1,x2,y2], width=1.5)  
 
     def switch_to_disk_form(self, *args):
         self.manager.transition.direction = 'right'
