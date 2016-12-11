@@ -20,7 +20,7 @@ import kivy.metrics
 from functools import partial
 from random import random
 from copy import deepcopy
-from math import sqrt, cos, radians
+from math import sqrt, radians, atan, tan
 # OS Algorithms
 import cpu_scheduling, deadlock, memory_allocation, page_replacement, disk_scheduling
 
@@ -1925,7 +1925,7 @@ class DiskOutputScreen(Screen):
             x2 = self.scale_x(movement_list[i+1])
             y2 = y1 - kivy.metrics.dp(30)
             self.add_arrow(x1, y1, x2, y2)
-            self.add_arrow_head(x1,y1,x2,y2)
+            #self.add_arrow_head(x1,y1,x2,y2)
             y1 = y2
 
     def scale_x(self, x, *args):
@@ -1934,7 +1934,7 @@ class DiskOutputScreen(Screen):
     # Drawing the arrow line
     def add_arrow(self, x1, y1, x2, y2, *args):
         with self.arrows_widget.canvas:
-            Color(1,1,1)
+            Color(1, 1, 1)
             Line(points=[x1,y1,x2,y2], width=1.5)
 
     # Drawing the arrow head        
@@ -1950,27 +1950,37 @@ class DiskOutputScreen(Screen):
         # Length of the arrow head on each side
         len_head = kivy.metrics.dp(13)
 
+        # Angle of the arrow head from main line on each side
+        arrow_angle = 45
+
         # Slope of the arrow line
         m = (float(y2-y1))/(float(x2-x1))
-        print "x2 = {} m= {}".format(x2,m)
+        print "x2 = {} m = {}".format(x2,m)
         # Coordinates for right half of the head
-        deg = self.calc_normalised_angle(m)
-        m3 = m * cos(radians(deg))#/-75
+        # deg = self.calc_normalised_angle(m)
+        # m3 = m * cos(radians(deg))#/120
+
+        m3 = tan(atan(m) + radians(arrow_angle))
+
+        # c,s = Cos and Sine of the slope angle
         c = 1/(sqrt(1 + (m3*m3)))
         s = m3 * c
-        x3 = x2 + len_head * c
-        y3 = y2 + len_head * s
+        x3 = x2 - len_head * c
+        y3 = y2 - len_head * s
+
         # Coordinates for left half of the head
-        m4 = m * cos(radians(70))#\100
+        # m4 = m * cos(radians(70))#\70
+        m4 = tan(atan(m) - radians(arrow_angle))
         c = 1/(sqrt(1 + (m4*m4)))
         s = m4 * c
         x4 = x2 - len_head * c
         y4 = y2 - len_head * s
         # Drawing the arrow head on each side
         with self.arrows_widget.canvas:
-              Color(0, 0.5, 1)
-              Line(points=[x2,y2,x3,y3], width=1.1)
-              Line(points=[x2,y2,x4,y4], width=1.1)
+            Color(0, 0.5, 1)
+            Line(points=[x2,y2,x3,y3], width=1.1)
+            Line(points=[x2,y2,x4,y4], width=1.1)
+
     def calc_normalised_angle(self, slope, *args):
         return abs(slope*30)
     def switch_to_disk_form(self, *args):
