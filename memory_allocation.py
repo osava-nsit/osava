@@ -1,7 +1,80 @@
 from operator import itemgetter
 from copy import deepcopy
 
-#to check if external fragmentation is present 
+# Bad input case(s):
+# 0. 1 <= total_size 
+# 1. 1 <= process_size 
+# 2. 1 <= arrival_time 
+# 3. 1 <= burst_time
+
+
+# Bad input handling and error message for the user
+default_message = "Press back button to go back to the input form."
+
+def get_error_message(error_number, process_id):
+    ERROR = {}
+    if error_number == -1:
+        ERROR['error_message'] = " "
+        ERROR['error_number'] = -1
+    elif error_number == 0:
+        ERROR['error_message'] = "Please enter a valid size of main memory.\n" + default_message
+        ERROR['error_number'] = 0
+    elif error_number == 1:
+        ERROR['error_message'] = "Please enter a valid size of process " + str(process_id) + ".\n " + default_message
+        ERROR['error_number'] = 1
+    elif error_number == 2:
+        ERROR['error_message'] = "Arrival time for process " + str(process_id) + " is invalid. Please enter a valid arrival time.\n" + default_message
+        ERROR['error_number'] = 2
+    elif error_number == 3:
+        ERROR['error_message'] = "CPU-I/O burst time for process " + str(process_id) + " is invalid. Please enter a valid arrival time.\n" + default_message
+        ERROR['error_number'] = 3
+    return ERROR
+
+def check_for_bad_input(data):
+    error = 0 # Boolean to check bad input 
+    error_status = {} # Dictionary to store error number and error message
+    processes = sorted(data, key=itemgetter('arrival'))
+    total_size = processes[0]['mem_size']
+    if int(total_size) <= 0:
+        error_status = get_error_message(0, -1)
+        error = 1
+    else:
+        for process in processes:
+            #total_size=process['mem_size']
+            process_id = process['name']
+            arrival_time = process['arrival']
+            if int(arrival_time) < 0:
+                error_status = get_error_message(2, process_id)
+                error = 1
+                break
+            burst_time = process['burst']
+            if int(burst_time) <= 0:
+                error_status = get_error_message(3, process_id)
+                error = 1
+                break
+            process_size = process['size']
+            if int(process_size) <= 0:
+                error_status = get_error_message(1, process_id)
+                error = 1
+                break
+
+    if(error == 0):
+        error_status = get_error_message(-1, -1)
+    status = (error, error_status);
+    return status
+
+# To construct output in case of bad input             
+def construct_output(error_status, event, memory_state, processes_waiting, wait_to_memory, external_fragmentation):
+    temp_memory = {}
+    temp_memory['event'] = event
+    temp_memory['memory_state'] = memory_state
+    temp_memory['processes_waiting'] =  processes_waiting
+    temp_memory['wait_to_memory'] =wait_to_memory
+    temp_memory['external_fragmentation'] = external_fragmentation
+    temp_memory['error_status'] = error_status
+    return temp_memory
+
+# To check if external fragmentation is present 
 def check_external_frag(memory_allocated, process_size, total_size):
     flag = 0 #variable to check if external fragmentation is present
     free_space = 0
@@ -17,7 +90,6 @@ def check_external_frag(memory_allocated, process_size, total_size):
         return flag 
     else:
         return flag
-
 
 def add_termination_event(event_list, process_id, curr_time, burst_time, process_size):
     pair = (process_id,0,curr_time+burst_time,burst_time,process_size);
@@ -36,7 +108,7 @@ def add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process
         if(process_size < total_size):
             start = 0
             end = process_size
-            new_pair1 = (process_id,start, end);
+            new_pair1 = (process_id, start, end);
             memory_allocated.append(new_pair1)
             event_list = add_termination_event(event_list, process_id, curr_time, burst_time, process_size)
         else:
@@ -151,51 +223,63 @@ def remove_from_memory_firstfit(event_list,process_id,end_time,process_size,tota
     temp_memory['processes_waiting'] = deepcopy(wait_queue)      
     return temp_memory
 
+
 def first_fit(data):
-    processes = sorted(data, key=itemgetter('arrival'))
-    total_size = processes[0]['mem_size']
-    curr_time = 0
-    memory_chart = []
-    memory_allocated = []
-    wait_queue = []
-    event_list = []
-    wait_to_memory = [] #processes added from wait queue to memory
-    for process in processes:
-        #total_size=process['mem_size']
-        process_id = process['name']
-        arrival_bit = 1 #time field indiactes arrival time
-        arrival_time = process['arrival']
-        burst_time = process['burst']
-        process_size = process['size']
-        pair = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-        event_list.append(pair)
-    for event in event_list:
-        process_id,arrival_bit,arrival_time,burst_time,process_size = event
-        if(arrival_bit == 1):
-            #new process has arrived
-            temp_memory = add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
-            # print "-------------------"
-            # print "Added to memory: " + str(temp_memory)
-            event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-            temp_memory['event'] = event1
-            temp_memory['wait_to_memory'] = wait_to_memory
-            memory_chart.append(temp_memory)
-            # print "\nMemory chart after addition: " + str(memory_chart)
-            # print "-------------------"
-        else:
-            #process has completed its execution
-            #here arrival time=curr_time+burst_time set by add_to_memory function
-            end_time = arrival_time
-            temp_memory = remove_from_memory_firstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
-            # print "-------------------"
-            # print "Removed from memory: " + str(temp_memory)
-            event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-            temp_memory['event'] = event1
-            temp_memory['external_fragmentation'] = 0
-            memory_chart.append(temp_memory)
-            # print "\nMemory chart after removal: " + str(memory_chart)
-            # print "-------------------"
-    return memory_chart
+    # To store memory states and wait queue state after arrival of each process
+    memory_chart = [] 
+    # For bad input handling
+    error, error_status = check_for_bad_input(data)
+    if(error):
+        temp_memory = {}
+        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
+        return memory_chart
+    else:
+        processes = sorted(data, key=itemgetter('arrival'))
+        total_size = processes[0]['mem_size']
+        curr_time = 0
+        memory_allocated = []
+        wait_queue = []
+        event_list = []
+        wait_to_memory = [] #processes added from wait queue to memory
+        for process in processes:
+            #total_size=process['mem_size']
+            process_id = process['name']
+            arrival_bit = 1 #time field indiactes arrival time
+            arrival_time = process['arrival']
+            burst_time = process['burst']
+            process_size = process['size']
+            pair = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+            event_list.append(pair)
+        for event in event_list:
+            process_id,arrival_bit,arrival_time,burst_time,process_size = event
+            if(arrival_bit == 1):
+                #new process has arrived
+                temp_memory = add_to_memory_firstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+                # print "-------------------"
+                # print "Added to memory: " + str(temp_memory)
+                event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+                temp_memory['event'] = event1
+                temp_memory['wait_to_memory'] = wait_to_memory
+                temp_memory['error_status'] = error_status
+                memory_chart.append(temp_memory)
+                # print "\nMemory chart after addition: " + str(memory_chart)
+                # print "-------------------"
+            else:
+                #process has completed its execution
+                #here arrival time=curr_time+burst_time set by add_to_memory function
+                end_time = arrival_time
+                temp_memory = remove_from_memory_firstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+                # print "-------------------"
+                # print "Removed from memory: " + str(temp_memory)
+                event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+                temp_memory['event'] = event1
+                temp_memory['external_fragmentation'] = 0
+                temp_memory['error_status'] = error_status
+                memory_chart.append(temp_memory)
+                # print "\nMemory chart after removal: " + str(memory_chart)
+                # print "-------------------"
+        return memory_chart
 
 #Worst Fit Agorithm
 def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
@@ -341,42 +425,53 @@ def remove_from_memory_worstfit(event_list,process_id,end_time,process_size,tota
     return temp_memory
 
 def worst_fit(data):
-    processes = sorted(data, key=itemgetter('arrival'))
-    total_size = processes[0]['mem_size']
-    curr_time = 0
-    memory_chart = []
-    memory_allocated = []
-    wait_queue = []
-    event_list = []
-    wait_to_memory = []
-    for process in processes:
-        #total_size=process['mem_size']
-        process_id = process['name']
-        arrival_bit = 1 #time field indicates arrival time
-        arrival_time = process['arrival']
-        burst_time = process['burst']
-        process_size = process['size']
-        pair = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-        event_list.append(pair)
-    for event in event_list:
-        process_id,arrival_bit,arrival_time,burst_time,process_size=event
-        if(arrival_bit == 1):
-            #new process has arrived
-            temp_memory = add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
-            event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-            temp_memory['event'] = event1
-            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
-            memory_chart.append(temp_memory)
-        else:
-            #process has completed its execution
-            #here arrival time=curr_time+burst_time set by add_to_memory function
-            end_time = arrival_time
-            temp_memory = remove_from_memory_worstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
-            event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-            temp_memory['event'] = event1
-            temp_memory['external_fragmentation'] = 0
-            memory_chart.append(temp_memory)
-    return memory_chart
+    # To store memory states and wait queue state after arrival of each process
+    memory_chart = [] 
+    # For bad input handling
+    error, error_status = check_for_bad_input(data)
+    if(error):
+        temp_memory = {}
+        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
+        return memory_chart
+    else:
+        processes = sorted(data, key=itemgetter('arrival'))
+        total_size = processes[0]['mem_size']
+        curr_time = 0
+        memory_allocated = []
+        wait_queue = []
+        event_list = []
+        wait_to_memory = []
+        for process in processes:
+            #total_size=process['mem_size']
+            process_id = process['name']
+            arrival_bit = 1 #time field indicates arrival time
+            arrival_time = process['arrival']
+            burst_time = process['burst']
+            process_size = process['size']
+            pair = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+            event_list.append(pair)
+        for event in event_list:
+            process_id,arrival_bit,arrival_time,burst_time,process_size=event
+            if(arrival_bit == 1):
+                #new process has arrived
+                temp_memory = add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+                event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+                temp_memory['event'] = event1
+                temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
+                temp_memory['error_status'] = error_status
+                memory_chart.append(temp_memory)
+            else:
+                #process has completed its execution
+                #here arrival time=curr_time+burst_time set by add_to_memory function
+                end_time = arrival_time
+                temp_memory = remove_from_memory_worstfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+                event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+                temp_memory['event'] = event1
+                temp_memory['external_fragmentation'] = 0
+                temp_memory['error_status'] = error_status
+                memory_chart.append(temp_memory)
+        return memory_chart
 
 def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
     temp_memory = {}
@@ -520,39 +615,51 @@ def remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total
 
           
 def best_fit(data):
-    processes = sorted(data, key=itemgetter('arrival'))
-    total_size = processes[0]['mem_size']
-    memory_chart = []
-    curr_time = 0
-    memory_allocated=[]
-    wait_queue=[]
-    event_list=[]
-    wait_to_memory = []
-    for process in processes:
-        process_id=process['name']
-        arrival_bit=1 #time field indiactes arrival time
-        arrival_time=process['arrival']
-        burst_time=process['burst']
-        process_size=process['size']
-        pair=(process_id,arrival_bit,arrival_time,burst_time,process_size)
-        event_list.append(pair)
-    for event in event_list:
-        process_id,arrival_bit,arrival_time,burst_time,process_size=event
-        if(arrival_bit==1):
-            #new process has arrived
-            temp_memory=add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
-            event1=(process_id,arrival_bit,arrival_time,burst_time,process_size)
-            temp_memory['event']=event1
-            temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
-            memory_chart.append(temp_memory)
-        else:
-            #process has completed its execution
-            #here arrival time=curr_time+burst_time set by add_to_memory function
-            end_time=arrival_time
-            temp_memory=remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
-            event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
-            temp_memory['event'] = event1
-            temp_memory['external_fragmentation'] = 0
-            memory_chart.append(temp_memory)
-    return memory_chart
+    # To store memory states and wait queue state after arrival of each process
+    memory_chart = [] 
+    # For bad input handling
+    error, error_status = check_for_bad_input(data)
+    if(error):
+        temp_memory = {}
+        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
+        return memory_chart
+    else:
+        curr_time = 0
+        memory_allocated=[]
+        wait_queue=[]
+        event_list=[]
+        wait_to_memory = []
+        # Input data
+        processes = sorted(data, key=itemgetter('arrival'))
+        total_size = processes[0]['mem_size']
+        for process in processes:
+            process_id=process['name']
+            arrival_bit=1 #time field indicates arrival time
+            arrival_time=process['arrival']
+            burst_time=process['burst']
+            process_size=process['size']
+            pair=(process_id,arrival_bit,arrival_time,burst_time,process_size)
+            event_list.append(pair)
+        for event in event_list:
+            process_id,arrival_bit,arrival_time,burst_time,process_size=event
+            if(arrival_bit==1):
+                #new process has arrived
+                temp_memory=add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+                event1=(process_id,arrival_bit,arrival_time,burst_time,process_size)
+                temp_memory['event']=event1
+                temp_memory['wait_to_memory'] = deepcopy(wait_to_memory)
+                temp_memory['error_status'] = error_status
+                memory_chart.append(temp_memory)
+            else:
+                #process has completed its execution
+                #here arrival time=curr_time+burst_time set by add_to_memory function
+                end_time=arrival_time
+                temp_memory=remove_from_memory_bestfit(event_list,process_id,end_time,process_size,total_size,curr_time,memory_allocated,wait_queue)
+                event1 = (process_id,arrival_bit,arrival_time,burst_time,process_size);
+                temp_memory['event'] = event1
+                temp_memory['external_fragmentation'] = 0
+                temp_memory['error_status'] = error_status
+                memory_chart.append(temp_memory)
+        return memory_chart
         

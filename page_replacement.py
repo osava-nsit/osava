@@ -2,6 +2,63 @@ from copy import deepcopy
 from sys import maxint
 from random import randint
 
+# Bad input case(s):
+# 0. 1 <= Frame number
+# 1. 0 < Page number
+# 2. 0 <= modify_bit <= 1
+
+# Bad input handling and error message for the user
+default_message = "Press back button to go back to the input form."
+
+def get_error_message(error_number, page_num_or_modify_bit_pos):
+    ERROR = {}
+    if error_number == -1:
+        ERROR['error_message'] = " "
+        ERROR['error_number'] = -1
+    elif error_number == 0:
+        ERROR['error_message'] = "Please enter valid number of frames.\n" + default_message
+        ERROR['error_number'] = 0
+    elif error_number == 1:
+        ERROR['error_message'] = "Page number at " + str(page_num_or_modify_bit_pos) + " position in reference string is invalid. Please enter a valid page number.\n" + default_message
+        ERROR['error_number'] = 1
+    elif error_number == 2:
+        ERROR['error_message'] = "Modify bit at position " + str(page_num_or_modify_bit_pos) + " in modify bit string is invalid. Please enter a valid modify bit ( 0 or 1 ).\n" + default_message
+        ERROR['error_number'] = 2
+    return ERROR
+
+def check_for_bad_input(data):
+    error = 0 # Boolean to check if bad input entered
+    error_status = {} # Dictionary to store error number and error message
+    frames_number = data['num_frames']
+    page_numbers = data['ref_str']
+    if frames_number <= 0:
+        error_status = get_error_message(0, -1)
+        error = 1
+    else:
+        for idx,page_number in enumerate(page_numbers):
+            if int(page_number) < 0:
+                print "Error detected"
+                error_status = get_error_message(1, idx+1)
+                error = 1
+                break
+    if(error == 1):
+        status = (error, error_status);
+        print "Error detected"
+        return status
+    else:
+        if data['algo'] == 4:
+            modify_bit_string = data['modify_bits'] 
+            for idx,modify_bit in enumerate(modify_bit_string):
+                if int(modify_bit) != 0 and int(modify_bit) != 1:
+                    error_status = get_error_message(2, idx+1)
+                    error = 1
+                    break
+        if(error == 0):
+            error_status = get_error_message(-1, -1) # No error in input data
+            error = 0
+        status = (error, error_status);
+        return status
+
 # Utility function to check if referenced page is already in memory
 def page_in_memory(page_number, memory_frames):
     for frame_number, page_n in enumerate(memory_frames):
@@ -252,71 +309,82 @@ def find_and_replace_page_most_frequently_used(page_number, memory_frames, refer
     status = (frame_to_be_replaced, deepcopy(memory_frames));
     return status
 
+def construct_output(error_status, page_number, frame_number, memory_frames, page_fault, page_fault_count):
+    temp_memory = {}
+    temp_memory['page_number'] = page_number
+    temp_memory['frame_number'] = frame_number 
+    temp_memory['memory_frames'] = memory_frames
+    temp_memory['page_fault'] = page_fault
+    temp_memory['page_fault_count'] = page_fault_count
+    temp_memory['error_status'] = error_status
+    return temp_memory
 
 # Main function to call algo chosen by the user
 def page_replacement(data):
-    memory_chart = []
-    frames_number = data['num_frames']
-    page_numbers = data['ref_str']
-    memory_frames = []
-    page_fault_count = 0
-    if data['algo'] == 3 or data['algo'] == 4:
-        reference_bit = []
-    if data['algo'] == 4:
-        modify_bit_string = data['modify_bits'] 
-        modify_bit = []
-
-    # variable for FIFO, Second Chance and Enhanced Second Chance Algorithmn
-    last_replaced_frame = -1 # to track which page was allocated memory first
-
-    # Intialising all frames to empty 
-    for i in range(frames_number):
-        memory_frames.append(-1)
-        if data['algo'] == 3 or data['algo'] == 4:
-            reference_bit.append(0)
-        if data['algo'] == 4:
-            modify_bit.append(0)
-
-    for pos, page_number in enumerate(page_numbers):
+    # To store the state of main memory(which is divided into frames) after each page arrives
+    memory_chart = [] 
+    # For bad input handling
+    error, error_status = check_for_bad_input(data)
+    if(error):
         temp_memory = {}
-        frame_number, in_memory = page_in_memory(page_number, memory_frames) 
-        if in_memory:
-            temp_memory['page_number'] = page_number
-            temp_memory['frame_number'] = frame_number + 1 # To start frame numbers from 1 instead of 0 
-            temp_memory['memory_frames'] = deepcopy(memory_frames)
-            temp_memory['page_fault'] = 0
-            temp_memory['page_fault_count'] = page_fault_count
-            memory_chart.append(temp_memory)
-            if data['algo'] == 3:
-                reference_bit[frame_number] = 1
+        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
+        return memory_chart
+    else:
+        frames_number = data['num_frames']
+        page_numbers = data['ref_str']
+        memory_frames = []
+        page_fault_count = 0
+        if data['algo'] == 3 or data['algo'] == 4:
+            reference_bit = []
+        if data['algo'] == 4:
+            modify_bit_string = data['modify_bits'] 
+            modify_bit = []
+
+        # variable for FIFO, Second Chance and Enhanced Second Chance Algorithmn
+        last_replaced_frame = -1 # to track which page was allocated memory first
+
+        # Intialising all frames to empty 
+        for i in range(frames_number):
+            memory_frames.append(-1)
+            if data['algo'] == 3 or data['algo'] == 4:
+                reference_bit.append(0)
             if data['algo'] == 4:
-                if modify_bit_string[pos] == 1:
+                modify_bit.append(0)
+
+        for pos, page_number in enumerate(page_numbers):
+            temp_memory = {}
+            frame_number, in_memory = page_in_memory(page_number, memory_frames) 
+            if in_memory:
+                temp_memory = construct_output(error_status, page_number, frame_number+1, deepcopy(memory_frames), 0, page_fault_count)
+                memory_chart.append(temp_memory)
+                if data['algo'] == 3:
                     reference_bit[frame_number] = 1
-                else:
-                    modify_bit[frame_number] = 1
-        else:
-            temp_memory['page_number'] = page_number
-            if data['algo'] == 0:
-                allocated_frame, new_memory_frames = find_and_replace_page_fifo(page_number, memory_frames, last_replaced_frame)
-                last_replaced_frame = allocated_frame 
-            elif data['algo'] == 1:
-                allocated_frame, new_memory_frames = find_and_replace_page_optimal(page_number, memory_frames, page_numbers, pos)
-            elif data['algo'] == 2:
-                allocated_frame, new_memory_frames = find_and_replace_page_lru(page_number, memory_frames, page_numbers, pos)
-            elif data['algo'] == 3:
-                allocated_frame, new_memory_frames = find_and_replace_page_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit)
-                last_replaced_frame = allocated_frame
-            elif data['algo'] == 4:
-                allocated_frame, new_memory_frames = find_and_replace_page_enhanced_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit, modify_bit,pos,modify_bit_string)
-                last_replaced_frame = allocated_frame
-            elif data['algo'] == 5:
-                allocated_frame, new_memory_frames = find_and_replace_page_least_frequently_used(page_number, memory_frames, page_numbers, pos)
-            elif data['algo'] == 6:
-                allocated_frame, new_memory_frames = find_and_replace_page_most_frequently_used(page_number, memory_frames, page_numbers, pos)
-            temp_memory['frame_number'] = allocated_frame + 1 # To start frame numbers from 1 instead of 0 
-            temp_memory['memory_frames'] = new_memory_frames
-            temp_memory['page_fault'] = 1
-            page_fault_count += 1
-            temp_memory['page_fault_count'] = page_fault_count
-            memory_chart.append(temp_memory)
-    return memory_chart
+                if data['algo'] == 4:
+                    if modify_bit_string[pos] == 1:
+                        reference_bit[frame_number] = 1
+                    else:
+                        modify_bit[frame_number] = 1
+            else:
+                temp_memory['page_number'] = page_number
+                if data['algo'] == 0:
+                    allocated_frame, new_memory_frames = find_and_replace_page_fifo(page_number, memory_frames, last_replaced_frame)
+                    last_replaced_frame = allocated_frame 
+                elif data['algo'] == 1:
+                    allocated_frame, new_memory_frames = find_and_replace_page_optimal(page_number, memory_frames, page_numbers, pos)
+                elif data['algo'] == 2:
+                    allocated_frame, new_memory_frames = find_and_replace_page_lru(page_number, memory_frames, page_numbers, pos)
+                elif data['algo'] == 3:
+                    allocated_frame, new_memory_frames = find_and_replace_page_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit)
+                    last_replaced_frame = allocated_frame
+                elif data['algo'] == 4:
+                    allocated_frame, new_memory_frames = find_and_replace_page_enhanced_second_chance(page_number, memory_frames, last_replaced_frame, reference_bit, modify_bit,pos,modify_bit_string)
+                    last_replaced_frame = allocated_frame
+                elif data['algo'] == 5:
+                    allocated_frame, new_memory_frames = find_and_replace_page_least_frequently_used(page_number, memory_frames, page_numbers, pos)
+                elif data['algo'] == 6:
+                    allocated_frame, new_memory_frames = find_and_replace_page_most_frequently_used(page_number, memory_frames, page_numbers, pos)
+                temp_memory = construct_output( error_status, page_number, allocated_frame+1, new_memory_frames, 1, page_fault_count)
+                page_fault_count += 1
+                memory_chart.append(temp_memory)
+        return memory_chart

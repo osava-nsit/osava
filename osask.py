@@ -159,6 +159,15 @@ class WhiteBorderedLabel(Label):
 class ColoredBorderedLabel(Label):
     pass
 
+# Global function for bad input handling
+def display_error(grid, error):
+    error_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='400dp')
+    error_label = Label(text="Bad Input:\n\n " + error['error_message'],size_hint_x=None, width=Window.width, valign='top', halign='center', font_size='15sp')
+    error_label.text_size = error_label.size
+    error_box.add_widget(error_label)
+    grid.add_widget(error_box)
+    return
+
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
     ribbon_added = False
@@ -543,6 +552,8 @@ class CPUOutputScreen(Screen):
     stats = {}
     # Stores the individual per process stats
     details = {}
+    # Stores information related to bad input data
+    error_status = {}
 
     # Prints the details of the process schedule and statistics
     def calculate_schedule(self, *args):
@@ -563,84 +574,92 @@ class CPUOutputScreen(Screen):
             self.colors[process['name']] = [random(), random(), random()]
         self.colors['Idle'] = [0.2, 0.2, 0.2]
 
+        
         if cpu_scheduling_type == 0:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.fcfs(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.fcfs(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 1:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 2:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_non_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.shortest_job_non_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 3:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.shortest_job_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.shortest_job_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 4:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 5:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 7:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], data_cpu['queue_time_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], data_cpu['queue_time_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
         
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll
         grid.bind(minimum_height=grid.setter('height'))
 
-        row_height = '30dp'
+        if self.error_status['error_number'] != -1:
+            # Inform the user
+            display_error(grid, self.error_status)
+        else:
+            row_height = '30dp'
 
-        # Display process schedule details
-        for process in self.cpu_schedule:
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='20dp')
+            # Display process schedule details
+            for process in self.cpu_schedule:
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height='20dp')
 
-            label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
-            box.add_widget(label_name)
-            label = Label(text=str(process['start']))
-            box.add_widget(label)
-            label = Label(text=str(process['end']))
-            box.add_widget(label)
+                label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
+                box.add_widget(label_name)
+                label = Label(text=str(process['start']))
+                box.add_widget(label)
+                label = Label(text=str(process['end']))
+                box.add_widget(label)
 
-            # Add view details button for each process
-            details_button = Button(text='Details', size_hint_x=None, width='100dp')
-            box.add_widget(details_button)
+                # Add view details button for each process
+                details_button = Button(text='Details', size_hint_x=None, width='100dp')
+                box.add_widget(details_button)
 
-            # Blank label for padding on right
-            box.add_widget(Label(text='', size_hint_x=None, width='20dp'))
+                # Blank label for padding on right
+                box.add_widget(Label(text='', size_hint_x=None, width='20dp'))
 
-            # Popup showing details of process when box is clicked
-            if process['name'] != 'Idle':
-                content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
-                    "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
-                    "Turnaround time: "+str(self.details[process['name']]['turn_time']))
-                content_label = Label(text=content_str)
-                popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(kivy.metrics.dp(200), kivy.metrics.dp(200)))
-                label_name.bind(on_ref_press=popup.open)
-                details_button.bind(on_release=popup.open)
-                popup.open()
-                popup.dismiss()
-                print "Bound popup for process: "+str(label_name.text)
+                # Popup showing details of process when box is clicked
+                if process['name'] != 'Idle':
+                    content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                        "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                        "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                    content_label = Label(text=content_str)
+                    popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(kivy.metrics.dp(200), kivy.metrics.dp(200)))
+                    label_name.bind(on_ref_press=popup.open)
+                    details_button.bind(on_release=popup.open)
+                    popup.open()
+                    popup.dismiss()
+                    print "Bound popup for process: "+str(label_name.text)
+                grid.add_widget(box)
+
+            # Display statistics
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Timeline -', size_hint_y=0.07))
             grid.add_widget(box)
 
-        # Display statistics
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-        box.add_widget(Label(text='Statistics -'))
-        grid.add_widget(box)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0)))
+            grid.add_widget(box)
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-        box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0)))
-        grid.add_widget(box)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0)))
+            grid.add_widget(box)
+            
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0)))
+            grid.add_widget(box)
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-        box.add_widget(Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0)))
-        grid.add_widget(box)
-        
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-        box.add_widget(Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0)))
-        grid.add_widget(box)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0)))
+            grid.add_widget(box)
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-        box.add_widget(Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0)))
-        grid.add_widget(box)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%'))
+            grid.add_widget(box)
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-        box.add_widget(Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%'))
-        grid.add_widget(box)
+            self.draw_gantt()
 
         # Add ScrollView
         sv = ScrollView(size=self.size)
@@ -834,105 +853,110 @@ class DeadlockAvoidanceOutputScreen(Screen):
         grid.add_widget(box)
 
         # Check if the request can be granted or not
-        grantable, message = deadlock.check_request(available, maximum, allocation, request, data_da['request_process'], data_da['num_processes'], data_da['num_resource_types'])
+        grantable, message, error_status = deadlock.check_request(available, maximum, allocation, request, data_da['request_process'], data_da['num_processes'], data_da['num_resource_types'])
 
-        # If request is grantable, check if the state is safe or not
-        if grantable:
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text='If the request can be granted, the system will be in the following state -'))
-            grid.add_widget(box)
-
-            for j in range(data_da['num_resource_types']):
-                # print "Request["+str(j)+"] = "+str(request[j])
-                available[j] -= request[j]
-                allocation[data_da['request_process']][j] += request[j]
-
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text='Available'))
-            grid.add_widget(box)
-
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            available_text = ''
-            for i in range(data_da['num_resource_types']):
-                available_text += (str(available[i])+'   ')
-            box.add_widget(Label(text=available_text))
-            grid.add_widget(box)
-
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text='Allocation'))
-            box.add_widget(Label(text='Need'))
-            grid.add_widget(box)
-
-            for i in range(data_da['num_processes']):
+        if error_status['error_number'] != -1:
+            # Inform the user
+            display_error(grid, error_status)
+        else:
+            # If request is grantable, check if the state is safe or not
+            if grantable:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                allocation_text = ''
+                box.add_widget(Label(text='If the request can be granted, the system will be in the following state -'))
+                grid.add_widget(box)
+
                 for j in range(data_da['num_resource_types']):
-                    allocation_text += (str(allocation[i][j])+'   ')
-                box.add_widget(Label(text=allocation_text))
+                    # print "Request["+str(j)+"] = "+str(request[j])
+                    available[j] -= request[j]
+                    allocation[data_da['request_process']][j] += request[j]
 
-                need_text = ''
-                for j in range(data_da['num_resource_types']):
-                    need_text += (str(maximum[i][j] - allocation[i][j])+'   ')
-                box.add_widget(Label(text=need_text))
-                grid.add_widget(box)
-
-            safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
-            work = deepcopy(available)
-            finish = ['F'] * data_da['num_processes']
-
-            if safe:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='The state is safe. Hence the request can be granted. The processes can be scheduled as follows:'))
+                box.add_widget(Label(text='Available'))
                 grid.add_widget(box)
 
-                # Output table labels
-                # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='Process'))
-                box.add_widget(Label(text='Work'))
-                box.add_widget(Label(text='Finish'))
+                available_text = ''
+                for i in range(data_da['num_resource_types']):
+                    available_text += (str(available[i])+'   ')
+                box.add_widget(Label(text=available_text))
                 grid.add_widget(box)
 
-                # Display initial work vector
-                # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='Initial'))
-                work_text = ''
-                for i in range(len(work)):
-                    work_text += (str(work[i])+'   ')
-                box.add_widget(Label(text=work_text))
-                finish_text = ''
-                for i in range(len(finish)):
-                    finish_text += (finish[i]+'   ')
-                box.add_widget(Label(text=finish_text))
+                box.add_widget(Label(text='Allocation'))
+                box.add_widget(Label(text='Need'))
                 grid.add_widget(box)
 
-                # Display step by step changes in work vector according to process scheduled
-                for i in range(len(schedule)):
-                    for j in range(len(work)):
-                        work[j] += allocation[schedule[i]][j]
-                    finish[schedule[i]] = 'T'
+                for i in range(data_da['num_processes']):
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                    allocation_text = ''
+                    for j in range(data_da['num_resource_types']):
+                        allocation_text += (str(allocation[i][j])+'   ')
+                    box.add_widget(Label(text=allocation_text))
+
+                    need_text = ''
+                    for j in range(data_da['num_resource_types']):
+                        need_text += (str(maximum[i][j] - allocation[i][j])+'   ')
+                    box.add_widget(Label(text=need_text))
+                    grid.add_widget(box)
+
+                safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
+                work = deepcopy(available)
+                finish = ['F'] * dat
+                a_da['num_processes']
+
+                if safe:
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                    box.add_widget(Label(text='The state is safe. Hence the request can be granted. The processes can be scheduled as follows:'))
+                    grid.add_widget(box)
+
+                    # Output table labels
                     # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text='P'+str(schedule[i]+1)))
+                    box.add_widget(Label(text='Process'))
+                    box.add_widget(Label(text='Work'))
+                    box.add_widget(Label(text='Finish'))
+                    grid.add_widget(box)
+
+                    # Display initial work vector
+                    # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                    box.add_widget(Label(text='Initial'))
                     work_text = ''
-                    for j in range(len(work)):
-                        work_text += (str(work[j])+'   ')
+                    for i in range(len(work)):
+                        work_text += (str(work[i])+'   ')
                     box.add_widget(Label(text=work_text))
                     finish_text = ''
-                    for j in range(len(finish)):
-                        finish_text += (finish[j]+'   ')
+                    for i in range(len(finish)):
+                        finish_text += (finish[i]+'   ')
                     box.add_widget(Label(text=finish_text))
                     grid.add_widget(box)
+
+                    # Display step by step changes in work vector according to process scheduled
+                    for i in range(len(schedule)):
+                        for j in range(len(work)):
+                            work[j] += allocation[schedule[i]][j]
+                        finish[schedule[i]] = 'T'
+                        # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+                        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                        box.add_widget(Label(text='P'+str(schedule[i]+1)))
+                        work_text = ''
+                        for j in range(len(work)):
+                            work_text += (str(work[j])+'   ')
+                        box.add_widget(Label(text=work_text))
+                        finish_text = ''
+                        for j in range(len(finish)):
+                            finish_text += (finish[j]+'   ')
+                        box.add_widget(Label(text=finish_text))
+                        grid.add_widget(box)
+                else:
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                    box.add_widget(Label(text='The state is unsafe and will result in a deadlock. Hence the request cannot be granted.'))
+                    grid.add_widget(box)
+            # Request not grantable
             else:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='The state is unsafe and will result in a deadlock. Hence the request cannot be granted.'))
+                box.add_widget(Label(text=message))
                 grid.add_widget(box)
-        # Request not grantable
-        else:
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text=message))
-            grid.add_widget(box)
 
         # Add back button
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
@@ -1065,74 +1089,78 @@ class DeadlockDetectionOutputScreen(Screen):
         grid.add_widget(box)
 
         # Check if the system is deadlocked
-        deadlock_safe, schedule = deadlock.detect(available, allocation, request, data_dd['num_processes'], data_dd['num_resource_types'])
+        deadlock_safe, schedule, error_status = deadlock.detect(available, allocation, request, data_dd['num_processes'], data_dd['num_resource_types'])
 
-        work = deepcopy(available)
-        finish = ['F'] * data_dd['num_processes']
+        if error_status['error_number'] != -1:
+            # Inform the user
+            display_error(grid, error_status)
+        else:
+            work = deepcopy(available)
+            finish = ['F'] * data_dd['num_processes']
 
-        # Display schedule
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='The processes can be scheduled as follows: '))
-        grid.add_widget(box)
+            # Display schedule
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='The processes can be scheduled as follows: '))
+            grid.add_widget(box)
 
-        # Output table labels
-        # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Process'))
-        box.add_widget(Label(text='Work'))
-        box.add_widget(Label(text='Finish'))
-        grid.add_widget(box)
-
-        # Display initial work vector
-        # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Initial'))
-        work_text = ''
-        for i in range(len(work)):
-            work_text += (str(work[i])+'   ')
-        box.add_widget(Label(text=work_text))
-        finish_text = ''
-        for i in range(len(finish)):
-            finish_text += (finish[i]+'   ')
-        box.add_widget(Label(text=finish_text))
-        grid.add_widget(box)
-
-        # Display step by step changes in work vector according to process scheduled
-        for i in range(len(schedule)):
-            for j in range(len(work)):
-                work[j] += allocation[schedule[i]][j]
-            # print "Schedule["+str(i)+"] = "+str(schedule[i])
-            finish[schedule[i]] = 'T'
+            # Output table labels
             # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text='P'+str(schedule[i]+1)))
+            box.add_widget(Label(text='Process'))
+            box.add_widget(Label(text='Work'))
+            box.add_widget(Label(text='Finish'))
+            grid.add_widget(box)
+
+            # Display initial work vector
+            # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            box.add_widget(Label(text='Initial'))
             work_text = ''
-            for j in range(len(work)):
-                work_text += (str(work[j])+'   ')
+            for i in range(len(work)):
+                work_text += (str(work[i])+'   ')
             box.add_widget(Label(text=work_text))
             finish_text = ''
-            for j in range(len(finish)):
-                finish_text += (finish[j]+'   ')
+            for i in range(len(finish)):
+                finish_text += (finish[i]+'   ')
             box.add_widget(Label(text=finish_text))
             grid.add_widget(box)
 
-        # Not deadlocked
-        if deadlock_safe:
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text='No deadlocked detected.'))
-            grid.add_widget(box)
-        else:
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text='Deadlock Detected. Deadlocked processes: '))
-            grid.add_widget(box)
-            processes_string = ''
-            for j in range(data_dd['num_processes']):
-                if finish[j] == 'F':
-                    processes_string += "P"+str(j+1)+", "
-            processes_string = processes_string[:-2]
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            box.add_widget(Label(text=processes_string))
-            grid.add_widget(box)
+            # Display step by step changes in work vector according to process scheduled
+            for i in range(len(schedule)):
+                for j in range(len(work)):
+                    work[j] += allocation[schedule[i]][j]
+                # print "Schedule["+str(i)+"] = "+str(schedule[i])
+                finish[schedule[i]] = 'T'
+                # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='P'+str(schedule[i]+1)))
+                work_text = ''
+                for j in range(len(work)):
+                    work_text += (str(work[j])+'   ')
+                box.add_widget(Label(text=work_text))
+                finish_text = ''
+                for j in range(len(finish)):
+                    finish_text += (finish[j]+'   ')
+                box.add_widget(Label(text=finish_text))
+                grid.add_widget(box)
+
+            # Not deadlocked
+            if deadlock_safe:
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='No deadlocked detected.'))
+                grid.add_widget(box)
+            else:
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='Deadlock Detected. Deadlocked processes: '))
+                grid.add_widget(box)
+                processes_string = ''
+                for j in range(data_dd['num_processes']):
+                    if finish[j] == 'F':
+                        processes_string += "P"+str(j+1)+", "
+                processes_string = processes_string[:-2]
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text=processes_string))
+                grid.add_widget(box)
 
         # Add back button
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
@@ -1307,40 +1335,45 @@ class MemoryOutputScreen(Screen):
         box.add_widget(Label(text=algo_desc))
         grid.add_widget(box)
 
-        # Display each element of memroy chart timeline
-        for idx,temp_memory in enumerate(self.memory_chart):
-            # print str(temp_memory)
-            wait_queue = temp_memory['processes_waiting']
-            event_details = temp_memory['event']
-            external_fragmentation = temp_memory['external_fragmentation']
-            memory_state = temp_memory['memory_state']
-            process_id,arrival_bit,curr_time,burst_time,process_size = event_details
+        error = self.memory_chart[0]['error_status']
+        if error['error_number'] != -1:
+            # Inform the user
+            display_error(grid, error)
+        else:
+            # Display each element of memory chart timeline
+            for idx,temp_memory in enumerate(self.memory_chart):
+                # print str(temp_memory)
+                wait_queue = temp_memory['processes_waiting']
+                event_details = temp_memory['event']
+                external_fragmentation = temp_memory['external_fragmentation']
+                memory_state = temp_memory['memory_state']
+                process_id,arrival_bit,curr_time,burst_time,process_size = event_details
 
-            if (arrival_bit == 1): # new process has arrived
-                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='At time T = '+ str(curr_time) + 'ms,  process '+str(process_id)+' requests for a memory slot.'))
-                grid.add_widget(box)
-            else: # process is leaving
-                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='At time T = '+ str(curr_time) + 'ms,  process '+str(process_id)+' leaving memory.'))
-                grid.add_widget(box)
+                if (arrival_bit == 1): # new process has arrived
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                    box.add_widget(Label(text='At time T = '+ str(curr_time) + 'ms,  process '+str(process_id)+' requests for a memory slot.'))
+                    grid.add_widget(box)
+                else: # process is leaving
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                    box.add_widget(Label(text='At time T = '+ str(curr_time) + 'ms,  process '+str(process_id)+' leaving memory.'))
+                    grid.add_widget(box)
 
-            # Draw the memory state
-            mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-            size_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            wait_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            status_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            wait_to_memory_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                # Draw the memory state
+                mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+                size_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                wait_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                status_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                wait_to_memory_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
 
-            grid.add_widget(mem_box)
-            grid.add_widget(size_box)
-            grid.add_widget(wait_box)
-            grid.add_widget(status_box)
-            grid.add_widget(wait_to_memory_box)
-            # TODO: Better tracking of total height
-            start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(330))
-            self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
-            self.draw_wait_queue(wait_box, status_box, wait_to_memory_box, start_height, temp_memory)
+                grid.add_widget(mem_box)
+                grid.add_widget(size_box)
+                grid.add_widget(wait_box)
+                grid.add_widget(status_box)
+                grid.add_widget(wait_to_memory_box)
+                # TODO: Better tracking of total height
+                start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(330))
+                self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
+                self.draw_wait_queue(wait_box, status_box, wait_to_memory_box, start_height, temp_memory)
 
         # Add back button
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
@@ -1667,17 +1700,10 @@ class PageOutputScreen(Screen):
         grid.bind(minimum_height=grid.setter('height'))
 
 
-        if not self.memory_chart:
-            # Add back button
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-            box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
-            grid.add_widget(box)
-
-            # Add ScrollView
-            sv = ScrollView(size=self.size)
-            sv.add_widget(grid)
-            layout.add_widget(sv)
-
+        error = self.memory_chart[0]['error_status']
+        if error['error_number'] != -1:
+            # Inform the user
+            display_error(grid, error)
         else:
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
@@ -1736,15 +1762,15 @@ class PageOutputScreen(Screen):
             page_fault_ratio_box.add_widget(Label(text='Page fault ratio: '+ str(round(output, 3))))
             grid.add_widget(page_fault_ratio_box) 
 
-            # Add back button
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-            box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
-            grid.add_widget(box)
+        # Add back button
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
+        grid.add_widget(box)
 
-            # Add ScrollView
-            sv = ScrollView(size=self.size)
-            sv.add_widget(grid)
-            layout.add_widget(sv)
+        # Add ScrollView
+        sv = ScrollView(size=self.size)
+        sv.add_widget(grid)
+        layout.add_widget(sv)
 
     def draw_memory_state(self, mem_box, page_fault_box, temp_memory, *args):
         page_number = temp_memory['page_number']
@@ -1967,17 +1993,16 @@ class DiskOutputScreen(Screen):
 
         layout = self.manager.get_screen('disk_output').layout
         layout.clear_widgets()
-        self.arrows_widget = Widget()
+        self.arrows_widget = Widget() 
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
-        if not self.secondary_memory_chart:
+        error = self.secondary_memory_chart['error_status']
+        if error['error_number'] != -1:
             # Inform the user
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-            box.add_widget(Label(text="Disk queue not entered."))
-            grid.add_widget(box)
+            display_error(grid, error)
         else:
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
