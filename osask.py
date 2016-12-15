@@ -33,7 +33,7 @@ DEBUG_MODE = False
 form_row_height = '40dp'
 
 # Global data for CPU Scheduling Algorithms
-cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive', 'Multilevel Queue']
+cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive', 'Multilevel Queue', 'Multilevel Feedback Queue']
 cpu_scheduling_type = 0
 data_cpu = dict()
 
@@ -81,7 +81,12 @@ def cpu_on_num_queues(instace, value):
     if value == '':
         value = 2
     data_cpu['num_queues'] = int(value)
-    
+
+def cpu_on_queue_quantum(instace, value, i):
+    if value == '':
+        value = 2
+    data_cpu['queue_quantum'][i] = int(value)
+
 def cpu_on_queue_assigned(instace, value, i):
     if value == '':
         value = 0
@@ -191,6 +196,12 @@ class CPUInputScreen(Screen):
     def update_multilevel_form(self, *args):
         self.load_multilevel_form()
 
+     # Called when queue algo is changed
+    # (Wrapper function to allow for condition checking if required)
+    def update_sub_multilevel_form(self, *args):
+        self.load_sub_multilevel_form()
+
+
     # Binder function for number of processes input
     def bind_num_processes(self, *args):
         self.num_processes.bind(text=self.update_form)
@@ -203,6 +214,9 @@ class CPUInputScreen(Screen):
     def bind_num_queues(self, *args):
         self.num_queues.bind(text=self.update_multilevel_form)
 
+    def bind_queue_algo(self, *args):
+        self.queue_algo.bind(text=self.update_sub_multilevel_form)
+
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinner(self, *args):
         spinner = self.manager.get_screen('cpu_form').algo_spinner
@@ -211,9 +225,9 @@ class CPUInputScreen(Screen):
         variant_spinner.bind(text=self.show_variant)
     
     # Binder function for algorithm type selection from Spinner (Dropdown)  
-    def bind_multilevel_spinner(self, *args):
-        spinner = self.manager.get_screen('cpu_form').algo_spinner
-        spinner.bind(text=self.show_queue)
+    #def bind_multilevel_spinner(self, *args):
+        #spinner = self.manager.get_screen('cpu_form').algo_spinner
+        #spinner.bind(text=self.show_queue)
 
     # Wrapper function that calls binder functions for the required widgets
     def bind_widgets(self, *args):
@@ -233,6 +247,8 @@ class CPUInputScreen(Screen):
             self.set_cpu_type(1)
         elif text == 'Multilevel Queue':
             self.set_cpu_type(7)
+        elif text == 'Multilevel Feedback Queue':
+            self.set_cpu_type(8)
 
     def show_variant(self, spinner, text, *args):
         if text == 'Preemptive':
@@ -249,7 +265,6 @@ class CPUInputScreen(Screen):
             self.queue_type = 1
         data_cpu['queue_type'] = self.queue_type
 
-
     # Called when a new value is chosen from spinner. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
     def set_cpu_type(self, new_cpu_type, *args):
         global cpu_scheduling_type
@@ -257,7 +272,7 @@ class CPUInputScreen(Screen):
         self.cpu_type = new_cpu_type
         # variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
         # If FCFS or RR
-        if new_cpu_type == 0 or new_cpu_type == 1 or new_cpu_type == 7:
+        if new_cpu_type == 0 or new_cpu_type == 1 or new_cpu_type == 7 or new_cpu_type == 8:
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
             # variant_spinner.disabled = True
@@ -277,7 +292,7 @@ class CPUInputScreen(Screen):
     def update_cpu_type(self, *args):
         global cpu_scheduling_type
         # If FCFS or RR Scheduling
-        if self.cpu_type == 0 or self.cpu_type == 1 or self.cpu_type == 7:
+        if self.cpu_type == 0 or self.cpu_type == 1 or self.cpu_type == 7 or self.cpu_type == 8:
             pass
         elif self.preemptive_flag == True and self.cpu_type%2 == 0:
             self.cpu_type += 1
@@ -391,17 +406,17 @@ class CPUInputScreen(Screen):
             box.add_widget(inp)
             layout.add_widget(box)
         # If Multilevel Queue scheduling is selected
-        elif self.cpu_type == 7:
+        elif self.cpu_type == 7 or self.cpu_type == 8:
             box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
             inp = TextInput(id='num_queues')
             # inp.bind(text=cpu_on_num_queues)
-            inp.bind(text=partial(self.load_multilevel_form, layout, inp))
+            inp.bind(text=partial(self.load_multilevel_form, layout, inp, self.cpu_type))
             label = Label(text='Number of queues')
             box.add_widget(label)
             box.add_widget(inp)
             layout.add_widget(box)          
 
-        if self.cpu_type != 7:
+        if self.cpu_type != 7 and self.cpu_type != 8:
             # Add Visualize and back button at the end of form
             button_box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
             button_box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
@@ -420,11 +435,11 @@ class CPUInputScreen(Screen):
         self.multilevel_input_widgets = []
 
 
-    def load_multilevel_form(self, grid_layout, num_queues_input, *args):
+    def load_multilevel_form(self, grid_layout, num_queues_input, type, *args ):
         # Remove previous multilevel form widgets
         self.remove_multilevel_widgets(grid_layout)
 
-        data_cpu['queue_algo'] = []
+       
 
         # Update num_queues and set to default value if empty
         if DEBUG_MODE:
@@ -442,77 +457,100 @@ class CPUInputScreen(Screen):
             print "Number of queues is zero. Cannot load form."
             return
 
-        # Iniatilize time quantum list
-        data_cpu['queue_time_quantum'] = [0] * data_cpu['num_queues']
-        data_cpu['queue_assigned'] = [0] * data_cpu['num_processes']
 
-        # Adding descriptive features
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        label = Label(text='Information about intra queue scheduling algorithms:')
-        box.add_widget(label)
-        grid_layout.add_widget(box)
-        self.multilevel_input_widgets.append(box)
+        if type == 7:
+            data_cpu['queue_algo'] = []
+            # Iniatilize time quantum list
+            data_cpu['queue_time_quantum'] = [0] * data_cpu['num_queues']
+            data_cpu['queue_assigned'] = [0] * data_cpu['num_processes']
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        label = Label(text='Queue number')
-        box.add_widget(label)
-        label = Label(text='Algorithm chosen')
-        box.add_widget(label)
-        grid_layout.add_widget(box)
-        self.multilevel_input_widgets.append(box)
+            # Adding descriptive features
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            label = Label(text='Information about intra queue scheduling algorithms:')
+            box.add_widget(label)
+            grid_layout.add_widget(box)
+            self.multilevel_input_widgets.append(box)
 
-        # Adding input rows for intra queue scheduling algorithm for each queue 
-        for i in range(data_cpu['num_queues']):
-            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
-            qnum = Label(text='Q'+str(i+1))
-            box.add_widget(qnum)
-            data_cpu['qnum'+str(i)] = 'Q'+str(i+1)
-         
-            queue_spinner = Spinner(
-                text='-',
-                values=('FCFS','Round Robin'))
-            queue_spinner.bind(text=self.show_queue)
-            box.add_widget(queue_spinner)
-            (data_cpu['queue_algo']).insert(i,self.queue_type)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            label = Label(text='Queue number')
+            box.add_widget(label)
+            label = Label(text='Algorithm chosen')
+            box.add_widget(label)
+            grid_layout.add_widget(box)
+            self.multilevel_input_widgets.append(box)
 
-            if self.queue_type == 1:
-                inp = TextInput(id='quantum')
-                inp.bind(text=cpu_on_quantum)
-                label = Label(text='Time quantum (ms):')
-                box.add_widget(label)
+            # Adding input rows for intra queue scheduling algorithm for each queue 
+            for i in range(data_cpu['num_queues']):
+                box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
+                qnum = Label(text='Q'+str(i+1))
+                box.add_widget(qnum)
+                data_cpu['qnum'+str(i)] = 'Q'+str(i+1)
+             
+                queue_spinner = Spinner(
+                    text='-',
+                    values=('FCFS','Round Robin'))
+                queue_spinner.bind(text=self.show_queue)
+                box.add_widget(queue_spinner)
+                (data_cpu['queue_algo']).insert(i,self.queue_type)
+                if self.queue_type == 1:
+                    inp = TextInput(id='quantum')
+                    inp.bind(text=cpu_on_quantum)
+                    label = Label(text='Time quantum (ms):')
+                    box.add_widget(label)
+                    box.add_widget(inp)
+                    data_cpu['queue_time_quantum'][i] = data_cpu['quantum']
+                else:
+                    data_cpu['queue_time_quantum'][i] = 0
+
+                grid_layout.add_widget(box)
+                self.multilevel_input_widgets.append(box)
+
+            # Descriptive features for assigning a queue to every process
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            label = Label(text='Enter queues assigned:')
+            box.add_widget(label)
+            grid_layout.add_widget(box)
+            self.multilevel_input_widgets.append(box)
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            label = Label(text='Process name')
+            box.add_widget(label)
+            label = Label(text='Queue assigned')
+            box.add_widget(label)
+            grid_layout.add_widget(box)
+            self.multilevel_input_widgets.append(box)
+
+            # Adding input rows to assign a queue to each process
+            for i in range(data_cpu['num_processes']):
+                box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
+                qnum = Label(text='P'+str(i+1))
+                box.add_widget(qnum)
+                inp = TextInput(id='queue_assigned'+str(i))
+                inp.bind(text=partial(cpu_on_queue_assigned, i=i))
                 box.add_widget(inp)
-                data_cpu['queue_time_quantum'][i] = data_cpu['quantum']
-            else:
-                data_cpu['queue_time_quantum'][i] = 0
-
+                grid_layout.add_widget(box)
+                self.multilevel_input_widgets.append(box)
+        elif type == 8:
+            data_cpu['queue_quantum'] = [0] * (data_cpu['num_queues']-1)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            label = Label(text='Queue number')
+            box.add_widget(label)
+            label = Label(text='Time Quantum(ms)')
+            box.add_widget(label)
             grid_layout.add_widget(box)
             self.multilevel_input_widgets.append(box)
-
-        # Descriptive features for assigning a queue to every process
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        label = Label(text='Enter queues assigned:')
-        box.add_widget(label)
-        grid_layout.add_widget(box)
-        self.multilevel_input_widgets.append(box)
-
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        label = Label(text='Process name')
-        box.add_widget(label)
-        label = Label(text='Queue assigned')
-        box.add_widget(label)
-        grid_layout.add_widget(box)
-        self.multilevel_input_widgets.append(box)
-
-        # Adding input rows to assign a queue to each process
-        for i in range(data_cpu['num_processes']):
-            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
-            qnum = Label(text='P'+str(i+1))
-            box.add_widget(qnum)
-            inp = TextInput(id='queue_assigned'+str(i))
-            inp.bind(text=partial(cpu_on_queue_assigned, i=i))
-            box.add_widget(inp)
-            grid_layout.add_widget(box)
-            self.multilevel_input_widgets.append(box)
+            for i in range(data_cpu['num_queues']-1):
+                box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
+                qnum = Label(text='Q'+str(i+1))
+                box.add_widget(qnum)
+                data_cpu['qnum'+str(i)] = 'Q'+str(i+1)
+                inp = TextInput(id='queue_quantum'+str(i))
+                inp.bind(text=partial(cpu_on_queue_quantum, i=i))
+                box.add_widget(inp)
+                grid_layout.add_widget(box)
+                self.multilevel_input_widgets.append(box)
+                #data_cpu['queue_time_quantum'][i] = data_cpu['quantum']
+             
 
         # Add Visualize and back button at the end of form
         button_box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
@@ -576,8 +614,9 @@ class CPUOutputScreen(Screen):
         elif cpu_scheduling_type == 5:
             self.cpu_schedule, self.stats, self.details = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 7:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], data_cpu['queue_time_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
-        
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], [1,2,3], dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 8:
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel_feedback(formatted_data, data_cpu['num_queues'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll
@@ -605,9 +644,21 @@ class CPUOutputScreen(Screen):
 
             # Popup showing details of process when box is clicked
             if process['name'] != 'Idle':
-                content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
-                    "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
-                    "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                if cpu_scheduling_type != 8:
+                    content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                        "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                        "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                else:
+                    if process['next_queue'] == 0:
+                        content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                        "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                        "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                        "Process "+process['name']+" is completed.")
+                    else:
+                        content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                        "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                        "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                        process['name']+" moved to queue Q"+str(process['next_queue']+1)+".")
                 content_label = Label(text=content_str)
                 popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(kivy.metrics.dp(200), kivy.metrics.dp(200)))
                 label_name.bind(on_ref_press=popup.open)
@@ -2082,7 +2133,7 @@ class DiskOutputScreen(Screen):
             x2 = self.scale_x(movement_list[i+1])
             y2 = y1 - kivy.metrics.dp(30)
             self.add_arrow(x1, y1, x2, y2)
-            #self.add_arrow_head(x1,y1,x2,y2)
+            self.add_arrow_head(x1,y1,x2,y2)
             y1 = y2
 
     def scale_x(self, x, *args):
@@ -2092,7 +2143,7 @@ class DiskOutputScreen(Screen):
     def add_arrow(self, x1, y1, x2, y2, *args):
         with self.arrows_widget.canvas:
             Color(1, 1, 1)
-            Line(points=[x1,y1,x2,y2], width=1.5)
+            Line(points=[x1,y1,x2,y2], width=1.3)
 
     # Drawing the arrow head        
     def add_arrow_head(self, x1, y1, x2, y2, *args):
