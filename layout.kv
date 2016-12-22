@@ -461,8 +461,11 @@
             on_press: app.stop()
 
 <MemoryInputScreen>:
+    on_pre_enter: root.bind_widgets()
     num_processes: num_processes
     mem_size: mem_size
+    algo_spinner: algo_spinner
+    visualize_button: visualize_button
     form: form
     BoxLayout:
         canvas:
@@ -474,8 +477,8 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '10dp', '2.5dp'
-            size_hint_y: 0.08
+            padding: '10dp', '5dp'
+            size_hint_y: 0.1
             size_hint_x: 0.3
             pos_hint: {'top': 1}
             Label:
@@ -490,10 +493,10 @@
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.08
+            size_hint_y: 0.1
             size_hint_x: 0.7
             Label:
-                size_hint_x: 0.25
+                size_hint_x: 0.3
                 valign: 'middle'
                 text: 'Size of Main Memory (KB):'
                 text_size: self.size
@@ -503,27 +506,72 @@
                 multiline: 'False'
             Label:
                 size_hint_x: 0.3
-            Button:
-                size_hint_x: 0.15
-                text: 'Load form'
-                on_release: root.load_form()
+        BoxLayout:
+            orientation: 'horizontal'
+            padding: '5dp', '10dp'
+            size_hint_y: 0.2
+            #height: '100dp'
+            Label:
+                text: 'Algorithm -'
+                size_hint_x: 0.3
+                text_size: self.size
+                #pos_hint: {'top': 1}
+                padding: '10dp', '10dp'
+            Spinner:
+                id: algo_spinner
+                text:'Select an Algorithm'
+                size_hint_y: 'None'
+                height: '40dp'
+                values: ('First Fit', 'Best Fit', 'Worst Fit')
+            Label:
+                size_hint_x: 0.3
         BoxLayout:
             orientation: 'vertical'
             id: form
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_release:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'menu'
+            Button:
+                id: visualize_button
+                text: 'Visualize'
+                disabled: True
+                on_release:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'mem_output'
 
 <MemoryOutputScreen>:
     on_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
-        id: layout
-
+        BoxLayout:
+            orientation: 'vertical'
+            id: layout
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'mem_form'
+            Button:
+                text: 'Exit'
+                on_press: app.stop()
 
 <PageInputScreen>:
     on_pre_enter: root.bind_widgets()
     num_frames: num_frames
     form: form
     algo_spinner: algo_spinner
+    visualize_button: visualize_button
     BoxLayout:
         canvas:
             Color:
@@ -535,7 +583,7 @@
         BoxLayout:
             orientation: 'horizontal'
             padding: '30dp', '5dp'
-            size_hint_y: 0.08
+            size_hint_y: 0.1
             size_hint_x: 0.7
             Label:
                 size_hint_x: 0.25
@@ -548,9 +596,8 @@
                 multiline: 'False'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '5dp', '20dp'
-            size_hint_y: None
-            height: '100dp'
+            padding: '5dp', '10dp'
+            size_hint_y: 0.2
             Label:
                 text: 'Algorithm -'
                 size_hint_x: 0.3
@@ -563,16 +610,48 @@
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used')
+            Label:
+                size_hint_x: 0.3
         BoxLayout:
             orientation: 'vertical'
             id: form
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_release:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'menu'
+            Button:
+                id: visualize_button
+                text: 'Visualize'
+                disabled: True
+                on_release:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'page_output'
 
 <PageOutputScreen>:
     on_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
-        id: layout
+        BoxLayout:
+            orientation: 'vertical'
+            id: layout
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'page_form'
+            Button:
+                text: 'Exit'
+                on_press: app.stop()
 
 
 <DiskInputScreen>:
@@ -581,6 +660,7 @@
     form: form
     pos_head: pos_head
     algo_spinner: algo_spinner
+    visualize_button: visualize_button
     BoxLayout:
         canvas:
             Color:
@@ -641,11 +721,41 @@
         BoxLayout:
             id: form
             orientation: 'vertical'
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_release:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'menu'
+            Button:
+                id: visualize_button
+                text: 'Visualize'
+                disabled: True
+                on_release:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'disk_output'
 
 <DiskOutputScreen>:
     on_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
-        id: layout
+        BoxLayout:
+            orientation: 'vertical'
+            id: layout
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'disk_form'
+            Button:
+                text: 'Exit'
+                on_press: app.stop()
 
