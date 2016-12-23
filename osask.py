@@ -35,7 +35,6 @@ form_row_height = '40dp'
 # Global data for CPU Scheduling Algorithms
 cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive', 'Multilevel Queue', 'Multilevel Feedback Queue']
 cpu_scheduling_type = 0
-queue_algo_type = 0
 data_cpu = dict()
 
 # Global data for Deadlock Avoidance Algorithm
@@ -92,11 +91,6 @@ def cpu_on_queue_assigned(instace, value, i):
     if value == '':
         value = 0
     data_cpu['queue_assigned'][i] = int(value)
-
-def cpu_on_time_quantum(instace, value):
-    if value == '':
-        value = 0
-    data_cpu['time_quantum'].insert(len(data_cpu['time_quantum']), value)
 
 # Binder functions for Deadlock Avoidance Algorithm form
 def da_on_available(instace, value, i):
@@ -229,13 +223,15 @@ class CPUInputScreen(Screen):
     def bind_num_queues(self, *args):
         self.num_queues.bind(text=self.update_multilevel_form)
 
+    def bind_queue_algo(self, *args):
+        self.queue_algo.bind(text=self.update_sub_multilevel_form)
+
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinner(self, *args):
         spinner = self.manager.get_screen('cpu_form').algo_spinner
         spinner.bind(text=self.show_selected_value)
         variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
         variant_spinner.bind(text=self.show_variant)
-        spinner.bind(text=self.show_queue)
     
     # Binder function for algorithm type selection from Spinner (Dropdown)  
     #def bind_multilevel_spinner(self, *args):
@@ -273,9 +269,10 @@ class CPUInputScreen(Screen):
 
     def show_queue(self, spinner, text, *args):
         if text == 'FCFS':
-            self.set_queue_type(0)
+            self.queue_type = 0
         elif text == 'Round Robin':
-            self.set_queue_type(1)
+            self.queue_type = 1
+        data_cpu['queue_type'] = self.queue_type
 
     # Called when a new value is chosen from spinner. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
     def set_cpu_type(self, new_cpu_type, *args):
@@ -299,12 +296,6 @@ class CPUInputScreen(Screen):
             self.cpu_type = new_cpu_type
             # variant_spinner.disabled = False
         self.load_form()
-
-    def set_queue_type(self, new_queue_type, *args):
-        global queue_algo_type
-        queue_algo_type = new_queue_type
-        self.queue_type = new_queue_type
-        self.load_sub_multilevel_form()
 
     # Called when preemptive or non-preemtive option is clicked. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
     def update_cpu_type(self, *args):
@@ -477,9 +468,9 @@ class CPUInputScreen(Screen):
 
 
         if type == 7:
-            data_cpu['queue_algo'] = [0] * data_cpu['num_queues']
+            data_cpu['queue_algo'] = []
             # Iniatilize time quantum list
-            data_cpu['time_quantum'] = [0] * data_cpu['num_queues']
+            data_cpu['queue_time_quantum'] = [0] * data_cpu['num_queues']
             data_cpu['queue_assigned'] = [0] * data_cpu['num_processes']
 
             # Adding descriptive features
@@ -510,15 +501,15 @@ class CPUInputScreen(Screen):
                 queue_spinner.bind(text=self.show_queue)
                 box.add_widget(queue_spinner)
                 (data_cpu['queue_algo']).insert(i,self.queue_type)
-                #if self.queue_type == 1:
-                    #inp = TextInput(id='quantum')
-                    #inp.bind(text=cpu_on_quantum)
-                    #label = Label(text='Time quantum (ms):')
-                    #box.add_widget(label)
-                    #box.add_widget(inp)
-                    #data_cpu['queue_quantum'][i] = data_cpu['quantum']
-                #else:
-                    #data_cpu['queue_quantum'][i] = 0
+                if self.queue_type == 1:
+                    inp = TextInput(id='quantum')
+                    inp.bind(text=cpu_on_quantum)
+                    label = Label(text='Time quantum (ms):')
+                    box.add_widget(label)
+                    box.add_widget(inp)
+                    data_cpu['queue_time_quantum'][i] = data_cpu['quantum']
+                else:
+                    data_cpu['queue_time_quantum'][i] = 0
 
                 grid_layout.add_widget(box)
                 self.multilevel_input_widgets.append(box)
@@ -576,22 +567,7 @@ class CPUInputScreen(Screen):
         button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
         grid_layout.add_widget(button_box)
         self.multilevel_input_widgets.append(button_box)
-
-    def load_sub_multilevel_form(self, *args):
-        layout = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
-        layout.bind(minimum_height=layout.setter('height'))
-        if self.queue_type == 1: 
-            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
-            inp = TextInput(id='time_quantum')
-            inp.bind(text=cpu_on_time_quantum)
-            label = Label(text='Time quantum (ms):')
-            box.add_widget(label)
-            box.add_widget(inp)
-            layout.add_widget(box)
-        else:
-            data_cpu['time_quantum'].insert(len(data_cpu['time_quantum']), 0)
-
-   
+        
     def switch_to_cpu_output(self, *args):
         self.manager.transition.direction = 'left'
         self.manager.current = 'cpu_output'
@@ -616,24 +592,6 @@ class CPUOutputScreen(Screen):
     details = {}
     # Stores information related to bad input data
     error_status = {}
-
-    def get_description(self, *args):
-        if cpu_scheduling_type == 0:
-            return 'In First Come First Served Scheduling, the processor is allocated to the process which has arrived first.\nIt is a non-preemptive algorithm.'
-        elif cpu_scheduling_type == 1:
-            return 'In Round Robin Scheduling, the processor is allocated to a process for a small time quantum. The processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
-        elif cpu_scheduling_type == 2:
-            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.'
-        elif cpu_scheduling_type == 3:
-            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
-        elif cpu_scheduling_type == 4:
-            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
-        elif cpu_scheduling_type == 5:
-            return 'In Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
-        elif cpu_scheduling_type == 7:
-            return 'In Multilevel Queue Scheduling, the ready queue is partitioned into several queues.\nA process is permanently assigned to a queue.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is often used for inter-queue scheduling.'
-        elif cpu_scheduling_type == 8:
-            return 'In Multilevel Feedback Queue Scheduling, the ready queue is partitioned into several queues.\nThe processes can move between the queues.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is typically used for inter-queue scheduling.'
 
     # Prints the details of the process schedule and statistics
     def calculate_schedule(self, *args):
@@ -669,7 +627,7 @@ class CPUOutputScreen(Screen):
             self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 7:
 
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], [1,2,3], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 8:
             self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel_feedback(formatted_data, data_cpu['num_queues'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
         
@@ -733,11 +691,6 @@ class CPUOutputScreen(Screen):
 
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
             box.add_widget(Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%'))
-            grid.add_widget(box)
-
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-            algo_desc = self.get_description()
-            box.add_widget(Label(text=algo_desc))
             grid.add_widget(box)
 
             self.draw_gantt()
@@ -1743,20 +1696,11 @@ class PageOutputScreen(Screen):
 
     def get_description(self, *args):
         if data_page['algo'] == 0:
-            return 'In First In First Out Page Replacement Algorithm, the page that was loaded earliest in the memory is replaced.'
+            return 'FIFO: First In First Out'
         elif data_page['algo'] == 1:
-            return 'In Optimal Page Replacement Algorithm, the page that will not be referenced for the longest period of time is replaced.'
-        elif data_page['algo'] == 2:
-            return 'In Least Recently Used Page Replacement Algorithm,\nthe page that has not been referenced for the longest period of time is replaced.'
-        elif data_page['algo'] == 3:
-            return 'In Second Chance Page Replacement Algorithm,\nthe page that was loaded earliest in the memory is replaced.\nHowever, if the reference bit of the page is set then that page is given a second chance and the next possible page is replaced.\nWhen a page is given a second chance, its reference bit is reset and its arrival time is set to the current time.'
-        elif data_page['algo'] == 4:
-            return 'In Enhanced Second Chance Page Replacement Algorithm,\nthe pages are divided in four classes using their reference bit and modify bit as ordered pairs.\nThe page of the lowest nonempty class which was loaded earliest in the memory is replaced.'
-        elif data_page['algo'] == 5:
-            return 'In Least Frequently Used Page Replacement Algorithm,\nthe page that has been referenced the least number of times is replaced.'
-        elif data_page['algo'] == 6:
-            return 'In Most Frequently Used Page Replacement Algorithm,\nthe page that has been referenced the most number of times is replaced.'
-            
+            return 'Optimal Page Replacement'
+        else:
+            return 'TBA'
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
@@ -2058,17 +2002,11 @@ class DiskOutputScreen(Screen):
 
     def get_description(self, *args):
         if data_disk['algo'] == 0:
-            return 'In First Come First Served Scheduling, the i/o requests are processed in the order in which they arrive.'
+            return 'FCFS'
         elif data_disk['algo'] == 1:
-            return 'In Shortest Seek Time First Scheduling, the i/o request which will need the minimum seek time is processed first.'
-        elif data_disk['algo'] == 2:
-            return 'In SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.'
-        elif data_disk['algo'] == 3:
-            return 'In C-SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.\nOn reaching the end, the r/w head immediately returns to the beginning without servicing any request on the return trip.'
-        elif data_disk['algo'] == 4:
-            return 'In LOOK scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.'
-        elif data_disk['algo'] == 5:
-            return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.\nOn reaching the end, the r/w head immediately returns to the beginning, if need be, without servicing any request on the return trip.'
+            return 'Shortest Seek Time First'
+        else:
+            return 'TBA'
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
