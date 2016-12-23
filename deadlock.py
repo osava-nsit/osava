@@ -96,15 +96,15 @@ def check_for_bad_input_detection(available, allocation, request, num_processes,
                 error_status = get_error_message(2, -1, chr(ord('A')+j))
                 error = 1
                 break
-            if int(request[j]) < 0:
-                error_status = get_error_message(4, -1, chr(ord('A')+j))
-                error = 1
-                break
         if error == 0:
             for i in range(num_processes):
                 for j in range(num_resources):
                     if int(allocation[i][j]) < 0:
                         error_status = get_error_message(6, i+1, chr(ord('A')+j))
+                        error = 1
+                        break
+                    if int(request[i][j]) < 0:
+                        error_status = get_error_message(4, -1, chr(ord('A')+j))
                         error = 1
                         break
     # No bad input
