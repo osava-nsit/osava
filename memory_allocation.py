@@ -690,6 +690,6 @@ def best_fit(data):
                 temp_memory['external_fragmentation'] = 0
                 temp_memory['error_status'] = error_status
                 memory_chart.append(temp_memory)
-            del event_list[]
+            del event_list[0]
         return memory_chart
         
