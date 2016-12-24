@@ -24,6 +24,7 @@
 
 <MainMenuScreen>:
     title: title
+    about_label: about_label
     on_enter: root.load_ribbon()
     FloatLayout:
         canvas:
@@ -81,12 +82,19 @@
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'disk_form'
-        Image:
-            source: "images/nsit_logo.png"
-            size_hint: 0.2, 0.2
-            pos_hint: {'x': .4, 'y': .1}
+        #Image:
+            #source: "images/nsit_logo.png"
+            #size_hint: 0.2, 0.2
+            #pos_hint: {'x': .4, 'y': .1}
+        Button:
+            size_hint: 0.2, 0.05
+            pos_hint: {'x': 0.4, 'y': 0.2}
+            text: 'About'
+            on_press:
+                root.about_label.text = 'Developers: Udit Arora, Namrata Mukhija, Priyanka Singla, Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
         Label:
-            text: 'Developers: Udit Arora, Rohit Takhar, Namrata Mukhija, Priyanka Singla\nAdvisor: Dr. Pinaki Chakraborty'
+            id: about_label
+            text: ''
             size_hint: 0.6, 0.06
             pos_hint: {'x': .2, 'y': .02}
 

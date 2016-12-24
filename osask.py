@@ -249,10 +249,8 @@ class CPUInputScreen(Screen):
 
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinner(self, *args):
-        spinner = self.manager.get_screen('cpu_form').algo_spinner
-        spinner.bind(text=self.show_selected_value)
-        variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
-        variant_spinner.bind(text=self.show_variant)
+        self.algo_spinner.bind(text=self.show_selected_value)
+        self.variant_spinner.bind(text=self.show_variant)
     
     # Binder function for algorithm type selection from Spinner (Dropdown)  
     #def bind_multilevel_spinner(self, *args):
@@ -261,24 +259,30 @@ class CPUInputScreen(Screen):
 
     # Wrapper function that calls binder functions for the required widgets
     def bind_widgets(self, *args):
-            self.bind_num_processes()
-            self.bind_dispatch_latency()
-            self.bind_spinner()
+        self.bind_num_processes()
+        self.bind_dispatch_latency()
+        self.bind_spinner()
 
     # Call set_cpu_type method with appropriate index of scheduling algorithm
     def show_selected_value(self, spinner, text, *arg):
         if text == 'First Come First Serve':
             self.set_cpu_type(0)
+            self.variant_spinner.disabled = True
         elif text == 'Shortest Job First':
             self.set_cpu_type(2)
+            self.variant_spinner.disabled = False
         elif text == 'Priority':
             self.set_cpu_type(4)
+            self.variant_spinner.disabled = False
         elif text == 'Round Robin':
             self.set_cpu_type(1)
+            self.variant_spinner.disabled = True
         elif text == 'Multilevel Queue':
             self.set_cpu_type(7)
+            self.variant_spinner.disabled = True
         elif text == 'Multilevel Feedback Queue':
             self.set_cpu_type(8)
+            self.variant_spinner.disabled = True
 
     def show_variant(self, spinner, text, *args):
         if text == 'Preemptive':
@@ -300,23 +304,20 @@ class CPUInputScreen(Screen):
         global cpu_scheduling_type
         cpu_scheduling_type = new_cpu_type
         self.cpu_type = new_cpu_type
-        # variant_spinner = self.manager.get_screen('cpu_form').variant_spinner
         # If FCFS or RR
         if new_cpu_type == 0 or new_cpu_type == 1 or new_cpu_type == 7 or new_cpu_type == 8:
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
-            # variant_spinner.disabled = True
         elif self.preemptive_flag == True and new_cpu_type%2 == 0:
-            new_cpu_type += 10
+            new_cpu_type += 1
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
-            # variant_spinner.disabled = False
         elif self.preemptive_flag == False and new_cpu_type%2 != 0:
             new_cpu_type -= 1
             cpu_scheduling_type = new_cpu_type
             self.cpu_type = new_cpu_type
-            # variant_spinner.disabled = False
-        self.load_form()
+        if ('num_processes' in data_cpu and data_cpu['num_processes'] > 0):
+            self.load_form()
 
     # Called when preemptive or non-preemtive option is clicked. Sets cpu_type to the appropriate index in the cpu_scheduling_types list
     def update_cpu_type(self, *args):
