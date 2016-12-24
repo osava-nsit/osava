@@ -621,6 +621,7 @@ class CPUOutputScreen(Screen):
             formatted_data.append(process)
             self.colors[process['name']] = [random(), random(), random()]
         self.colors['Idle'] = [0.2, 0.2, 0.2]
+        self.colors['DL'] = [0.2, 0.2, 0.2]
 
         
         if cpu_scheduling_type == 0:
@@ -654,7 +655,10 @@ class CPUOutputScreen(Screen):
             for process in self.cpu_schedule:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height='20dp')
 
-                label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
+                if (process['name'] == 'DL'):
+                    label_name = Label(text='[ref=click]'+'Dispatch Latency'+':[/ref]', markup=True)
+                else:
+                    label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
                 box.add_widget(label_name)
                 label = Label(text=str(process['start']))
                 box.add_widget(label)
@@ -669,7 +673,7 @@ class CPUOutputScreen(Screen):
                 box.add_widget(Label(text='', size_hint_x=None, width='20dp'))
 
                 # Popup showing details of process when box is clicked
-                if process['name'] != 'Idle':
+                if process['name'] != 'Idle' and process['name'] != 'DL':
                     content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
                         "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
                         "Turnaround time: "+str(self.details[process['name']]['turn_time']))

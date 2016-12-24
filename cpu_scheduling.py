@@ -109,6 +109,7 @@ def fcfs(data, dispatch_latency = 0):
             sum_time += process['burst']
             details_process[process['name']] = temp_process
 
+            # Add Idle process if required
             if len(process_chart) > 0:
                 if process_chart[-1]['end'] != chart_details['start']:
                     idle_cpu = dict()
@@ -124,6 +125,15 @@ def fcfs(data, dispatch_latency = 0):
                 process_chart += [idle_cpu]
 
             process_chart += [chart_details]
+
+            # Add dispatch latency
+            if (dispatch_latency > 0):
+                dl_cpu = dict()
+                dl_cpu['name'] = 'DL'
+                dl_cpu['start'] = chart_details['end']
+                dl_cpu['end'] = chart_details['end'] + dispatch_latency
+                process_chart += [dl_cpu]
+                curr_time += dispatch_latency
 
         stats = {}
         stats['sum_time'] = sum_time
