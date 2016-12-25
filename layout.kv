@@ -357,7 +357,7 @@
                     root.manager.current = 'da_output'
 
 <DeadlockAvoidanceOutputScreen>:
-    on_enter: root.calculate()
+    on_pre_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
@@ -450,7 +450,7 @@
                     root.manager.current = 'dd_output'
 
 <DeadlockDetectionOutputScreen>:
-    on_enter: root.calculate()
+    on_pre_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
@@ -554,7 +554,7 @@
                     root.manager.current = 'mem_output'
 
 <MemoryOutputScreen>:
-    on_enter: root.calculate()
+    on_pre_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
@@ -641,7 +641,7 @@
                     root.manager.current = 'page_output'
 
 <PageOutputScreen>:
-    on_enter: root.calculate()
+    on_pre_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'
@@ -747,7 +747,7 @@
                     root.manager.current = 'disk_output'
 
 <DiskOutputScreen>:
-    on_enter: root.calculate()
+    on_pre_enter: root.calculate()
     layout: layout
     BoxLayout:
         orientation: 'vertical'

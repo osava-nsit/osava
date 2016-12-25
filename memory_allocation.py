@@ -477,7 +477,7 @@ def worst_fit(data):
             process_size = process['size']
             pair = (process_id,arrival_bit,arrival_time,burst_time,process_size);
             event_list.append(pair)
-         while (len(event_list) > 0):
+        while (len(event_list) > 0):
             event = event_list[0]
             process_id,arrival_bit,arrival_time,burst_time,process_size=event
             if(arrival_bit == 1):
@@ -669,7 +669,7 @@ def best_fit(data):
             process_size=process['size']
             pair=(process_id,arrival_bit,arrival_time,burst_time,process_size)
             event_list.append(pair)
-         while (len(event_list) > 0):
+        while (len(event_list) > 0):
             event = event_list[0]
             process_id,arrival_bit,arrival_time,burst_time,process_size=event
             if(arrival_bit==1):

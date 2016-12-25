@@ -53,47 +53,47 @@ data_page = dict()
 data_disk = dict()
 
 # Binder functions for CPU Scheduling Algorithms form, to store data in the global 'data_cpu' dictionary
-def cpu_on_name(instace, value, i):
+def cpu_on_name(instance, value, i):
     if value == '':
         value = 'P'+str(i+1)
     data_cpu['name'+str(i)] = value
-def cpu_on_arrival(instace, value, i):
+def cpu_on_arrival(instance, value, i):
     if value == '':
         value = 1
     data_cpu['arrival'+str(i)] = value
-def cpu_on_burst(instace, value, i):
+def cpu_on_burst(instance, value, i):
     if value == '':
         value = 4
     data_cpu['burst'+str(i)] = value
-def cpu_on_priority(instace, value, i):
+def cpu_on_priority(instance, value, i):
     if value == '':
         value = 10
     data_cpu['priority'+str(i)] = value
-def cpu_on_quantum(instace, value):
+def cpu_on_quantum(instance, value):
     if value == '':
         value = 2
     data_cpu['quantum'] = int(value)
-def cpu_on_aging(instace, value):
+def cpu_on_aging(instance, value):
     if value == '':
         value = 4
     data_cpu['aging'] = int(value)
-def cpu_on_num_queues(instace, value):
+def cpu_on_num_queues(instance, value):
     if value == '':
         value = 2
     data_cpu['num_queues'] = int(value)
 
-def cpu_on_queue_quantum(instace, value, i):
+def cpu_on_queue_quantum(instance, value, i):
     if value == '':
         value = 2
     data_cpu['queue_quantum'][i] = int(value)
 
-def cpu_on_queue_assigned(instace, value, i):
+def cpu_on_queue_assigned(instance, value, i):
     if value == '':
         value = 0
     data_cpu['queue_assigned'][i] = int(value)
 
 # Binder functions for Deadlock Avoidance Algorithm form
-def da_on_available(instace, value, i):
+def da_on_available(instance, value, i):
     if (value == ''):
         value = 5
     data_da['available'][i] = int(value)
@@ -153,7 +153,7 @@ def page_on_modify(instance, value):
     data_page['modify_bit'] = str(value)
 
 # Binder functions for Disk Scheduling Algorithms
-def disk_queue(instance, value):
+def disk_on_queue(instance, value):
     if(value == ''):
         value = '98,183,37,122,14,124,65,67'
     data_disk['disk_queue'] = str(value)
@@ -167,7 +167,7 @@ class ColoredBorderedLabel(Label):
 # Global function for bad input handling
 def display_error(grid, error):
     error_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='400dp')
-    error_label = Label(text="Bad Input:\n\n " + error['error_message'],size_hint_x=None, width=Window.width, valign='top', halign='center', font_size='15sp')
+    error_label = Label(text="Bad Input:\n" + error, size_hint_x=None, width=Window.width, valign='top', halign='center')
     error_label.text_size = error_label.size
     error_box.add_widget(error_label)
     grid.add_widget(error_box)
@@ -195,10 +195,31 @@ class CPUInputScreen(Screen):
 
     multilevel_input_widgets = []
 
+    # Update dispatch_latency and set to default value if empty
+    def update_dispatch_latency(self, *args):
+        if not self.dispatch_latency.text.isdigit():
+            data_cpu['dispatch_latency'] = 0
+        else:
+            data_cpu['dispatch_latency'] = int(self.dispatch_latency.text)
+
     # Called when the number of processes input is changed
     # (Wrapper function to allow for condition checking if required)
     def update_form(self, *args):
-        self.load_form()
+        if (self.num_processes.text == ""):
+            data_cpu['num_processes'] = 0
+        elif not (self.num_processes.text.isdigit()):
+            data_cpu['num_processes'] = 0
+        else:
+            data_cpu['num_processes'] = int(self.num_processes.text)
+
+        # If input is valid, load form else display error message
+        if (data_cpu['num_processes'] > 0):
+            self.load_form()
+        elif (self.num_processes.text != ""):
+            layout_form = self.manager.get_screen('cpu_form').layout_form
+            layout_form.clear_widgets()
+            display_error(layout_form, "Invalid number of processes.")
+            self.visualize_button.disabled = True
 
     # Called when the number of queues input is changed
     # (Wrapper function to allow for condition checking if required)
@@ -217,7 +238,7 @@ class CPUInputScreen(Screen):
 
     # Binder function for dispatch latency input
     def bind_dispatch_latency(self, *args):
-        self.dispatch_latency.bind(text=self.update_form)
+        self.dispatch_latency.bind(text=self.update_dispatch_latency)
 
     # Binder function for number of queues input
     def bind_num_queues(self, *args):
@@ -317,21 +338,8 @@ class CPUInputScreen(Screen):
         layout_form = self.manager.get_screen('cpu_form').layout_form
         layout_form.clear_widgets()
 
-        # Update num_processes and set to default value if empty
-        if DEBUG_MODE:
-            if (self.num_processes.text == "" or int(self.num_processes.text) == 0):
-                self.num_processes.text = "5"
-        if not self.num_processes.text.isdigit():
-            print "Invalid number of processes. Please enter valid input."
-            data_cpu['num_processes'] = 0
-        else:
-            data_cpu['num_processes'] = int(self.num_processes.text)
-
-        # If num_processes is zero, stop
-        # TODO: Prompt the user to enter number of processes
-        if data_cpu['num_processes'] == 0:
-            print "Number of processes is zero. Cannot load form."
-            return
+        # Enable visualize button - load_form will only be called when form load input is correct
+        self.visualize_button.disabled = False
 
         # Update dispatch_latency and set to default value if empty
         if (self.dispatch_latency.text == ""):
@@ -426,12 +434,13 @@ class CPUInputScreen(Screen):
             box.add_widget(inp)
             layout.add_widget(box)          
 
-        if self.cpu_type != 7 and self.cpu_type != 8:
-            # Add Visualize and back button at the end of form
-            button_box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
-            button_box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-            button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
-            layout.add_widget(button_box)
+        # Uncomment to insert buttons at end of scroll view
+        # if self.cpu_type != 7 and self.cpu_type != 8:
+        #     # Add Visualize and back button at the end of form
+        #     button_box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
+        #     button_box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        #     button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
+        #     layout.add_widget(button_box)
 
         # Add ScrollView
         # sv = ScrollView(size_hint=(None, None), size=(400, 400))
@@ -561,13 +570,13 @@ class CPUInputScreen(Screen):
                 self.multilevel_input_widgets.append(box)
                 #data_cpu['queue_time_quantum'][i] = data_cpu['quantum']
              
-
-        # Add Visualize and back button at the end of form
-        button_box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
-        button_box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
-        grid_layout.add_widget(button_box)
-        self.multilevel_input_widgets.append(button_box)
+        # Uncomment to insert buttons at end of scroll view
+        # # Add Visualize and back button at the end of form
+        # button_box = BoxLayout(orientation='horizontal', padding=(0, kivy.metrics.dp(5)), size_hint_y=None, height='50dp')
+        # button_box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        # button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
+        # grid_layout.add_widget(button_box)
+        # self.multilevel_input_widgets.append(button_box)
         
     def switch_to_cpu_output(self, *args):
         self.manager.transition.direction = 'left'
@@ -628,7 +637,6 @@ class CPUOutputScreen(Screen):
         elif cpu_scheduling_type == 5:
             self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 7:
-
             self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], [1,2,3], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 8:
             self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel_feedback(formatted_data, data_cpu['num_queues'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
@@ -639,7 +647,7 @@ class CPUOutputScreen(Screen):
 
         if self.error_status['error_number'] != -1:
             # Inform the user
-            display_error(grid, self.error_status)
+            display_error(grid, self.error_status['error_message'])
         else:
             row_height = '30dp'
 
@@ -676,6 +684,10 @@ class CPUOutputScreen(Screen):
                     popup.open()
                     popup.dismiss()
                     print "Bound popup for process: "+str(label_name.text)
+                else:
+                    details_button.disabled = True
+
+                grid.add_widget(box)
 
             # Display statistics
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
@@ -756,22 +768,54 @@ class CPUOutputScreen(Screen):
 class DeadlockAvoidanceInputScreen(Screen):
     form = ObjectProperty(None)
     request_form = ObjectProperty(None)
+
+    margin_right = '10dp'
+
+    def bind_widgets(self, *args):
+        self.bind_num_processes()
+        self.bind_num_resource_types()
+
+    # Binder function for number of processes input
+    def bind_num_processes(self, *args):
+        self.num_processes.bind(text=self.update_form)
+
+    # Binder function for number of processes input
+    def bind_num_resource_types(self, *args):
+        self.num_resource_types.bind(text=self.update_form)
+
+    # Called when the number of processes or number of resources input is changed
+    # (Wrapper function to allow for condition checking if required)
+    def update_form(self, *args):
+        if (self.num_processes.text == ""):
+            data_da['num_processes'] = 0
+        elif not (self.num_processes.text.isdigit()):
+            data_da['num_processes'] = 0
+        else:
+            data_da['num_processes'] = int(self.num_processes.text)
+
+        if (self.num_resource_types.text == ""):
+            data_da['num_resource_types'] = 0
+        elif not (self.num_resource_types.text.isdigit()):
+            data_da['num_resource_types'] = 0
+        else:
+            data_da['num_resource_types'] = int(self.num_resource_types.text)
+
+        # If input is valid, load form else display error message
+        if (data_da['num_processes'] > 0 and data_da['num_resource_types'] > 0):
+            self.load_form()
+        elif (self.num_processes.text != "" and self.num_resource_types.text != ""):
+            form = self.manager.get_screen('da_form').form
+            form.clear_widgets()
+            display_error(form, "Invalid number of processes/resource types.")
+            self.visualize_button.disabled = True
+
     def load_form(self, *args):
         form = self.manager.get_screen('da_form').form
         form.clear_widgets()
-        if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
-            self.num_processes.text = "4"
-        if (self.num_resource_types.text == "" or int(self.num_resource_types.text) < 1):
-            self.num_resource_types.text = "4"
 
-        # Number of processes
-        n = int(self.num_processes.text)
-        # Number of resource types
-        m = int(self.num_resource_types.text)
+        self.visualize_button.disabled = False
 
         # Initialize the global data_da dictionary
-        data_da['num_processes'] = n
-        data_da['num_resource_types'] = m
         data_da['available'] = [5] * data_da['num_resource_types']
         data_da['request'] = [0] * data_da['num_resource_types']
         data_da['max'] = [[10 for x in range(data_da['num_resource_types'])] for x in range(data_da['num_processes'])]
@@ -784,61 +828,68 @@ class DeadlockAvoidanceInputScreen(Screen):
         # Add form labels for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Available:'))
-        for i in range(m):
+        for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Add input fields for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text=''))
-        for i in range(m):
+        for i in range(data_da['num_resource_types']):
             inp = TextInput(id='available'+str(i))
             inp.bind(text=partial(da_on_available, i=i))
             box.add_widget(inp)
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Max Matrix (n x m)
         # Add form labels for resource types
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Max:'))
-        for i in range(m):
+        for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Add input fields for Max matrix (n x m)
-        for i in range(n):
+        for i in range(data_da['num_processes']):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='P'+str(i+1)))
-            for j in range(m):
+            for j in range(data_da['num_resource_types']):
                 inp = TextInput(id='max'+str(i)+':'+str(j))
                 inp.bind(text=partial(da_on_max, i=i, j=j))
                 box.add_widget(inp)
+            box.add_widget(Label(size_hint_x=None, width=self.margin_right))
             grid.add_widget(box)
 
         # Allocation Matrix (n x m)
         # Add form labels for resource types
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Allocation:'))
-        for i in range(m):
+        for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # # Add input fields for Allocation matrix (n x m)
-        for i in range(n):
+        for i in range(data_da['num_processes']):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='P'+str(i+1)))
-            for j in range(m):
+            for j in range(data_da['num_resource_types']):
                 inp = TextInput(id='allocation'+str(i)+':'+str(j))
                 inp.bind(text=partial(da_on_allocation, i=i, j=j))
                 box.add_widget(inp)
+            box.add_widget(Label(size_hint_x=None, width=self.margin_right))
             grid.add_widget(box)
 
         # Add labels for resource types in request form:
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Request:'))
         box.add_widget(Label(text='Process No.'))
-        for i in range(m):
+        for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Add input fields for resource form
@@ -847,10 +898,11 @@ class DeadlockAvoidanceInputScreen(Screen):
         inp = TextInput(id='process_id')
         inp.bind(text=da_request_on_process_id)
         box.add_widget(inp)
-        for i in range(m):
+        for i in range(data_da['num_resource_types']):
             inp = TextInput(id='request'+str(i))
             inp.bind(text=partial(da_on_request, i=i))
             box.add_widget(inp)
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Add ScrollView
@@ -858,11 +910,12 @@ class DeadlockAvoidanceInputScreen(Screen):
         sv.add_widget(grid)
         form.add_widget(sv)
 
-        # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        box.add_widget(Button(text='Visualize', on_release=self.switch_to_da_output))
-        form.add_widget(box)
+        # Uncomment to add buttons on scroll view
+        # # Add Visualize and back button at the end of form
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        # box.add_widget(Button(text='Visualize', on_release=self.switch_to_da_output))
+        # form.add_widget(box)
         
 
     def switch_to_da_output(self, *args):
@@ -896,7 +949,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
 
         if error_status['error_number'] != -1:
             # Inform the user
-            display_error(grid, error_status)
+            display_error(grid, error_status['error_message'])
         else:
             # If request is grantable, check if the state is safe or not
             if grantable:
@@ -940,8 +993,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
 
                 safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
                 work = deepcopy(available)
-                finish = ['F'] * dat
-                a_da['num_processes']
+                finish = ['F'] * data_da['num_processes']
 
                 if safe:
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -998,9 +1050,9 @@ class DeadlockAvoidanceOutputScreen(Screen):
                 grid.add_widget(box)
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_da_form))
-        grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_da_form))
+        # grid.add_widget(box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size)
@@ -1014,22 +1066,54 @@ class DeadlockAvoidanceOutputScreen(Screen):
 # Input Screen for Deadlock Detection algorithm
 class DeadlockDetectionInputScreen(Screen):
     form = ObjectProperty(None)
+
+    margin_right = '10dp'
+
+    def bind_widgets(self, *args):
+        self.bind_num_processes()
+        self.bind_num_resource_types()
+
+    # Binder function for number of processes input
+    def bind_num_processes(self, *args):
+        self.num_processes.bind(text=self.update_form)
+
+    # Binder function for number of processes input
+    def bind_num_resource_types(self, *args):
+        self.num_resource_types.bind(text=self.update_form)
+
+    # Called when the number of processes or number of resources input is changed
+    # (Wrapper function to allow for condition checking if required)
+    def update_form(self, *args):
+        if (self.num_processes.text == ""):
+            data_dd['num_processes'] = 0
+        elif not (self.num_processes.text.isdigit()):
+            data_dd['num_processes'] = 0
+        else:
+            data_dd['num_processes'] = int(self.num_processes.text)
+
+        if (self.num_resource_types.text == ""):
+            data_dd['num_resource_types'] = 0
+        elif not (self.num_resource_types.text.isdigit()):
+            data_dd['num_resource_types'] = 0
+        else:
+            data_dd['num_resource_types'] = int(self.num_resource_types.text)
+
+        # If input is valid, load form else display error message
+        if (data_dd['num_processes'] > 0 and data_dd['num_resource_types'] > 0):
+            self.load_form()
+        elif (self.num_processes.text != "" and self.num_resource_types.text != ""):
+            form = self.manager.get_screen('dd_form').form
+            form.clear_widgets()
+            display_error(form, "Invalid number of processes/resource types.")
+            self.visualize_button.disabled = True
+
     def load_form(self, *args):
         form = self.manager.get_screen('dd_form').form
         form.clear_widgets()
-        if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
-            self.num_processes.text = "4"
-        if (self.num_resource_types.text == "" or int(self.num_resource_types.text) < 1):
-            self.num_resource_types.text = "4"
 
-        # Number of processes
-        n = int(self.num_processes.text)
-        # Number of resource types
-        m = int(self.num_resource_types.text)
+        self.visualize_button.disabled = False
 
         # Initialize the global data_dd dictionary
-        data_dd['num_processes'] = n
-        data_dd['num_resource_types'] = m
         data_dd['available'] = [5] * data_dd['num_resource_types']
         data_dd['request'] = [[10 for x in range(data_dd['num_resource_types'])] for x in range(data_dd['num_processes'])]
         data_dd['allocation'] = [[4 for x in range(data_dd['num_resource_types'])] for x in range(data_dd['num_processes'])]
@@ -1038,56 +1122,62 @@ class DeadlockDetectionInputScreen(Screen):
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
-        # Add form labels for Available array (n)
+        # Add form labels for Available array (m)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Available:'))
-        for i in range(m):
+        for i in range(data_dd['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
-        # Add input fields for Available array (n)
+        # Add input fields for Available array (m)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text=''))
-        for i in range(m):
+        for i in range(data_dd['num_resource_types']):
             inp = TextInput(id='available'+str(i))
             inp.bind(text=partial(dd_on_available, i=i))
             box.add_widget(inp)
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Allocation Matrix (n x m)
         # Add form labels for resource types
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Allocation:'))
-        for i in range(m):
+        for i in range(data_dd['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # # Add input fields for Allocation matrix (n x m)
-        for i in range(n):
+        for i in range(data_dd['num_processes']):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='P'+str(i+1)))
-            for j in range(m):
+            for j in range(data_dd['num_resource_types']):
                 inp = TextInput(id='allocation'+str(i)+':'+str(j))
                 inp.bind(text=partial(dd_on_allocation, i=i, j=j))
                 box.add_widget(inp)
+            box.add_widget(Label(size_hint_x=None, width=self.margin_right))
             grid.add_widget(box)
 
         # Request Matrix (n x m)
         # Add form labels for resource types
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text='Request:'))
-        for i in range(m):
+        for i in range(data_dd['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
+        box.add_widget(Label(size_hint_x=None, width=self.margin_right))
         grid.add_widget(box)
 
         # Add input fields for Request matrix (n x m)
-        for i in range(n):
+        for i in range(data_dd['num_processes']):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='P'+str(i+1)))
-            for j in range(m):
+            for j in range(data_dd['num_resource_types']):
                 inp = TextInput(id='request'+str(i)+':'+str(j))
                 inp.bind(text=partial(dd_on_request, i=i, j=j))
                 box.add_widget(inp)
+            box.add_widget(Label(size_hint_x=None, width=self.margin_right))
             grid.add_widget(box)
 
         # Add ScrollView
@@ -1095,11 +1185,11 @@ class DeadlockDetectionInputScreen(Screen):
         sv.add_widget(grid)
         form.add_widget(sv)
 
-        # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        box.add_widget(Button(text='Visualize', on_release=self.switch_to_dd_output))
-        form.add_widget(box)
+        # # Add Visualize and back button at the end of form
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        # box.add_widget(Button(text='Visualize', on_release=self.switch_to_dd_output))
+        # form.add_widget(box)
 
     def switch_to_dd_output(self, *args):
         self.manager.transition.direction = 'left'
@@ -1132,7 +1222,7 @@ class DeadlockDetectionOutputScreen(Screen):
 
         if error_status['error_number'] != -1:
             # Inform the user
-            display_error(grid, error_status)
+            display_error(grid, error_status['error_message'])
         else:
             work = deepcopy(available)
             finish = ['F'] * data_dd['num_processes']
@@ -1202,9 +1292,9 @@ class DeadlockDetectionOutputScreen(Screen):
                 grid.add_widget(box)
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_dd_form))
-        grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_dd_form))
+        # grid.add_widget(box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size)
@@ -1220,6 +1310,15 @@ class MemoryInputScreen(Screen):
     strategy_type = NumericProperty(None)
     form = ObjectProperty(None)
 
+    margin_right = '10dp'
+
+    # Update dispatch_latency and set to default value if empty
+    def update_mem_size(self, *args):
+        if not self.mem_size.text.isdigit():
+            data_mem['mem_size'] = 0
+        else:
+            data_mem['mem_size'] = int(self.mem_size.text)
+
     #Set appropriate strategy type according to the chosen algorithm by the user
     def show_selected_value(self, spinner, text, *args):
         if text == 'First Fit':
@@ -1230,41 +1329,69 @@ class MemoryInputScreen(Screen):
             self.strategy_type = 2
         data_mem['algo'] = self.strategy_type
 
+    def bind_widgets(self, *args):
+        self.bind_num_processes()
+        self.bind_mem_size()
+        self.bind_algo_spinner()
+
+    # Binder function for number of processes input
+    def bind_num_processes(self, *args):
+        self.num_processes.bind(text=self.update_form)
+
+    # Binder function for memory size input
+    def bind_mem_size(self, *args):
+        self.mem_size.bind(text=self.update_mem_size)
+
+    def bind_algo_spinner(self, *args):
+        self.algo_spinner.bind(text=self.show_selected_value)
+
+    # Called when the number of processes or number of resources input is changed
+    # (Wrapper function to allow for condition checking if required)
+    def update_form(self, *args):
+        if (self.num_processes.text == ""):
+            data_mem['num_processes'] = 0
+        elif not (self.num_processes.text.isdigit()):
+            data_mem['num_processes'] = 0
+        else:
+            data_mem['num_processes'] = int(self.num_processes.text)
+
+        # If input is valid, load form else display error message
+        if (data_mem['num_processes'] > 0):
+            self.load_form()
+        elif (self.num_processes.text != ""):
+            form = self.manager.get_screen('mem_form').form
+            form.clear_widgets()
+            display_error(form, "Invalid number of processes/resource types.")
+            self.visualize_button.disabled = True
+
     # Load the input form based on input
     def load_form(self, *args):
         form = self.manager.get_screen('mem_form').form
         form.clear_widgets()
-        if (self.num_processes.text == "" or int(self.num_processes.text) < 1):
-            self.num_processes.text = "4"
-        if (self.mem_size.text == "" or int(self.mem_size.text) < 1):
-            self.mem_size.text = "200"
 
-        # Number of processes
-        n = int(self.num_processes.text)
-        # Memory size
-        m = int(self.mem_size.text)
+        self.visualize_button.disabled = False
 
         # Initialize the global data_mem dictionary
         data_mem['algo'] = 0
-        data_mem['num_processes'] = n
-        data_mem['mem_size'] = m
-        data_mem['size'] = [128] * n
-        data_mem['arrival'] = [0] * n
-        data_mem['burst'] = [10] * n
+        if 'mem_size' not in data_mem:
+            data_mem['mem_size'] = 0
+        data_mem['size'] = [128] * data_mem['num_processes']
+        data_mem['arrival'] = [0] * data_mem['num_processes']
+        data_mem['burst'] = [10] * data_mem['num_processes']
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
         # Box for algo spinner
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
-        box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
-        algo_spinner = Spinner(
-            text='Select an Algorithm',
-            values=('First Fit', 'Best Fit', 'Worst Fit'))
-        algo_spinner.bind(text=self.show_selected_value)
-        box.add_widget(algo_spinner)
-        grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
+        # box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
+        # algo_spinner = Spinner(
+        #     text='Select an Algorithm',
+        #     values=('First Fit', 'Best Fit', 'Worst Fit'))
+        # algo_spinner.bind(text=self.show_selected_value)
+        # box.add_widget(algo_spinner)
+        # grid.add_widget(box)
 
         # Add labels for input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
@@ -1300,10 +1427,10 @@ class MemoryInputScreen(Screen):
         form.add_widget(sv)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        box.add_widget(Button(text='Visualize', on_release=self.switch_to_mem_output))
-        form.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        # box.add_widget(Button(text='Visualize', on_release=self.switch_to_mem_output))
+        # form.add_widget(box)
 
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
@@ -1377,7 +1504,7 @@ class MemoryOutputScreen(Screen):
         error = self.memory_chart[0]['error_status']
         if error['error_number'] != -1:
             # Inform the user
-            display_error(grid, error)
+            display_error(grid, error['error_message'])
         else:
             # Display each element of memory chart timeline
             for idx,temp_memory in enumerate(self.memory_chart):
@@ -1415,9 +1542,9 @@ class MemoryOutputScreen(Screen):
                 self.draw_wait_queue(wait_box, status_box, wait_to_memory_box, start_height, temp_memory)
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_mem_form))
-        grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_mem_form))
+        # grid.add_widget(box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size)
@@ -1563,7 +1690,21 @@ class PageInputScreen(Screen):
     algo_type = 0
 
     def update_form(self, *args):
-        self.load_form()
+        if (self.num_frames.text == ""):
+            data_page['num_frames'] = 0
+        elif not (self.num_frames.text.isdigit()):
+            data_page['num_frames'] = 0
+        else:
+            data_page['num_frames'] = int(self.num_frames.text)
+
+        # If input is valid, load form else display error message
+        if (data_page['num_frames'] > 0):
+            self.load_form()
+        elif (self.num_frames.text != ""):
+            form = self.manager.get_screen('page_form').form
+            form.clear_widgets()
+            display_error(form, "Invalid number of processes/resource types.")
+            self.visualize_button.disabled = True
 
     # Binder function for number of processes input
     def bind_num_frames(self, *args):
@@ -1604,28 +1745,29 @@ class PageInputScreen(Screen):
         data_page['algo'] = self.strategy_type
         self.load_form()
 
-
-
     # Load the input form based on input
     def load_form(self, *args):
         form = self.manager.get_screen('page_form').form
         form.clear_widgets()
 
-        if DEBUG_MODE:
-            if (self.num_frames.text == "" or int(self.num_frames.text) == 0):
-                self.num_frames.text = "4"
-        if not self.num_frames.text.isdigit():
-            print "Invalid number of frames. Please enter valid input."
-            data_page['num_frames'] = 0
-        else:
-            data_page['num_frames'] = int(self.num_frames.text)
+        self.visualize_button.disabled = False
+
+        # if DEBUG_MODE:
+        #     if (self.num_frames.text == "" or int(self.num_frames.text) == 0):
+        #         self.num_frames.text = "4"
+        # if not self.num_frames.text.isdigit():
+        #     print "Invalid number of frames. Please enter valid input."
+        #     data_page['num_frames'] = 0
+        # else:
+        #     data_page['num_frames'] = int(self.num_frames.text)
 
         # Number of frames
-        n = int(self.num_frames.text)
+        # n = int(self.num_frames.text)
 
         # Initialize the global data_page dictionary
-        #data_page['algo'] = 0
-        data_page['num_frames'] = n
+        data_page['algo'] = 0
+        if 'num_frames' not in data_page:
+            data_page['num_frames'] = 0
         data_page['ref_str'] = ''
         data_page['modify_bit'] = ''
 
@@ -1673,10 +1815,10 @@ class PageInputScreen(Screen):
         form.add_widget(sv)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        box.add_widget(Button(text='Visualize', on_release=self.switch_to_page_output))
-        form.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        # box.add_widget(Button(text='Visualize', on_release=self.switch_to_page_output))
+        # form.add_widget(box)
 
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
@@ -1742,7 +1884,7 @@ class PageOutputScreen(Screen):
         error = self.memory_chart[0]['error_status']
         if error['error_number'] != -1:
             # Inform the user
-            display_error(grid, error)
+            display_error(grid, error['error_message'])
         else:
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
@@ -1802,9 +1944,9 @@ class PageOutputScreen(Screen):
             grid.add_widget(page_fault_ratio_box) 
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
-        grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
+        # grid.add_widget(box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size)
@@ -1863,8 +2005,28 @@ class DiskInputScreen(Screen):
     form = ObjectProperty(None)
     algo_type = 0
 
+    def update_pos_head(self, *args):
+        if not self.pos_head.text.isdigit():
+            data_disk['pos_head'] = 0
+        else:
+            data_disk['pos_head'] = int(self.pos_head.text)
+
     def update_form(self, *args):
-        self.load_form()
+        if (self.num_cylinders.text == ""):
+            data_disk['num_cylinders'] = 0
+        elif not (self.num_cylinders.text.isdigit()):
+            data_disk['num_cylinders'] = 0
+        else:
+            data_disk['num_cylinders'] = int(self.num_cylinders.text)
+
+        # If input is valid, load form else display error message
+        if (data_disk['num_cylinders'] > 0):
+            self.load_form()
+        elif (self.num_cylinders.text != ""):
+            form = self.manager.get_screen('disk_form').form
+            form.clear_widgets()
+            display_error(form, "Invalid number of cylinders.")
+            self.visualize_button.disabled = True
 
     # Binder function for number of cylinders input
     def bind_num_cylinders(self, *args):
@@ -1872,7 +2034,7 @@ class DiskInputScreen(Screen):
 
     # Binder function for current position of head
     def bind_pos_head(self, *args):
-        self.pos_head.bind(text=self.update_form)
+        self.pos_head.bind(text=self.update_pos_head)
 
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinner(self, *args):
@@ -1921,29 +2083,15 @@ class DiskInputScreen(Screen):
         form = self.manager.get_screen('disk_form').form
         form.clear_widgets()
 
-        # Update number of cylinders and set to default value if empty
-        if DEBUG_MODE:
-            if (self.num_cylinders.text == ''  or int(self.num_cylinders.text) == 0):
-                self.num_cylinders.text = 100
-        if not self.num_cylinders.text.isdigit() or int(self.num_cylinders.text) < 0:
-            print "Invalid number of cylinders. Please enter valid input."
-            data_disk['num_cylinders'] = 0
-        else:
-            data_disk['num_cylinders'] = int(self.num_cylinders.text)
-
-       
-        # Update current position of head and set to default value if empty
-        if (self.pos_head.text < 0):
-            data_disk['pos_head'] = 53
-        else:
-            data_disk['pos_head'] = int(self.pos_head.text)
+        self.visualize_button.disabled = False
 
         # Initialize the global data_disk dictionary
-         # Number of cylinders
-        n = int(self.num_cylinders.text)
-        m = int(self.pos_head.text)
-        data_disk['num_cylinders'] = n
-        data_disk['pos_head'] = m
+        if 'num_cylinders' not in data_disk:
+            data_disk['num_cylinders'] = 0
+        if 'pos_head' not in data_disk:
+            data_disk['pos_head'] = 0
+        if 'algo' not in data_disk:
+            data_disk['algo'] = 0
         data_disk['disk_queue'] = ''
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
@@ -1958,7 +2106,7 @@ class DiskInputScreen(Screen):
         # Add input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
         inp = TextInput(id='disk_queue'+str(0))
-        inp.bind(text=disk_queue)
+        inp.bind(text=disk_on_queue)
         box.add_widget(inp)
         grid.add_widget(box)
 
@@ -1979,10 +2127,10 @@ class DiskInputScreen(Screen):
         form.add_widget(sv)
 
         # Add Visualize and back button at the end of form
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
-        box.add_widget(Button(text='Visualize', on_release=self.switch_to_disk_output))
-        form.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+        # box.add_widget(Button(text='Visualize', on_release=self.switch_to_disk_output))
+        # form.add_widget(box)
 
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
@@ -2041,7 +2189,7 @@ class DiskOutputScreen(Screen):
         error = self.secondary_memory_chart['error_status']
         if error['error_number'] != -1:
             # Inform the user
-            display_error(grid, error)
+            display_error(grid, error['error_message'])
         else:
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
@@ -2079,9 +2227,9 @@ class DiskOutputScreen(Screen):
             grid.add_widget(total_cylinders)
 
         # Add back button
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
-        box.add_widget(Button(text='Back', on_release=self.switch_to_disk_form))
-        grid.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+        # box.add_widget(Button(text='Back', on_release=self.switch_to_disk_form))
+        # grid.add_widget(box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size)
@@ -2139,7 +2287,7 @@ class DiskOutputScreen(Screen):
             mem_box.add_widget(cylinder_label)
 
         # Initial height of head
-        y1 = kivy.metrics.dp(370)
+        y1 = kivy.metrics.dp(330)
 
         for i in range(len(movement_list)-1):
             x1 = self.scale_x(movement_list[i])
