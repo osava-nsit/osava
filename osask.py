@@ -603,6 +603,24 @@ class CPUOutputScreen(Screen):
     # Stores information related to bad input data
     error_status = {}
 
+    def get_description(self, *args):
+        if cpu_scheduling_type == 0:
+            return 'In First Come First Served Scheduling, the processor is allocated to the process which has arrived first.\nIt is a non-preemptive algorithm.'
+        elif cpu_scheduling_type == 1:
+            return 'In Round Robin Scheduling, the processor is allocated to a process for a small time quantum.\nThe processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
+        elif cpu_scheduling_type == 2:
+            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.'
+        elif cpu_scheduling_type == 3:
+            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
+        elif cpu_scheduling_type == 4:
+            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+        elif cpu_scheduling_type == 5:
+            return 'In Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+        elif cpu_scheduling_type == 7:
+            return 'In Multilevel Queue Scheduling, the ready queue is partitioned into several queues.\nA process is permanently assigned to a queue.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is often used for inter-queue scheduling.'
+        elif cpu_scheduling_type == 8:
+            return 'In Multilevel Feedback Queue Scheduling, the ready queue is partitioned into several queues.\nThe processes can move between the queues.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is typically used for inter-queue scheduling.'
+
     # Prints the details of the process schedule and statistics
     def calculate_schedule(self, *args):
         layout = self.manager.get_screen('cpu_output').layout
@@ -723,8 +741,25 @@ class CPUOutputScreen(Screen):
         chart_wid = Widget()
         # Area for displaying time values
         time = self.manager.get_screen('cpu_output').time
+        # Area for displaying description.
+        desc = self.manager.get_screen('cpu_output').desc
         gantt.clear_widgets()
         time.clear_widgets()
+        desc.clear_widgets()
+
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        box.add_widget(Label(text='Visualization results -' ))
+        grid.add_widget(box)
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        algo_desc = self.get_description()
+        box.add_widget(Label(text=algo_desc))
+        grid.add_widget(box)
+        desc.add_widget(grid)
+
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
         margin_bottom = kivy.metrics.dp(50)
@@ -1843,11 +1878,20 @@ class PageOutputScreen(Screen):
 
     def get_description(self, *args):
         if data_page['algo'] == 0:
-            return 'FIFO: First In First Out'
+            return 'In First In First Out Page Replacement Algorithm, the page that was loaded earliest in the memory is replaced.'
         elif data_page['algo'] == 1:
-            return 'Optimal Page Replacement'
-        else:
-            return 'TBA'
+            return 'In Optimal Page Replacement Algorithm, the page that will not be referenced for the longest period of time is replaced.'
+        elif data_page['algo'] == 2:
+            return 'In Least Recently Used Page Replacement Algorithm,\nthe page that has not been referenced for the longest period of time is replaced.'
+        elif data_page['algo'] == 3:
+            return 'In Second Chance Page Replacement Algorithm,\nthe page that was loaded earliest in the memory is replaced.\nHowever, if the reference bit of the page is set then that page is given a second chance and the next possible page is replaced.\nWhen a page is given a second chance, its reference bit is reset and its arrival time is set to the current time.'
+        elif data_page['algo'] == 4:
+            return 'In Enhanced Second Chance Page Replacement Algorithm,\nthe pages are divided in four classes using their reference bit and modify bit as ordered pairs.\nThe page of the lowest nonempty class which was loaded earliest in the memory is replaced.'
+        elif data_page['algo'] == 5:
+            return 'In Least Frequently Used Page Replacement Algorithm,\nthe page that has been referenced the least number of times is replaced.'
+        elif data_page['algo'] == 6:
+            return 'In Most Frequently Used Page Replacement Algorithm,\nthe page that has been referenced the most number of times is replaced.'
+            
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
@@ -2155,11 +2199,19 @@ class DiskOutputScreen(Screen):
 
     def get_description(self, *args):
         if data_disk['algo'] == 0:
-            return 'FCFS'
+            return 'In First Come First Served Scheduling, the i/o requests are processed in the order in which they arrive.'
         elif data_disk['algo'] == 1:
-            return 'Shortest Seek Time First'
-        else:
-            return 'TBA'
+            return 'In Shortest Seek Time First Scheduling, the i/o request which will need the minimum seek time is processed first.'
+        elif data_disk['algo'] == 2:
+            return 'In SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.'
+        elif data_disk['algo'] == 3:
+            return 'In C-SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.\nOn reaching the end, the r/w head immediately returns to the beginning without servicing any request on the return trip.'
+        elif data_disk['algo'] == 4:
+            return 'In LOOK scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.'
+        elif data_disk['algo'] == 5:
+            return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.\nOn reaching the end, the r/w head immediately returns to the beginning, if need be, without servicing any request on the return trip.'
+
+
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
