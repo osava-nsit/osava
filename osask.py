@@ -443,8 +443,7 @@ class CPUInputScreen(Screen):
         #     layout.add_widget(button_box)
 
         # Add ScrollView
-        # sv = ScrollView(size_hint=(None, None), size=(400, 400))
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(layout)
         layout_form.add_widget(sv)
 
@@ -731,7 +730,7 @@ class CPUOutputScreen(Screen):
             self.draw_gantt()
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -747,18 +746,14 @@ class CPUOutputScreen(Screen):
         time.clear_widgets()
         desc.clear_widgets()
 
-        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
-        grid.bind(minimum_height=grid.setter('height'))
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Visualization results' ))
+        desc.add_widget(box)
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-        box.add_widget(Label(text='Visualization results -' ))
-        grid.add_widget(box)
-
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
         box.add_widget(Label(text=algo_desc))
-        grid.add_widget(box)
-        desc.add_widget(grid)
+        desc.add_widget(box)
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
@@ -804,7 +799,7 @@ class DeadlockAvoidanceInputScreen(Screen):
     form = ObjectProperty(None)
     request_form = ObjectProperty(None)
 
-    margin_right = '10dp'
+    margin_right = '15dp'
 
     def bind_widgets(self, *args):
         self.bind_num_processes()
@@ -941,7 +936,7 @@ class DeadlockAvoidanceInputScreen(Screen):
         grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -1090,7 +1085,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -1102,7 +1097,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
 class DeadlockDetectionInputScreen(Screen):
     form = ObjectProperty(None)
 
-    margin_right = '10dp'
+    margin_right = '15dp'
 
     def bind_widgets(self, *args):
         self.bind_num_processes()
@@ -1216,7 +1211,7 @@ class DeadlockDetectionInputScreen(Screen):
             grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -1332,7 +1327,7 @@ class DeadlockDetectionOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -1345,7 +1340,7 @@ class MemoryInputScreen(Screen):
     strategy_type = NumericProperty(None)
     form = ObjectProperty(None)
 
-    margin_right = '10dp'
+    margin_right = '15dp'
 
     # Update dispatch_latency and set to default value if empty
     def update_mem_size(self, *args):
@@ -1438,7 +1433,7 @@ class MemoryInputScreen(Screen):
 
         # Add inputs
         for i in range(data_mem['num_processes']):
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10), 0))
 
             box.add_widget(Label(text='P'+str(i+1)))
 
@@ -1457,7 +1452,7 @@ class MemoryInputScreen(Screen):
             grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -1582,7 +1577,7 @@ class MemoryOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -1800,7 +1795,8 @@ class PageInputScreen(Screen):
         # n = int(self.num_frames.text)
 
         # Initialize the global data_page dictionary
-        data_page['algo'] = 0
+        if 'algo' not in data_page:
+            data_page['algo'] = 0
         if 'num_frames' not in data_page:
             data_page['num_frames'] = 0
         data_page['ref_str'] = ''
@@ -1845,7 +1841,7 @@ class PageInputScreen(Screen):
             grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -1880,7 +1876,7 @@ class PageOutputScreen(Screen):
         if data_page['algo'] == 0:
             return 'In First In First Out Page Replacement Algorithm, the page that was loaded earliest in the memory is replaced.'
         elif data_page['algo'] == 1:
-            return 'In Optimal Page Replacement Algorithm, the page that will not be referenced for the longest period of time is replaced.'
+            return 'In Optimal Page Replacement Algorithm,\nthe page that will not be referenced for the longest period of time is replaced.'
         elif data_page['algo'] == 2:
             return 'In Least Recently Used Page Replacement Algorithm,\nthe page that has not been referenced for the longest period of time is replaced.'
         elif data_page['algo'] == 3:
@@ -1993,7 +1989,7 @@ class PageOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp', bar_inactive_color=[0.7,0.7,0.7,0.45])
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -2166,7 +2162,7 @@ class DiskInputScreen(Screen):
             grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -2284,7 +2280,7 @@ class DiskOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size)
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
