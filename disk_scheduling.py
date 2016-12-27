@@ -181,19 +181,12 @@ def shortest_seek_time_first(curr_head_pos, disk_queue):
         min_seek = maxint # To track the cylinder with minimum seek time from current head position
         min_idx = -1
         for idx, cylinder in enumerate(disk_queue):
-            # Bad input handling 
-            if int(cylinder) > num_cylinders - 1:
-                error_number = 1
-                error_status = get_error_message(error_number, int(cylinder))
-                break
             if abs(int(cylinder) - curr_head_pos) < min_seek:
                 min_seek = abs(int(cylinder) - curr_head_pos)
                 min_idx = idx
             elif abs(int(cylinder) - curr_head_pos) == min_seek:
                 min_seek = abs(int(cylinder) - curr_head_pos) 
                 min_idx = randint(idx, min_idx)
-        if error_number != -1:
-            break
         chosen_cylinder = disk_queue[min_idx]
         memory_state.append(chosen_cylinder)
         difference = abs(int(chosen_cylinder) - curr_head_pos)
