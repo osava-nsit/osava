@@ -1751,6 +1751,10 @@ class PageInputScreen(Screen):
 
     #Set appropriate strategy type according to the chosen algorithm by the user
     def show_selected_value(self, spinner, text, *args):
+        form_reload_flag = False
+        if self.strategy_type == 4:
+            form_reload_flag = True
+
         if text == 'First In First Out':
             self.strategy_type = 0
             self.algo_type = 0
@@ -1766,6 +1770,8 @@ class PageInputScreen(Screen):
         elif text == 'Enhanced Second Chance':
             self.strategy_type = 4
             self.algo_type = 4
+            # Toggle form reload flag for this algo since we require modify bit input here
+            form_reload_flag = not form_reload_flag
         elif text == 'Least Frequently Used':
             self.strategy_type = 5
             self.algo_type = 5
@@ -1773,7 +1779,8 @@ class PageInputScreen(Screen):
             self.strategy_type = 6
             self.algo_type = 6
         data_page['algo'] = self.strategy_type
-        self.load_form()
+        if form_reload_flag:
+            self.load_form()
 
     # Load the input form based on input
     def load_form(self, *args):
@@ -1782,25 +1789,15 @@ class PageInputScreen(Screen):
 
         self.visualize_button.disabled = False
 
-        # if DEBUG_MODE:
-        #     if (self.num_frames.text == "" or int(self.num_frames.text) == 0):
-        #         self.num_frames.text = "4"
-        # if not self.num_frames.text.isdigit():
-        #     print "Invalid number of frames. Please enter valid input."
-        #     data_page['num_frames'] = 0
-        # else:
-        #     data_page['num_frames'] = int(self.num_frames.text)
-
-        # Number of frames
-        # n = int(self.num_frames.text)
-
         # Initialize the global data_page dictionary
         if 'algo' not in data_page:
             data_page['algo'] = 0
         if 'num_frames' not in data_page:
             data_page['num_frames'] = 0
-        data_page['ref_str'] = ''
-        data_page['modify_bit'] = ''
+        if 'ref_str' not in data_page:
+            data_page['ref_str'] = ''
+        if 'modify_bit' not in data_page:
+            data_page['modify_bit'] = ''
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -1823,7 +1820,7 @@ class PageInputScreen(Screen):
 
         # Add input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
-        inp = TextInput(id='ref_str'+str(0))
+        inp = TextInput(id='ref_str'+str(0), text=data_page['ref_str'])
         inp.bind(text=page_on_ref)
         box.add_widget(inp)
         grid.add_widget(box)
@@ -1835,7 +1832,7 @@ class PageInputScreen(Screen):
             grid.add_widget(box)
 
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
-            inp = TextInput(id='modify_bit'+str(0))
+            inp = TextInput(id='modify_bit'+str(0), text=data_page['modify_bit'])
             inp.bind(text=page_on_modify)
             box.add_widget(inp)
             grid.add_widget(box)
@@ -1868,6 +1865,9 @@ class PageOutputScreen(Screen):
     # Margins for memory chart output
     margin_left = kivy.metrics.dp(125)
     margin_bottom = kivy.metrics.dp(255)
+
+    # Width of frame box
+    frame_width = kivy.metrics.dp(65)
 
     # Increment in width per unit size
     inc = 0
@@ -1936,12 +1936,12 @@ class PageOutputScreen(Screen):
             # To add frame labels
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             grid.add_widget(box)
-            frames_label = Label(text='', size_hint_x=None, width=self.margin_left+kivy.metrics.dp(100), valign='middle', halign='right')
+            frames_label = Label(text='', size_hint_x=None, width=self.margin_left+kivy.metrics.dp(125), valign='middle', halign='right')
             frames_label.text_size = frames_label.size
             box.add_widget(frames_label)
 
             for i in range(formatted_data['num_frames']):
-                frames_label = Label(text='Frame' + str(i+1), size_hint_x=None, width=self.margin_left, valign='middle', halign='right')
+                frames_label = Label(text='Frame' + str(i+1), size_hint_x=None, width=self.frame_width, valign='middle', halign='right')
                 frames_label.text_size = frames_label.size
                 box.add_widget(frames_label)
 
@@ -2010,9 +2010,9 @@ class PageOutputScreen(Screen):
             if state == -1:
                 state = 'X'
             if allocated_frame - 1 == idx and page_fault == 1:
-                mem_label = ColoredBorderedLabel(text='[b][color=ff0b3c]'+str(state)+'[/color][/b]', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
+                mem_label = ColoredBorderedLabel(text='[b][color=ff0b3c]'+str(state)+'[/color][/b]', markup=True, size_hint_x=None, width=self.frame_width, valign='middle', halign='center')
             else:
-                mem_label = WhiteBorderedLabel(text=str(state), size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
+                mem_label = WhiteBorderedLabel(text=str(state), size_hint_x=None, width=self.frame_width, valign='middle', halign='center')
 
             mem_label.text_size = mem_label.size
             mem_box.add_widget(mem_label)
