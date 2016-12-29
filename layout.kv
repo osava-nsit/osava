@@ -149,7 +149,7 @@
                 #text: 'Load form'
                 #on_release: root.load_form()
         Label:
-            text: 'Information about the scheduling algorithm -'
+            text: 'Information about the scheduling algorithm:'
             size_hint_y: 0.1
             text_size: self.size
             padding: '10dp', 0
@@ -160,14 +160,14 @@
             size_hint_x: 0.6
             size_hint_y: 0.2
             Label:
-                text: 'Algorithm -'
+                text: 'Algorithm:'
                 size_hint_x: 0.4
                 text_size: self.size
                 #pos_hint: {'top': 1}
                 padding: '5dp', '5dp'
             Spinner:
                 id: algo_spinner
-                text:'Select an Algorithm'
+                text:'Select an algorithm'
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('First Come First Serve', 'Shortest Job First', 'Priority', 'Round Robin', 'Multilevel Queue', 'Multilevel Feedback Queue')
@@ -177,7 +177,7 @@
             size_hint_x: 0.5
             padding: '5dp', '5dp'
             Label:
-                text: 'Variant -'
+                text: 'Variant'
                 size_hint_x: 0.4
                 text_size: self.size
                 padding: '5dp', 0
@@ -520,14 +520,14 @@
             size_hint_y: 0.2
             #height: '100dp'
             Label:
-                text: 'Algorithm -'
+                text: 'Algorithm:'
                 size_hint_x: 0.3
                 text_size: self.size
                 #pos_hint: {'top': 1}
                 padding: '10dp', '10dp'
             Spinner:
                 id: algo_spinner
-                text:'Select an Algorithm'
+                text:'Select an algorithm'
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('First Fit', 'Best Fit', 'Worst Fit')
@@ -607,14 +607,14 @@
             padding: '5dp', '10dp'
             size_hint_y: 0.2
             Label:
-                text: 'Algorithm -'
+                text: 'Algorithm:'
                 size_hint_x: 0.3
                 text_size: self.size
                 #pos_hint: {'top': 1}
                 padding: '10dp', '10dp'
             Spinner:
                 id: algo_spinner
-                text:'Select an Algorithm'
+                text:'Select an algorithm'
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used')
@@ -715,17 +715,17 @@
             height: '100dp'
             size_hint_y: None
             Label:
-                text: 'Algorithm -'
+                text: 'Algorithm:'
                 size_hint_x: 0.3
                 text_size: self.size
                 #pos_hint: {'top': 1}
                 padding: '10dp', '10dp'
             Spinner:
                 id: algo_spinner
-                text:'Select an Algorithm'
+                text:'Select an algorithm'
                 size_hint_y: 'None'
                 height: '40dp'
-                values: ('First Come First Serve', 'Shortest Seek Time First', 'Scan (Elevator Algorithm)', 'Circular-Scan', 'Look', 'Circular-Look')
+                values: ('First Come First Served', 'Shortest Seek Time First', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK')
         BoxLayout:
             id: form
             orientation: 'vertical'

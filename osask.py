@@ -2069,22 +2069,22 @@ class DiskInputScreen(Screen):
 
     #Set appropriate strategy type according to the chosen algorithm by the user
     def show_selected_value(self, spinner, text, *args):
-        if text == 'First Come First Serve':
+        if text == 'First Come First Served':
             self.strategy_type = 0
             self.algo_type = 0
         elif text == 'Shortest Seek Time First':
             self.strategy_type = 1
             self.algo_type = 1
-        elif text == 'Scan (Elevator Algorithm)':
+        elif text == 'SCAN':
             self.strategy_type = 2
             self.algo_type = 2
-        elif text == 'Circular-Scan':
+        elif text == 'C-SCAN':
             self.strategy_type = 3
             self.algo_type = 3
-        elif text == 'Look':
+        elif text == 'LOOK':
             self.strategy_type = 4
             self.algo_type = 4
-        elif text == 'Circular-Look':
+        elif text == 'C-LOOK':
             self.strategy_type = 5
             self.algo_type = 5
         data_disk['algo'] = self.strategy_type
@@ -2112,7 +2112,8 @@ class DiskInputScreen(Screen):
             data_disk['pos_head'] = 0
         if 'algo' not in data_disk:
             data_disk['algo'] = 0
-        data_disk['disk_queue'] = ''
+        if 'disk_queue' not in data_disk:
+            data_disk['disk_queue'] = ''
 
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -2120,12 +2121,12 @@ class DiskInputScreen(Screen):
 
         # Add labels for input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
-        box.add_widget(Label(text='Disk Queue'))
+        box.add_widget(Label(text='Disk queue (starts from 0):'))
         grid.add_widget(box)
 
         # Add input
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
-        inp = TextInput(id='disk_queue'+str(0))
+        inp = TextInput(id='disk_queue'+str(0), text=data_disk['disk_queue'])
         inp.bind(text=disk_on_queue)
         box.add_widget(inp)
         grid.add_widget(box)
@@ -2187,14 +2188,13 @@ class DiskOutputScreen(Screen):
         elif data_disk['algo'] == 5:
             return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.\nOn reaching the end, the r/w head immediately returns to the beginning, if need be, without servicing any request on the return trip.'
 
-
-
     # Generate formatted data for input to the algo
     def calculate(self, *args):
         formatted_data = {}
         formatted_data['curr_pos'] = int(data_disk['pos_head'])
         formatted_data['total_cylinders']= int(data_disk['num_cylinders'])
         formatted_data['algo'] = data_disk['algo']
+
         disk_queue = []
         disk_queue_data = data_disk['disk_queue']
         if ',' in disk_queue_data: # Comma separated disk_queue
@@ -2202,6 +2202,7 @@ class DiskOutputScreen(Screen):
         else: # Space separated disk_queue
             disk_queue = disk_queue_data.split()
         formatted_data['disk_queue'] = disk_queue
+
         if data_disk['algo'] != 0 and data_disk['algo'] != 1:
             formatted_data['direction'] = data_disk['direction']
         self.secondary_memory_chart = disk_scheduling.disk_scheduling(formatted_data)
@@ -2228,21 +2229,6 @@ class DiskOutputScreen(Screen):
             # Draw secondary storage chart
             self.draw_storage_chart(grid)
             temp = self.secondary_memory_chart
-            # for i in range(len(temp['memory_state'])):
-            #     if temp['memory_state'][i] == 0 or temp['memory_state'][i] == data_disk['num_cylinders']-1:
-            #         if temp['memory_state'][i] in formatted_data['disk_queue'] or temp['memory_state'][i] == data_disk['pos_head']:
-            #             box.add_widget(Label(text=str(temp['memory_state'][i])))
-            #         else:
-            #             box_label = Label(text='[color=ff0b3c]'+str(temp['memory_state'][i])+'[/color]', markup=True)
-            #             box.add_widget(box_label)
-            #         if i != len(temp['memory_state'])-1:
-            #             self.add_arrow()
-            #             #box.add_widget(Label(text='---->'))
-            #         continue
-            #     box.add_widget(Label(text=str(temp['memory_state'][i])))
-            #     if i != len(temp['memory_state'])-1:
-            #         self.add_arrow()
-            #        # box.add_widget(Label(text='---->'))
 
             # Add box for drawing arrows
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='300dp')
@@ -2295,7 +2281,10 @@ class DiskOutputScreen(Screen):
         mem_box.add_widget(cylinder_label)
 
         # To print path of read/ write head
+        prev_cylinder = -1
         for i, cylinder in enumerate(sorted_heads[1:]):
+            if cylinder == prev_cylinder:
+                continue
             # To get right value of index
             i = i + 1
             width = self.inc*(cylinder - sorted_heads[i-1])
@@ -2313,6 +2302,8 @@ class DiskOutputScreen(Screen):
             cylinder_label.text_size = (max(cylinder_label._label.content_width, width), kivy.metrics.dp(30))
 
             mem_box.add_widget(cylinder_label)
+
+            prev_cylinder = cylinder
 
         # Initial height of head
         y1 = kivy.metrics.dp(330)
@@ -2351,12 +2342,16 @@ class DiskOutputScreen(Screen):
         arrow_angle = 45
 
         # Slope of the arrow line
-        m = (float(y2-y1))/(float(x2-x1))
-        print "x2 = {} m = {}".format(x2,m)
+        if (x2-x1 == 0):
+            m = float("inf")
+        else:
+            m = (float(y2-y1))/(float(x2-x1))
+
+        # print "x2 = {} m = {}".format(x2,m)
+
         # Coordinates for right half of the head
         # deg = self.calc_normalised_angle(m)
         # m3 = m * cos(radians(deg))#/120
-
         m3 = tan(atan(m) + radians(arrow_angle))
 
         # c,s = Cos and Sine of the slope angle
@@ -2372,6 +2367,7 @@ class DiskOutputScreen(Screen):
         s = m4 * c
         x4 = x2 - len_head * c
         y4 = y2 - len_head * s
+
         # Drawing the arrow head on each side
         with self.arrows_widget.canvas:
             Color(0, 0.5, 1)
