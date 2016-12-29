@@ -173,7 +173,7 @@
                 values: ('First Come First Serve', 'Shortest Job First', 'Priority', 'Round Robin', 'Multilevel Queue', 'Multilevel Feedback Queue')
         BoxLayout:
             orientation: 'horizontal'
-            size_hint_y: 0.2
+            size_hint_y: 0.15
             size_hint_x: 0.5
             padding: '5dp', '5dp'
             Label:
@@ -187,6 +187,7 @@
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('Preemptive', 'Non-Preemptive')
+                disabled: True
             Label:
                 text: ''
                 size_hint_x: 0.05
