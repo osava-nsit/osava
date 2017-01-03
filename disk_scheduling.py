@@ -63,6 +63,7 @@ def check_for_bad_input(data):
 def calc_end_cylinder_moves(chosen_cylinder, memory_state, curr_head_pos):
     memory_state.append(chosen_cylinder)
     difference = abs(int(chosen_cylinder) - curr_head_pos)
+    # print "Moves: " + str(difference)
     return difference
 
 def c_scan_or_c_look(curr_head_pos, num_cylinders, disk_queue, next_larger_pos, direction, algo):
@@ -70,48 +71,60 @@ def c_scan_or_c_look(curr_head_pos, num_cylinders, disk_queue, next_larger_pos, 
     memory_state = [] # To keep track of the order in which cylinders are visited
     memory_state.append(curr_head_pos)
 
-    if(direction == 0): # Inward direction
+    if(direction == 1): # Inward direction
         start_idx = next_larger_pos - 1
         for i in range(next_larger_pos):
             chosen_cylinder = disk_queue[start_idx]
+            # print "Cylinder: " + str(chosen_cylinder)
             start_idx = start_idx -1
             memory_state.append(chosen_cylinder)
             difference = abs(int(chosen_cylinder) - curr_head_pos)
+            # print "Moves: " + str(difference)
             total_head_movements += difference
-        curr_head_pos = int(chosen_cylinder)
+            curr_head_pos = int(chosen_cylinder)
         if(algo == 3):
             chosen_cylinder = 0
+            # print "Cylinder: " + str(chosen_cylinder)
             total_head_movements += calc_end_cylinder_moves(chosen_cylinder, memory_state, curr_head_pos)
             curr_head_pos = int(chosen_cylinder)
             chosen_cylinder = num_cylinders - 1
+            # print "Cylinder: " + str(chosen_cylinder)
             memory_state.append(chosen_cylinder)
             curr_head_pos = int(chosen_cylinder)
         if(algo == 5):
             curr_head_pos = disk_queue[-1]
         for i, cylinder in reversed(list(enumerate(disk_queue[next_larger_pos:]))):
+            # print "Cylinder: " + str(cylinder)
             memory_state.append(cylinder)
             difference = abs(int(cylinder) - curr_head_pos)
+            # print "Moves: " + str(difference)
             total_head_movements += difference
             curr_head_pos = int(cylinder)
     else: # Outward direction
         for i, cylinder in enumerate(disk_queue[next_larger_pos:]):
+            # print "Cylinder: " + str(cylinder)
             memory_state.append(cylinder)
             difference = abs(int(cylinder) - curr_head_pos)
+            # print "Moves: " + str(difference)
             total_head_movements += difference
             curr_head_pos = int(cylinder)
         if(algo == 3):
             chosen_cylinder = num_cylinders - 1
+            # print "Cylinder: " + str(chosen_cylinder)
             total_head_movements += calc_end_cylinder_moves(chosen_cylinder, memory_state, curr_head_pos)
             curr_head_pos = int(chosen_cylinder)
             chosen_cylinder = 0
+            # print "Cylinder: " + str(chosen_cylinder)
             memory_state.append(chosen_cylinder)
             curr_head_pos = int(chosen_cylinder)
         if(algo == 5):
             curr_head_pos = disk_queue[0]
         for i, cylinder in enumerate(disk_queue[0:next_larger_pos]):
             chosen_cylinder = cylinder
+            # print "Cylinder: " + str(chosen_cylinder)
             memory_state.append(chosen_cylinder)
             difference = abs(int(chosen_cylinder) - curr_head_pos)
+            # print "Moves: " + str(difference)
             total_head_movements += difference
             curr_head_pos = int(chosen_cylinder)
 
@@ -123,7 +136,7 @@ def scan_or_look(curr_head_pos, num_cylinders, disk_queue, next_larger_pos, dire
     memory_state = [] # To keep track of the order in which cylinders are visited
     memory_state.append(curr_head_pos)
 
-    if(direction == 0): # Inward direction
+    if(direction == 1): # Inward direction
         start_idx = next_larger_pos - 1
         for i in range(next_larger_pos):
             chosen_cylinder = disk_queue[start_idx]
@@ -218,7 +231,7 @@ def construct_output(error_status, secondary_storage_memory, total_head_movement
     secondary_storage_chart['memory_state'] = secondary_storage_memory
     secondary_storage_chart['total_head_moves'] = total_head_movements
     secondary_storage_chart['error_status'] = error_status
-    print str(secondary_storage_chart)
+    # print str(secondary_storage_chart)
     return secondary_storage_chart
 
 # Main function to call algo chosen by the user
@@ -243,13 +256,17 @@ def disk_scheduling(data):
         elif data['algo'] == 1:
             secondary_storage_memory, total_head_movements = shortest_seek_time_first(curr_head_pos, disk_queue)
         else:
-            larger = curr_head_pos # To find the next largest cylinder to current head position
+            larger = -1 # To find the next largest cylinder to current head position
             new_disk_queue=list(map(int, disk_queue))
             disk_queue = sorted(new_disk_queue)
+            # print "Sorted qeue: " + str(disk_queue)
             for idx, cylinder in enumerate(disk_queue):
                 if(int(cylinder) > curr_head_pos):
                     larger = idx 
                     break
+            # print "next larger postion " + str(larger)
+            if larger==-1:
+                larger = len(disk_queue) 
             if data['algo'] == 2 or data['algo'] == 4:
                 secondary_storage_memory, total_head_movements = scan_or_look(curr_head_pos, num_cylinders, disk_queue, larger, direction, data['algo'])
             elif data['algo'] == 3 or data['algo'] == 5:
