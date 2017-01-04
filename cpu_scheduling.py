@@ -1,7 +1,7 @@
 from sys import maxsize
 from operator import itemgetter
 import Queue
-
+from copy import deepcopy
 # Bad input case(s):
 # 0. 1 <= queue assigned <= num_queues
 # 1. 0 < burst_time 
@@ -693,262 +693,287 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
         return process_chart, stats, process_details, error_status
 
 def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0):
-    queue_data = [[] for i in range(num_queues)]
-    all_processes = data
-    queue_cpu_schedule = [{} for i in range(num_queues)]
-    queue_stats = [{} for i in range(num_queues)]
-    queue_details = [{} for i in range(num_queues)]
-    priority_cpu_scheduling = {}
-    priority_stats = {}
-    priority_details = {}
-    priority_process = {}
-    priority_data = []
-    process_chart = {}
-    details_process = []
-    index = [0]*num_queues
-    flag = False
-    for process in all_processes:
-        queue_data[process['queue_assigned']-1].append(process)
-        temp_val = {}
-        temp_val['name'] = process['name']
-        temp_val['arrival'] = process['arrival']
-        temp_val['burst'] = process['burst']
-        temp_val['flag'] = 0
-        temp_val['start'] = -1
-        temp_val['end'] = -1
-        details_process += [temp_val]
-        del temp_val
-    for i in range(num_queues):
-        if algo_queue[i] == 0:
-            print "inside fcfs"
-            queue_cpu_schedule[i], queue_stats[i], queue_details[i] = fcfs(queue_data[i], dispatch_latency)
-        elif algo_queue[i] == 1:
-            print "inside rr"
-            queue_cpu_schedule[i], queue_stats[i], queue_details[i] = round_robin(queue_data[i], quantum_queue[i], dispatch_latency)
-    for i in range(num_queues):
-        for process in queue_cpu_schedule[i]:
-            if flag == False and process['name'] != 'Idle':
-                priority_process['name'] = process['name']
-                priority_process['arrival'] = process['start']
-                priority_process['priority'] = i
-                flag = True
-            elif flag == True and process['name'] == 'Idle':
-                priority_process['burst'] = process[-1]['end'] - priority_process['arrival']
-                flag = False
-                priority_data.append(priority_process)
-    priority_cpu_scheduling, priority_stats, priority_details = priority_preemptive(priority_data, maxsize, dispatch_latency)
-    curr_time = 0
-    for chart_details in priority_cpu_scheduling:
-        if chart_details['name'] == 'Idle':
-            process_chart+=chart_details
-        else:
-            for process in priority_data:
-                if process['name'] == chart_details['name']:
-                    while True:
-                        temp_process = {}
-                        temp_process = queue_cpu_schedule[process['priority']][index[process['priority']]] 
-                        temp_process['start'] = curr_time,   
-                        if temp_process['name'] == 'Idle':
-                            index[process['priority']] += 1
-                            curr_time += temp_process['end'] -queue_cpu_schedule[process['priority']][index[process['priority']]]['start']
-                            continue
-                        for details in details_process:
-                            if details['name'] == temp_process['name']:
-                                if details['flag'] == 0:
-                                    details['start'] = curr_time
-                                    details['flag'] = 1
-                        if (temp_process['end']-queue_cpu_schedule[process['priority']][index[process['priority']]]['start']+curr_time) < chart_details['end']:
-                            process_chart += temp_process
-                            index[process['priority']] += 1 
-                            curr_time += temp_process['end']-queue_cpu_schedule[process['priority']][index[process['priority']]]['start']
+    # For bad input handling
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 5)
+    if(error):
+        return -1, -1, -1, error_status
+    else:
+        queue_data = [[] for i in range(num_queues)]
+        all_processes = data
+        queue_cpu_schedule = [list() for i in range(num_queues)]
+        queue_stats = [{} for i in range(num_queues)]
+        queue_details = [{} for i in range(num_queues)]
+        queue_error_status = [{} for i in range(num_queues)]
+        priority_cpu_scheduling = []
+        priority_error_status = {}
+        priority_stats = {}
+        priority_details = {}
+        priority_process = {}
+        priority_data = []
+        process_chart = list()
+        details_process = []
+        index = [0]*num_queues
+        flag = False
+        wait_time = 0
+        resp_time = 0
+        turn_time = 0 
+        sum_time = 0
+        idx = 0
+        # For assignment of processes to their respective queues
+        for process in all_processes:
+            queue_data[process['queue_assigned']-1].append(process)
+            temp_val = {}
+            temp_val['name'] = process['name']
+            temp_val['arrival'] = process['arrival']
+            temp_val['burst'] = process['burst']
+            temp_val['flag'] = 0
+            temp_val['start'] = -1
+            temp_val['end'] = -1
+            details_process += [temp_val]
+            del temp_val
+        # Calling fcfs or round robin cpu scheduling algorithm on every queue
+        for i in range(num_queues):
+            if algo_queue[i] == 0:
+                queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = fcfs(queue_data[i], dispatch_latency)
+            elif algo_queue[i] == 1:
+                queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = round_robin(queue_data[i], quantum_queue[i], dispatch_latency)
+        for i in range(num_queues):
+            for index_queue ,process in enumerate(queue_cpu_schedule[i]):
+                if flag == False and process['name'] != 'Idle':
+                    priority_process['name'] = process['name']
+                    priority_process['arrival'] = process['start']
+                    priority_process['priority'] = i
+                    flag = True
+                elif flag == True and process['name'] == 'Idle':
+                    priority_process['burst'] = queue_cpu_schedule[i][index_queue-1]['end'] - priority_process['arrival']
+                    flag = False
+                    priority_data.insert(idx, deepcopy(priority_process))
+                    idx = idx+1
+                if process['name'] == queue_cpu_schedule[i][-1]['name'] and flag == True:
+                    priority_process['burst'] = process['end'] - priority_process['arrival']
+                    flag = False
+                    priority_data.insert(idx, deepcopy(priority_process))
+                    idx = idx+1
+        priority_cpu_scheduling, priority_stats, priority_details, priority_error_status = priority_preemptive(priority_data, maxsize, dispatch_latency)
+        curr_time = 0
+        for chart_details in priority_cpu_scheduling:
+            if chart_details['name'] == 'Idle':
+                process_chart.append(deepcopy(chart_details))
+            else:
+                for process in priority_data:
+                    if process['name'] == chart_details['name']:
+                        while True:
+                            temp_process = {}
+                            temp_process = queue_cpu_schedule[process['priority']][index[process['priority']]].copy()
+                            exp_process = {}
+                            exp_process = queue_cpu_schedule[process['priority']][index[process['priority']]]
+                            temp_process['start'] = curr_time  
+                            if temp_process['name'] == 'Idle':
+                                index[process['priority']] += 1
+                                continue
                             for details in details_process:
-                                if details['name'] == temp_process['name']:
-                                    if details['flag'] == 1:
-                                        details['end'] = curr_time
-                            continue
-                        elif temp_process['end'] - queue_cpu_schedule[process['priority']][index[process['priority']]]['start'] + curr_time == chart_details['end']:
-                            process_chart += temp_process
-                            index[process['priority']] += 1
-                            for details in details_process:
-                                if details['name'] == temp_process['name']:
-                                    if details['flag'] == 1:
-                                        details['end'] = chart_details['end']
-                            break
-                        else:
-                            temp_process['end'] = chart_details['end']
-                            process_chart += temp_process
-                            for details in details_process:
-                                if details['name'] == temp_process['name']:
-                                    if details['flag'] == 1:
-                                        details['end'] = chart_details['end']
-                            break
+                                if details['name'] == temp_process['name']: 
+                                    if details['flag'] == 0:
+                                        details['start'] = curr_time
+                                        details['flag'] = 1
+                            if (temp_process['end'] - exp_process['start'] + curr_time) < chart_details['end']:
+                                process_chart.append(deepcopy(temp_process))
+                                index[process['priority']] += 1 
+                                curr_time += temp_process['end'] - exp_process['start']
+                                for details in details_process:
+                                    if details['name'] == temp_process['name']:
+                                        if details['flag'] == 1:
+                                            details['end'] = curr_time
+                                continue
+                            elif temp_process['end'] - exp_process['start'] + curr_time == chart_details['end']:
+                                temp_process['end'] = chart_details['end']
+                                process_chart.append(deepcopy(temp_process))
+                                index[process['priority']] += 1
+                                for details in details_process:
+                                    if details['name'] == temp_process['name']:
+                                        if details['flag'] == 1:
+                                            details['end'] = chart_details['end']
+                                break
+                            else:
+                                temp_process['end'] = chart_details['end']
+                                process_chart.append(deepcopy(temp_process))
+                                queue_cpu_schedule[process['priority']][index[process['priority']]]['start'] += chart_details['end'] - curr_time
+                                for details in details_process:
+                                    if details['name'] == temp_process['name']:
+                                        if details['flag'] == 1:
+                                            details['end'] = chart_details['end']
+                                break
+                        break
+            curr_time = chart_details['end']
+        
+        process_details = dict()
+        for data in details_process:
+            process_details[data['name']] = dict()
+            process_details[data['name']]['resp_time'] = data['start'] - data['arrival']
+            process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+            process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
+            wait_time += process_details[data['name']]['wait_time']
+            resp_time += process_details[data['name']]['resp_time']
+            turn_time += process_details[data['name']]['turn_time']
+            sum_time += data['burst']
 
-                    break
-        curr_time = chart_details['end']
-    process_details = dict()
-    for data in details_process:
-        process_details[data['name']] = dict()
-        process_details[data['name']]['resp_time'] = data['start'] - data['arrival']
-        process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
-        process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
-        wait_time += process_details[data['name']]['wait_time']
-        resp_time += process_details[data['name']]['resp_time']
-        turn_time += process_details[data['name']]['turn_time']
-        sum_time += data['burst']
+        stats = {}
+        stats['sum_time'] = sum_time
+        stats['wait_time'] = float(wait_time)/len(details_process)
+        stats['resp_time'] = float(resp_time)/len(details_process)
+        stats['turn_time'] = float(turn_time)/len(details_process)
+        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
-    stats = {}
-    stats['sum_time'] = sum_time
-    stats['wait_time'] = float(wait_time)/len(details_process)
-    stats['resp_time'] = float(resp_time)/len(details_process)
-    stats['turn_time'] = float(turn_time)/len(details_process)
-    stats['throughput'] = len(details_process)*1000/float(curr_time)
-    stats['cpu_utilization'] = float(sum_time)*100/curr_time
-
-    return process_chart, stats, process_details
+        return process_chart, stats, process_details, error_status
     
 def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
-    print quantum_queue
-    queue_data = [[] for i in range(num_queues)]
-    all_processes = sorted(data, key=itemgetter('arrival'))
-    time_present = 0
-    wait_time = 0
-    resp_time = 0
-    turn_time = 0
-    sum_time = 0
-    details_process = []
-    process_chart = []
-    for process in all_processes:
-        queue_data[0].append(process)
-        temp_val = {}
-        temp_val['name'] = process['name']
-        temp_val['arrival'] = process['arrival']
-        temp_val['burst'] = process['burst']
-        temp_val['flag'] = 0
-        temp_val['start'] = -1
-        temp_val['end'] = -1
-        details_process += [temp_val]
-        del temp_val
-    for i in range(num_queues-1):
-        for process in queue_data[i]:
-            successful = False
-            while not successful:
-                chart_details = {}
-                if process['burst'] > 0 and process['arrival'] <= time_present:
-                    successful = True
-                    for data in details_process:
-                        if data['name'] == process['name'] and data['flag'] == 0:
-                            data['start'] = time_present
-                            data['flag'] = 1
-                    chart_details['name'] = process['name']
-                    chart_details['start'] = time_present
-                    quanta = quantum_queue[i]
-
-                    if process['burst'] >= quantum_queue[i]:
-                        process['burst'] -= quantum_queue[i]
-                    else:
-                        quanta = process['burst']
-                        process['burst'] = 0
-
-                    if process['burst'] > 0:
-                        queue_data[i+1].append(process)
-                        chart_details['next_queue'] = i+1
-                        time_present += quanta
-                        
-                    else:
-                        time_present += quanta
-                        chart_details['next_queue'] = 0
+    # For bad input handling
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 6)
+    if(error):
+        return -1, -1, -1, error_status
+    else:
+        queue_data = [[] for i in range(num_queues)]
+        all_processes = sorted(data, key=itemgetter('arrival'))
+        time_present = 0
+        wait_time = 0
+        resp_time = 0
+        turn_time = 0
+        sum_time = 0
+        details_process = []
+        process_chart = []
+        for process in all_processes:
+            queue_data[0].append(process)
+            temp_val = {}
+            temp_val['name'] = process['name']
+            temp_val['arrival'] = process['arrival']
+            temp_val['burst'] = process['burst']
+            temp_val['flag'] = 0
+            temp_val['start'] = -1
+            temp_val['end'] = -1
+            details_process += [temp_val]
+            del temp_val
+        for i in range(num_queues-1):
+            for process in queue_data[i]:
+                successful = False
+                while not successful:
+                    chart_details = {}
+                    if process['burst'] > 0 and process['arrival'] <= time_present:
+                        successful = True
                         for data in details_process:
-                            if data['name'] == process['name'] and data['flag'] == 1:
-                                data['end'] = time_present
-                       
-                    chart_details['end'] = time_present
-                    if len(process_chart) > 0:
-                        temp_dict = process_chart[-1]
-                        if temp_dict['name'] == chart_details['name']:
-                            chart_details['start'] = temp_dict['start']
-                            del process_chart[-1]
-                    
-                    process_chart += [chart_details]
-                else:             
-                    if len(process_chart) > 0:
-                        if process_chart[-1]['name'] == 'Idle':
-                            chart_details = process_chart[-1]
-                            time_present += 1
-                            chart_details['end'] = time_present
-                            chart_details['next_queue'] = 0
-                            del process_chart[-1]   
-                            process_chart += [chart_details]
+                            if data['name'] == process['name'] and data['flag'] == 0:
+                                data['start'] = time_present
+                                data['flag'] = 1
+                        chart_details['name'] = process['name']
+                        chart_details['start'] = time_present
+                        quanta = quantum_queue[i]
+
+                        if process['burst'] >= quantum_queue[i]:
+                            process['burst'] -= quantum_queue[i]
                         else:
+                            quanta = process['burst']
+                            process['burst'] = 0
+
+                        if process['burst'] > 0:
+                            queue_data[i+1].append(process)
+                            chart_details['next_queue'] = i+1
+                            time_present += quanta
+                            
+                        else:
+                            time_present += quanta
+                            chart_details['next_queue'] = 0
+                            for data in details_process:
+                                if data['name'] == process['name'] and data['flag'] == 1:
+                                    data['end'] = time_present
+                           
+                        chart_details['end'] = time_present
+                        if len(process_chart) > 0:
+                            temp_dict = process_chart[-1]
+                            if temp_dict['name'] == chart_details['name']:
+                                chart_details['start'] = temp_dict['start']
+                                del process_chart[-1]
+                        
+                        process_chart += [chart_details]
+                    else:             
+                        if len(process_chart) > 0:
+                            if process_chart[-1]['name'] == 'Idle':
+                                chart_details = process_chart[-1]
+                                time_present += 1
+                                chart_details['end'] = time_present
+                                chart_details['next_queue'] = 0
+                                del process_chart[-1]   
+                                process_chart += [chart_details]
+                            else:
+                                chart_details = {}
+                                chart_details['name'] = 'Idle'
+                                chart_details['start'] = time_present
+                                chart_details['next_queue'] = 0
+                                time_present += 1 
+                                chart_details['end'] = time_present
+                                process_chart += [chart_details]
+                                del chart_details
+                        elif len(process_chart) == 0:
                             chart_details = {}
                             chart_details['name'] = 'Idle'
-                            chart_details['start'] = time_present
+                            chart_details['start'] = 0
                             chart_details['next_queue'] = 0
-                            time_present += 1 
+                            time_present += 1  
                             chart_details['end'] = time_present
                             process_chart += [chart_details]
                             del chart_details
-                    elif len(process_chart) == 0:
-                        chart_details = {}
-                        chart_details['name'] = 'Idle'
-                        chart_details['start'] = 0
-                        chart_details['next_queue'] = 0
-                        time_present += 1  
-                        chart_details['end'] = time_present
-                        process_chart += [chart_details]
-                        del chart_details
-                    var_count = 0
+                        var_count = 0
 
-    for process in queue_data[num_queues-1]:
-        chart_details = {}
-        if (process['arrival'] > time_present):
-            time_present = process['arrival']
-        for data in details_process:
-            if data['name'] == process['name'] and data['flag'] == 0:
-                data['start'] = time_present
-                data['flag'] = 1
-        chart_details['name'] = process['name']
-        chart_details['start'] = time_present
-        chart_details['end'] = time_present + process['burst']
-        chart_details['next_queue'] = 0
-        time_present = time_present + process['burst']
-        for data in details_process:
-            if data['name'] == process['name'] and data['flag'] == 1:
-                data['end'] = time_present 
-        if len(process_chart) > 0:
-            if process_chart[-1]['end'] != chart_details['start']:
+        for process in queue_data[num_queues-1]:
+            chart_details = {}
+            if (process['arrival'] > time_present):
+                time_present = process['arrival']
+            for data in details_process:
+                if data['name'] == process['name'] and data['flag'] == 0:
+                    data['start'] = time_present
+                    data['flag'] = 1
+            chart_details['name'] = process['name']
+            chart_details['start'] = time_present
+            chart_details['end'] = time_present + process['burst']
+            chart_details['next_queue'] = 0
+            time_present = time_present + process['burst']
+            for data in details_process:
+                if data['name'] == process['name'] and data['flag'] == 1:
+                    data['end'] = time_present 
+            if len(process_chart) > 0:
+                if process_chart[-1]['end'] != chart_details['start']:
+                    idle_cpu = dict()
+                    idle_cpu['name'] = 'Idle'
+                    idle_cpu['start'] = process_chart[-1]['end']
+                    idle_cpu['end'] = chart_details['start']
+                    process_chart += [idle_cpu]
+            elif len(process_chart) == 0 and chart_details['start'] > 0:
                 idle_cpu = dict()
                 idle_cpu['name'] = 'Idle'
-                idle_cpu['start'] = process_chart[-1]['end']
+                idle_cpu['start'] = 0
                 idle_cpu['end'] = chart_details['start']
                 process_chart += [idle_cpu]
-        elif len(process_chart) == 0 and chart_details['start'] > 0:
-            idle_cpu = dict()
-            idle_cpu['name'] = 'Idle'
-            idle_cpu['start'] = 0
-            idle_cpu['end'] = chart_details['start']
-            process_chart += [idle_cpu]
 
-        process_chart += [chart_details]
+            process_chart += [chart_details]
 
 
-    process_details = dict()
-    for data in details_process:
-        process_details[data['name']] = dict()
-        process_details[data['name']]['resp_time'] = data['start'] - data['arrival']
-        process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
-        process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
-        wait_time += process_details[data['name']]['wait_time']
-        resp_time += process_details[data['name']]['resp_time']
-        turn_time += process_details[data['name']]['turn_time']
-        sum_time += data['burst']
+        process_details = dict()
+        for data in details_process:
+            process_details[data['name']] = dict()
+            process_details[data['name']]['resp_time'] = data['start'] - data['arrival']
+            process_details[data['name']]['wait_time'] = (data['start'] - data['arrival']) + (data['end'] - (data['start'] + data['burst']))
+            process_details[data['name']]['turn_time'] = (data['end'] - data['arrival'])
+            wait_time += process_details[data['name']]['wait_time']
+            resp_time += process_details[data['name']]['resp_time']
+            turn_time += process_details[data['name']]['turn_time']
+            sum_time += data['burst']
 
-    curr_time = time_present
-    stats = {}
-    stats['sum_time'] = sum_time
-    stats['wait_time'] = float(wait_time)/len(details_process)
-    stats['resp_time'] = float(resp_time)/len(details_process)
-    stats['turn_time'] = float(turn_time)/len(details_process)
-    stats['throughput'] = len(details_process)*1000/float(curr_time)
-    stats['cpu_utilization'] = float(sum_time)*100/curr_time
-        
-    return process_chart, stats, process_details
+        curr_time = time_present
+        stats = {}
+        stats['sum_time'] = sum_time
+        stats['wait_time'] = float(wait_time)/len(details_process)
+        stats['resp_time'] = float(resp_time)/len(details_process)
+        stats['turn_time'] = float(turn_time)/len(details_process)
+        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['cpu_utilization'] = float(sum_time)*100/curr_time
+            
+        return process_chart, stats, process_details, error_status

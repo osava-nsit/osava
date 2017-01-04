@@ -83,7 +83,7 @@ def cpu_on_num_queues(instance, value):
     data_cpu['num_queues'] = int(value)
 def cpu_on_queue_quantum(instance, value, i):
     if value == '':
-        value = 2
+        value = 0
     data_cpu['queue_quantum'][i] = int(value)
 def cpu_on_queue_assigned(instance, value, i):
     if value == '':
@@ -634,9 +634,9 @@ class CPUOutputScreen(Screen):
         elif cpu_scheduling_type == 5:
             self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 7:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], [1,2,3], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
         elif cpu_scheduling_type == 8:
-            self.cpu_schedule, self.stats, self.details = cpu_scheduling.multilevel_feedback(formatted_data, data_cpu['num_queues'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.multilevel_feedback(formatted_data, data_cpu['num_queues'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
         
         grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll
@@ -671,9 +671,21 @@ class CPUOutputScreen(Screen):
 
                 # Popup showing details of process when box is clicked
                 if process['name'] != 'Idle' and process['name'] != 'DL':
-                    content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
-                        "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
-                        "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                    if cpu_scheduling_type != 8:
+                        content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                    else:
+                        if process['next_queue'] == 0:
+                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                            "Process "+process['name']+" is completed.")
+                        else:
+                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                            process['name']+" moved to queue Q"+str(process['next_queue']+1)+".")
                     content_label = Label(text=content_str)
                     popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(kivy.metrics.dp(200), kivy.metrics.dp(200)))
                     label_name.bind(on_ref_press=popup.open)
