@@ -6,14 +6,16 @@ from copy import deepcopy
 # 0. 1 <= queue assigned <= num_queues
 # 1. 0 < burst_time 
 # 2. 0 < quantum 
-# 3. 0 <= priority 
+# 3. 0 < priority 
 # 4. 0 <= arrival_time 
 # 5. 0 <= dispatch_latency 
+# 6. 0 < quantum_queue
+
 
 # Bad input handling and error message for the user
 default_message = "Press back button to go back to the input form."
 
-def get_error_message(error_number, process_id):
+def get_error_message(error_number, process_id, queue_number=-1):
     ERROR = {}
     if error_number == -1:
         ERROR['error_message'] = " "
@@ -36,21 +38,24 @@ def get_error_message(error_number, process_id):
     elif error_number == 5:
         ERROR['error_message'] = "Please enter a valid dispatch latency.\n" + default_message
         ERROR['error_number'] = 5
+    elif error_number == 6:
+        ERROR['error_message'] = "Time quantum entered for queue " + str(queue_number) + " is invalid. Please enter a valid time quantum.\n" + default_message
+        ERROR['error_number'] = 6
     return ERROR
 
-# Values for algo : FCFS = 1, SJF Premptive/Non-premptive = 2, Priority Premptive/Non-premptive = 3, Round Robin = 4
-def check_for_bad_input(data, dispatch_latency, priority, quantum, algo):
+# Values for algo : FCFS = 1, SJF Premptive/Non-premptive = 2, Priority Premptive/Non-premptive = 3, Round Robin = 4, Multilevel Queue = 5, Multilevel Feedback Queue = 6
+def check_for_bad_input(data, dispatch_latency, priority, quantum, algo, num_queues, quantum_queue, algo_queue):
     error = 0 # Boolean to check bad input 
     error_status = {} # Dictionary to store error number and error message
     processes = sorted(data, key=itemgetter('arrival'))
     if int(dispatch_latency) < 0:
-        error_status = get_error_message(5, -1)
+        error_status = get_error_message(5, -1, -1)
         error = 1
     elif algo == 3 and priority < 0:
-        error_status = get_error_message(3, -1)
+        error_status = get_error_message(3, -1, -1)
         error = 1
     elif algo == 4 and quantum <= 0:
-        error_status = get_error_message(2, -1)
+        error_status = get_error_message(2, -1, -1)
         error = 1
     else:
         for process in processes:
@@ -58,20 +63,30 @@ def check_for_bad_input(data, dispatch_latency, priority, quantum, algo):
             process_id = process['name']
             arrival_time = process['arrival']
             if int(arrival_time) < 0:
-                error_status = get_error_message(4, process_id)
+                error_status = get_error_message(4, process_id, -1)
                 error = 1
                 break
             burst_time = process['burst']
             if int(burst_time) <= 0:
-                error_status = get_error_message(1, process_id)
+                error_status = get_error_message(1, process_id, -1)
+                error = 1
+                break
+            if algo == 5:
+                if process['queue_assigned'] <= 0 or process['queue_assigned'] > num_queues:
+                    error_status = get_error_message(0, process_id, -1)
+                    error = 1
+                    break
+    if error == 0 and algo == 5:
+        for i in range(quantum_queue):
+            if quantum_queue[i] <= 0 and algo_queue == 1:
+                error_status = get_error_message(6, -1, i+1)
                 error = 1
                 break
     if(error == 0):
-        error_status = get_error_message(-1, -1)
+        error_status = get_error_message(-1, -1, -1)
     status = (error, error_status);
     return status
 
-# TODO: Values for algo : Multilevel Queue = 5, Multilevel Feedback Queue = 6
 
 def fcfs(data, dispatch_latency = 0):
     # For bad input handling
@@ -146,7 +161,7 @@ def fcfs(data, dispatch_latency = 0):
 
 def round_robin(data, max_quanta = 4, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, max_quanta, 4)
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, max_quanta, 4, -1, -1, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
@@ -282,7 +297,7 @@ def round_robin(data, max_quanta = 4, dispatch_latency = 0):
 
 def shortest_job_non_prempted(data, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 2)
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 2, -1, -1, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
@@ -370,7 +385,7 @@ def shortest_job_non_prempted(data, dispatch_latency = 0):
     
 def shortest_job_prempted(data, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 2)
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 2, -1, -1, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
@@ -477,7 +492,7 @@ def shortest_job_prempted(data, dispatch_latency = 0):
 
 def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, -1, 3)
+    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, -1, 3, -1, -1, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
@@ -575,7 +590,7 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
     
 def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, -1, 3)
+    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, -1, 3, -1, -1, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
@@ -694,7 +709,7 @@ def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0
 
 def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 5)
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 5, num_queues, quantum_queue, algo_queue)
     if(error):
         return -1, -1, -1, error_status
     else:
@@ -829,7 +844,7 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
     
 def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 6)
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 6, num_queues, quantum_queue, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
