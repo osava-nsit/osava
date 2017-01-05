@@ -90,7 +90,7 @@ def check_for_bad_input(data, dispatch_latency, priority, quantum, algo, num_que
 
 def fcfs(data, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 1)
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, 1, -1, -1, -1)
     if(error):
         return -1, -1, -1, error_status
     else:
