@@ -107,8 +107,18 @@ def fcfs(data, dispatch_latency = 0):
             temp_process['arrival'] = process['arrival']
             temp_process['burst'] = process['burst']
             chart_details = {}
+
             if (process['arrival'] > curr_time):
                 curr_time = process['arrival']
+
+            # Add dispatch latency
+            if (dispatch_latency > 0):
+                dl_cpu = dict()
+                dl_cpu['name'] = 'DL'
+                dl_cpu['start'] = curr_time
+                dl_cpu['end'] = curr_time + dispatch_latency
+                process_chart += [dl_cpu]
+                curr_time += dispatch_latency
 
             chart_details['name'] = process['name']
             chart_details['start'] = curr_time
@@ -141,15 +151,6 @@ def fcfs(data, dispatch_latency = 0):
 
             process_chart += [chart_details]
 
-            # Add dispatch latency
-            if (dispatch_latency > 0):
-                dl_cpu = dict()
-                dl_cpu['name'] = 'DL'
-                dl_cpu['start'] = chart_details['end']
-                dl_cpu['end'] = chart_details['end'] + dispatch_latency
-                process_chart += [dl_cpu]
-                curr_time += dispatch_latency
-
         stats = {}
         stats['sum_time'] = sum_time
         stats['wait_time'] = float(wait_time)/len(processes)
@@ -159,7 +160,135 @@ def fcfs(data, dispatch_latency = 0):
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
         return process_chart, stats, details_process, error_status
 
-def round_robin(data, max_quanta = 4, dispatch_latency = 0):
+def round_robin(data, quantum=4, dispatch_latency=0):
+    # For bad input handling
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, quantum, 4, -1, -1, -1)
+    if(error):
+        return -1, -1, -1, error_status
+
+    all_processes = sorted(data, key=itemgetter('arrival'))
+    curr_time = 0
+    total_wait_time = 0
+    total_resp_time = 0
+    total_turn_time = 0
+    sum_time = 0
+
+    # The list of process objects in the gantt chart
+    process_chart = []
+
+    # Process wise details
+    details_process = {}
+    for process in all_processes:
+        details_process[process['name']] = {}
+        details_process[process['name']]['arrival'] = process['arrival']
+        details_process[process['name']]['burst'] = process['burst']
+        details_process[process['name']]['wait_time'] = 0
+        details_process[process['name']]['turn_time'] = 0
+        details_process[process['name']]['resp_time'] = 0
+
+    process_queue = []
+    rr_add_processes_to_queue(all_processes, process_queue)
+
+    robin_idx = 0
+    prev_robin_idx = -1
+
+    while process_queue:
+        process = process_queue[robin_idx]
+
+        if curr_time < process['arrival']:
+            # Add idle process
+            idle_cpu = dict()
+            idle_cpu['name'] = 'Idle'
+            idle_cpu['start'] = curr_time
+            idle_cpu['end'] = process['arrival']
+            process_chart += [idle_cpu]
+
+            curr_time = process['arrival']
+
+        # Add dispatch latency
+        if dispatch_latency > 0 and (robin_idx != prev_robin_idx or force_dispatch_flag):
+            dl_cpu = dict()
+            dl_cpu['name'] = 'DL'
+            dl_cpu['start'] = curr_time
+            dl_cpu['end'] = curr_time + dispatch_latency
+            process_chart += [dl_cpu]
+            curr_time += dispatch_latency
+
+        if (process['burst'] - process['time_given']) > quantum:
+            time_added = quantum
+            process['time_given'] += quantum
+        else:
+            time_added = process['burst'] - process['time_given']
+            process['time_given'] = process['burst']
+
+        if process['last_time'] == 0:
+            process['start_time'] = curr_time
+            process['resp_time'] = curr_time - process['arrival']
+            process['wait_time'] += curr_time - process['arrival']
+        else:
+            process['wait_time'] += curr_time - process['last_time']
+
+        # Add process segment to gantt chart
+        chart_details = {}
+        chart_details['name'] = process['name']
+        chart_details['start'] = curr_time
+        chart_details['end'] = curr_time+time_added
+        process_chart += [chart_details]
+
+        curr_time += time_added
+        process['last_time'] = curr_time
+
+        if process['time_given'] == process['burst']: # Process has finished execution
+            process['turn_time'] = curr_time - process['arrival']
+
+            details_process[process['name']]['wait_time'] = process['wait_time']
+            details_process[process['name']]['turn_time'] = process['turn_time']
+            details_process[process['name']]['resp_time'] = process['resp_time']
+
+            total_wait_time += process['wait_time']
+            total_turn_time += process['turn_time']
+            total_resp_time += process['resp_time']
+            sum_time += process['burst']
+
+            process_queue.remove(process)
+
+            force_dispatch_flag = True
+            if robin_idx >= len(process_queue):
+                robin_idx = 0
+        else:
+            prev_robin_idx = robin_idx
+            robin_idx = rr_get_next_process(robin_idx, curr_time, process_queue)
+            force_dispatch_flag = False
+
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(total_wait_time)/len(all_processes)
+    stats['resp_time'] = float(total_resp_time)/len(all_processes)
+    stats['turn_time'] = float(total_turn_time)/len(all_processes)
+    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
+
+    return process_chart, stats, details_process, error_status
+
+# Returns the index of the next process to be scheduled
+def rr_get_next_process(robin_idx, curr_time, process_queue):
+    next_idx = (robin_idx+1)%len(process_queue)
+    if process_queue[next_idx]['arrival'] <= curr_time:
+        return next_idx
+    else:
+        return robin_idx
+
+def rr_add_processes_to_queue(processes, queue):
+    for orig_process in processes:
+        process = deepcopy(orig_process)
+        process['time_given'] = 0
+        process['last_time'] = 0
+        process['wait_time'] = 0
+        process['turn_time'] = 0
+        process['resp_time'] = 0
+        queue.append(process)
+
+def round_robin_old(data, max_quanta = 4, dispatch_latency = 0):
     # For bad input handling
     error, error_status = check_for_bad_input(data, dispatch_latency, -1, max_quanta, 4, -1, -1, -1)
     if(error):
