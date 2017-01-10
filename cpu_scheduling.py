@@ -77,7 +77,7 @@ def check_for_bad_input(data, dispatch_latency, priority, quantum, algo, num_que
                     error = 1
                     break
     if error == 0 and algo == 5:
-        for i in range(quantum_queue):
+        for i in range(len(quantum_queue)):
             if quantum_queue[i] <= 0 and algo_queue == 1:
                 error_status = get_error_message(6, -1, i+1)
                 error = 1
@@ -878,9 +878,9 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
         # Calling fcfs or round robin cpu scheduling algorithm on every queue
         for i in range(num_queues):
             if algo_queue[i] == 0:
-                queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = fcfs(queue_data[i], dispatch_latency)
+                queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = fcfs(queue_data[i], 0)
             elif algo_queue[i] == 1:
-                queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = round_robin(queue_data[i], quantum_queue[i], dispatch_latency)
+                queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = round_robin(queue_data[i], quantum_queue[i], 0)
         for i in range(num_queues):
             for index_queue ,process in enumerate(queue_cpu_schedule[i]):
                 if flag == False and process['name'] != 'Idle':
@@ -898,58 +898,79 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
                     flag = False
                     priority_data.insert(idx, deepcopy(priority_process))
                     idx = idx+1
-        priority_cpu_scheduling, priority_stats, priority_details, priority_error_status = priority_preemptive(priority_data, maxsize, dispatch_latency)
+        priority_cpu_scheduling, priority_stats, priority_details, priority_error_status = priority_preemptive(priority_data, maxsize, 0)
         curr_time = 0
         for chart_details in priority_cpu_scheduling:
+            interval = chart_details['end'] - chart_details['start']
             if chart_details['name'] == 'Idle':
-                process_chart.append(deepcopy(chart_details))
+                diff = curr_time - chart_details['start']
+                if diff > 0 and diff < interval:
+                    temp_process = {}
+                    temp_process['name'] = chart_details['name']
+                    temp_process['start'] = curr_time
+                    temp_process['end'] = chart_details['end']
+                    process_chart.append(deepcopy(temp_process))
+                    curr_time += interval - diff
+                elif diff > 0 and diff >= interval:
+                    continue
+                else:
+                    process_chart.append(deepcopy(chart_details))
+                    curr_time += interval
             else:
                 for process in priority_data:
                     if process['name'] == chart_details['name']:
                         while True:
                             temp_process = {}
-                            temp_process = queue_cpu_schedule[process['priority']][index[process['priority']]].copy()
+                            temp_process = deepcopy(queue_cpu_schedule[process['priority']][index[process['priority']]])
                             exp_process = {}
                             exp_process = queue_cpu_schedule[process['priority']][index[process['priority']]]
-                            temp_process['start'] = curr_time  
+
                             if temp_process['name'] == 'Idle':
                                 index[process['priority']] += 1
                                 continue
+
+                            # Add dispatch latency
+                            if (dispatch_latency > 0):
+                                dl_cpu = dict()
+                                dl_cpu['name'] = 'DL'
+                                dl_cpu['start'] = curr_time
+                                dl_cpu['end'] = curr_time + dispatch_latency
+                                process_chart += [dl_cpu]
+                                curr_time += dispatch_latency
+                            temp_process['start'] = curr_time  
                             for details in details_process:
                                 if details['name'] == temp_process['name']: 
                                     if details['flag'] == 0:
                                         details['start'] = curr_time
                                         details['flag'] = 1
-                            if (temp_process['end'] - exp_process['start'] + curr_time) < chart_details['end']:
-                                process_chart.append(deepcopy(temp_process))
+                            if (exp_process['end'] - exp_process['start']) <= interval:
+                                curr_time += exp_process['end'] - exp_process['start']
+                                temp_process['end'] = curr_time
                                 index[process['priority']] += 1 
-                                curr_time += temp_process['end'] - exp_process['start']
                                 for details in details_process:
                                     if details['name'] == temp_process['name']:
                                         if details['flag'] == 1:
                                             details['end'] = curr_time
-                                continue
-                            elif temp_process['end'] - exp_process['start'] + curr_time == chart_details['end']:
-                                temp_process['end'] = chart_details['end']
                                 process_chart.append(deepcopy(temp_process))
-                                index[process['priority']] += 1
-                                for details in details_process:
-                                    if details['name'] == temp_process['name']:
-                                        if details['flag'] == 1:
-                                            details['end'] = chart_details['end']
-                                break
+                                if (exp_process['end'] - exp_process['start']) < interval:
+                                    interval -= exp_process['end'] - exp_process['start']
+                                    continue
+                                else:
+                                    interval -= exp_process['end'] - exp_process['start']
+                                    break
                             else:
-                                temp_process['end'] = chart_details['end']
+                                curr_time += interval
+                                temp_process['end'] = curr_time
+                                queue_cpu_schedule[process['priority']][index[process['priority']]]['start'] += interval
                                 process_chart.append(deepcopy(temp_process))
-                                queue_cpu_schedule[process['priority']][index[process['priority']]]['start'] += chart_details['end'] - curr_time
+                                interval = 0
                                 for details in details_process:
                                     if details['name'] == temp_process['name']:
                                         if details['flag'] == 1:
-                                            details['end'] = chart_details['end']
+                                            details['end'] = curr_time
                                 break
                         break
-            curr_time = chart_details['end']
-        
+                                                   
         process_details = dict()
         for data in details_process:
             process_details[data['name']] = dict()
@@ -1002,8 +1023,19 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
                 successful = False
                 while not successful:
                     chart_details = {}
+
                     if process['burst'] > 0 and process['arrival'] <= time_present:
                         successful = True
+                        chart_details['queue_name'] = i+1
+                        # Add dispatch latency
+                        if (dispatch_latency > 0):
+                            dl_cpu = dict()
+                            dl_cpu['name'] = 'DL'
+                            dl_cpu['start'] = time_present
+                            dl_cpu['end'] = time_present + dispatch_latency
+                            dl_cpu['queue_name'] = 0
+                            process_chart += [dl_cpu]
+                            time_present += dispatch_latency
                         for data in details_process:
                             if data['name'] == process['name'] and data['flag'] == 0:
                                 data['start'] = time_present
@@ -1038,7 +1070,8 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
                                 del process_chart[-1]
                         
                         process_chart += [chart_details]
-                    else:             
+                    else:  
+                        chart_details['queue_name'] = 0          
                         if len(process_chart) > 0:
                             if process_chart[-1]['name'] == 'Idle':
                                 chart_details = process_chart[-1]
@@ -1071,6 +1104,15 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
             chart_details = {}
             if (process['arrival'] > time_present):
                 time_present = process['arrival']
+            # Add dispatch latency
+            if (dispatch_latency > 0):
+                dl_cpu = dict()
+                dl_cpu['name'] = 'DL'
+                dl_cpu['start'] = time_present
+                dl_cpu['end'] = time_present + dispatch_latency
+                dl_cpu['queue_name'] = 0
+                process_chart += [dl_cpu]
+                time_present += dispatch_latency
             for data in details_process:
                 if data['name'] == process['name'] and data['flag'] == 0:
                     data['start'] = time_present
@@ -1079,6 +1121,7 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
             chart_details['start'] = time_present
             chart_details['end'] = time_present + process['burst']
             chart_details['next_queue'] = 0
+            chart_details['queue_name'] = num_queues
             time_present = time_present + process['burst']
             for data in details_process:
                 if data['name'] == process['name'] and data['flag'] == 1:
@@ -1089,12 +1132,14 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
                     idle_cpu['name'] = 'Idle'
                     idle_cpu['start'] = process_chart[-1]['end']
                     idle_cpu['end'] = chart_details['start']
+                    idle_cpu['queue_name'] = 0
                     process_chart += [idle_cpu]
             elif len(process_chart) == 0 and chart_details['start'] > 0:
                 idle_cpu = dict()
                 idle_cpu['name'] = 'Idle'
                 idle_cpu['start'] = 0
                 idle_cpu['end'] = chart_details['start']
+                idle_cpu['queue_name'] = 0
                 process_chart += [idle_cpu]
 
             process_chart += [chart_details]

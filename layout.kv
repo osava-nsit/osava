@@ -230,7 +230,9 @@
 <CPUOutputScreen>:
     layout: layout
     gantt: gantt
+    gantt_queue: gantt_queue
     time: time
+    time_queue: time_queue
     desc: desc
     on_pre_enter: root.calculate_schedule()
     on_enter: root.draw_gantt()
@@ -248,6 +250,14 @@
             size_hint_y: 0.07
             orientation: 'horizontal'
             id: time
+        BoxLayout:
+            size_hint_y: 0.4
+            orientation: 'horizontal'
+            id: gantt_queue
+        BoxLayout:
+            size_hint_y: 0.07
+            orientation: 'horizontal'
+            id: time_queue
         Label:
             text: 'Timeline -'
             size_hint_y: 0.07
