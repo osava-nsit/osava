@@ -87,6 +87,12 @@ def check_for_bad_input(data, dispatch_latency, priority, quantum, algo, num_que
     status = (error, error_status);
     return status
 
+def create_dl_process(dispatch_latency, curr_time):
+    dl_cpu = dict()
+    dl_cpu['name'] = 'DL'
+    dl_cpu['start'] = curr_time
+    dl_cpu['end'] = curr_time + dispatch_latency
+    return dl_cpu
 
 def fcfs(data, dispatch_latency = 0):
     # For bad input handling
@@ -113,10 +119,7 @@ def fcfs(data, dispatch_latency = 0):
 
             # Add dispatch latency
             if (dispatch_latency > 0):
-                dl_cpu = dict()
-                dl_cpu['name'] = 'DL'
-                dl_cpu['start'] = curr_time
-                dl_cpu['end'] = curr_time + dispatch_latency
+                dl_cpu = create_dl_process(dispatch_latency, curr_time)
                 process_chart += [dl_cpu]
                 curr_time += dispatch_latency
 
@@ -191,6 +194,7 @@ def round_robin(data, quantum=4, dispatch_latency=0):
 
     robin_idx = 0
     prev_robin_idx = -1
+    last_process_name = ''
 
     while process_queue:
         process = process_queue[robin_idx]
@@ -206,11 +210,9 @@ def round_robin(data, quantum=4, dispatch_latency=0):
             curr_time = process['arrival']
 
         # Add dispatch latency
-        if dispatch_latency > 0 and (robin_idx != prev_robin_idx or force_dispatch_flag):
-            dl_cpu = dict()
-            dl_cpu['name'] = 'DL'
-            dl_cpu['start'] = curr_time
-            dl_cpu['end'] = curr_time + dispatch_latency
+        # if dispatch_latency > 0 and (robin_idx != prev_robin_idx or force_dispatch_flag):
+        if dispatch_latency > 0 and last_process_name != process['name']:
+            dl_cpu = create_dl_process(dispatch_latency, curr_time)
             process_chart += [dl_cpu]
             curr_time += dispatch_latency
 
@@ -234,6 +236,7 @@ def round_robin(data, quantum=4, dispatch_latency=0):
         chart_details['start'] = curr_time
         chart_details['end'] = curr_time+time_added
         process_chart += [chart_details]
+        last_process_name = chart_details['name']
 
         curr_time += time_added
         process['last_time'] = curr_time
@@ -445,6 +448,12 @@ def shortest_job_non_prempted(data, dispatch_latency = 0):
             for process in all_processes:
                 chart_details = {}
                 if process['burst'] > 0 and process['arrival'] <= time_present:
+                    # Add dispatch latency
+                    if dispatch_latency > 0:
+                        dl_cpu = create_dl_process(dispatch_latency, time_present)
+                        process_chart += [dl_cpu]
+                        time_present += dispatch_latency
+
                     details_process = {}
                     chart_details['name'] = process['name']
                     details_process['name'] = process['name']
@@ -639,6 +648,12 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
             for process in all_processes:
                 chart_details = {}  
                 if process['burst'] > 0 and process['arrival'] <= time_present:
+                    # Add dispatch latency
+                    if dispatch_latency > 0:
+                        dl_cpu = create_dl_process(dispatch_latency, time_present)
+                        process_chart += [dl_cpu]
+                        time_present += dispatch_latency
+
                     details_process = {}
                     chart_details['name'] = process['name']
                     details_process['name'] = process['name']
