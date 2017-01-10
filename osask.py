@@ -758,7 +758,6 @@ class CPUOutputScreen(Screen):
         desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
-        grid.add_widget(box)
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
