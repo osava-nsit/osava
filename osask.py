@@ -156,10 +156,14 @@ def disk_on_queue(instance, value):
         value = '98,183,37,122,14,124,65,67'
     data_disk['disk_queue'] = str(value)
 
+# For labels with colored border
 class WhiteBorderedLabel(Label):
     pass
 
 class ColoredBorderedLabel(Label):
+    pass
+
+class ColoredButton(Button):
     pass
 
 # Global function for bad input handling
@@ -178,7 +182,7 @@ class MainMenuScreen(Screen):
         title = self.manager.get_screen('menu').title
         if not self.ribbon_added:
             with title.canvas:
-                Color(1, 0, 0, 0.4, mode='rgba')
+                Color(0.071, 0.106, 0.314, 0.001, mode='rgba')
                 Rectangle(pos=(0,Window.height-kivy.metrics.dp(40)), size=(Window.width,kivy.metrics.dp(40)))
                 self.ribbon_added = True
         # title.add_widget(Label(text='OS - Algo Visualization App'))
@@ -677,7 +681,7 @@ class CPUOutputScreen(Screen):
                 box.add_widget(label)
             
                 # Add view details button for each process
-                details_button = Button(text='Details', size_hint_x=None, width='100dp')
+                details_button = ColoredButton(text='Details', size_hint_x=None, width='100dp')
                 box.add_widget(details_button)
 
                 # Blank label for padding on right
@@ -908,7 +912,7 @@ class CPUOutputScreenMultilevel(Screen):
                 box.add_widget(label)
             
                 # Add view details button for each process
-                details_button = Button(text='Details', size_hint_x=None, width='100dp')
+                details_button = ColoredButton(text='Details', size_hint_x=None, width='100dp')
                 box.add_widget(details_button)
 
                 # Blank label for padding on right
@@ -2333,7 +2337,7 @@ class PageOutputScreen(Screen):
             if state == -1:
                 state = 'X'
             if allocated_frame - 1 == idx and page_fault == 1:
-                mem_label = ColoredBorderedLabel(text='[b][color=ff0b3c]'+str(state)+'[/color][/b]', markup=True, size_hint_x=None, width=self.frame_width, valign='middle', halign='center')
+                mem_label = ColoredBorderedLabel(text='[b][color=DEC41B]'+str(state)+'[/color][/b]', markup=True, size_hint_x=None, width=self.frame_width, valign='middle', halign='center')
             else:
                 mem_label = WhiteBorderedLabel(text=str(state), size_hint_x=None, width=self.frame_width, valign='middle', halign='center')
 
@@ -2350,7 +2354,7 @@ class PageOutputScreen(Screen):
         page_fault_box.add_widget(page_f_label)
 
         if page_fault == 1:
-            page_f_label = Label(text='[color=ff0b3c]Yes[/color]', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
+            page_f_label = Label(text='[color=DEC41B]Yes[/color]', markup=True, size_hint_x=None, width=self.margin_left, valign='middle', halign='left')
         else:
             page_f_label = Label(text='No', markup=True, size_hint_x=None
                 , width=self.margin_left, valign='middle', halign='left')
