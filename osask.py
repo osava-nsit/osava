@@ -754,8 +754,11 @@ class CPUOutputScreen(Screen):
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
-        box.add_widget(Label(text=algo_desc))
+        desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+        desc_label.text_size = desc_label.size
+        box.add_widget(desc_label)
         desc.add_widget(box)
+        grid.add_widget(box)
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
@@ -1602,7 +1605,9 @@ class MemoryOutputScreen(Screen):
         else:
             algo_desc = 'In the Worst Fit Algorithm, a process is loaded in the largest hole.'
 
-        box.add_widget(Label(text=algo_desc))
+        desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+        desc_label.text_size = desc_label.size
+        box.add_widget(desc_label)
         grid.add_widget(box)
 
         error = self.memory_chart[0]['error_status']
@@ -2003,8 +2008,9 @@ class PageOutputScreen(Screen):
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
-            
-            box.add_widget(Label(text=algo_desc))
+            desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+            desc_label.text_size = desc_label.size
+            box.add_widget(desc_label)
             grid.add_widget(box)
 
             # To add frame labels
@@ -2317,7 +2323,9 @@ class DiskOutputScreen(Screen):
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
-            box.add_widget(Label(text=algo_desc))
+            desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+            desc_label.text_size = desc_label.size
+            box.add_widget(desc_label)
             grid.add_widget(box)
 
             # Draw secondary storage chart
@@ -2344,7 +2352,7 @@ class DiskOutputScreen(Screen):
         sv.add_widget(grid)
         layout.add_widget(sv)
 
-    def draw_storage_chart(self,grid,*args):
+    def draw_storage_chart(self, grid, *args):
         # To add path of head
         path_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         path_label = Label(text='Path of the read/write head: ', valign='top', halign='center')
@@ -2406,6 +2414,16 @@ class DiskOutputScreen(Screen):
             x1 = self.scale_x(movement_list[i])
             x2 = self.scale_x(movement_list[i+1])
             y2 = y1 - kivy.metrics.dp(30)
+            if(data_disk['algo'] == 3):
+                if(int(movement_list[i]) == 0 and int(movement_list[i+1]) == data_disk['num_cylinders'] -1) or (int(movement_list[i+1]) == 0 and int(movement_list[i]) == data_disk['num_cylinders']-1):
+                    self.add_dashed_arrow(x1,y1,x2,y2)
+                    y1 = y2
+                    continue
+            elif(data_disk['algo'] == 5):
+               if(int(movement_list[i]) == sorted_heads[1] and int(movement_list[i+1]) == sorted_heads[-2]) or (int(movement_list[i]) == sorted_heads[-2] and int(movement_list[i+1]) == sorted_heads[1]):
+                    self.add_dashed_arrow(x1,y1,x2,y2)
+                    y1 = y2
+                    continue
             self.add_arrow(x1, y1, x2, y2)
             self.add_arrow_head(x1,y1,x2,y2)
             y1 = y2
@@ -2418,6 +2436,12 @@ class DiskOutputScreen(Screen):
         with self.arrows_widget.canvas:
             Color(1, 1, 1)
             Line(points=[x1,y1,x2,y2], width=1.3)
+
+    # Drawing the dotted arrow line in circular algorithms
+    def add_dashed_arrow(self, x1, y1, x2, y2, *args):
+        with self.arrows_widget.canvas:
+            Color(1, 1, 1)
+            Line(points=[x1,y1,x2,y2], width=1, dash_length=1, dash_offset=3)
 
     # Drawing the arrow head        
     def add_arrow_head(self, x1, y1, x2, y2, *args):
