@@ -230,9 +230,7 @@
 <CPUOutputScreen>:
     layout: layout
     gantt: gantt
-    gantt_queue: gantt_queue
     time: time
-    time_queue: time_queue
     desc: desc
     on_pre_enter: root.calculate_schedule()
     on_enter: root.draw_gantt()
@@ -250,8 +248,65 @@
             size_hint_y: 0.07
             orientation: 'horizontal'
             id: time
+        Label:
+            text: 'Timeline -'
+            size_hint_y: 0.07
+            #padding: 100, 0
+            #text_size: self.size
+            #halign: 'left'
         BoxLayout:
-            size_hint_y: 0.4
+            size_hint_y: 0.07
+            orientation: 'horizontal'
+            Label:
+                text: 'Process'
+            Label:
+                text: 'Start/Resume time'
+            Label:
+                text: 'Suspend/Termination time'
+            Label:
+                text: ''
+        BoxLayout:
+            size_hint_y: 0.5
+            orientation: 'vertical'
+            id: layout
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            Button:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'cpu_form'
+            Button:
+                text: 'Exit'
+                on_press: app.stop()
+
+<CPUOutputScreenMultilevel>:
+    layout: layout
+    gantt: gantt
+    gantt_queue: gantt_queue
+    time: time
+    time_queue: time_queue
+    desc: desc
+    on_pre_enter: root.calculate_schedule()
+    on_enter: root.draw_gantt()
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: 0.3
+            orientation: 'vertical'
+            id: desc
+        BoxLayout:
+            size_hint_y: 0.35
+            orientation: 'horizontal'
+            id: gantt
+        BoxLayout:
+            size_hint_y: 0.07
+            orientation: 'horizontal'
+            id: time
+        BoxLayout:
+            size_hint_y: 0.35
             orientation: 'horizontal'
             id: gantt_queue
         BoxLayout:
@@ -276,7 +331,7 @@
             Label:
                 text: ''
         BoxLayout:
-            size_hint_y: 0.5
+            size_hint_y: 0.4
             orientation: 'vertical'
             id: layout
         GridLayout:

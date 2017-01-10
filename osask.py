@@ -83,11 +83,11 @@ def cpu_on_num_queues(instance, value):
     data_cpu['num_queues'] = int(value)
 def cpu_on_queue_quantum(instance, value, i):
     if value == '':
-        value = 0
+        value = 2
     data_cpu['queue_quantum'][i] = int(value)
 def cpu_on_queue_assigned(instance, value, i):
     if value == '':
-        value = 0
+        value = 1
     data_cpu['queue_assigned'][i] = int(value)
 
 # Binder functions for Deadlock Avoidance Algorithm form
@@ -308,6 +308,12 @@ class CPUInputScreen(Screen):
         # Enable visualize button - load_form will only be called when form load input is correct
         self.visualize_button.disabled = False
 
+        # If algo selected is one of multilevel, update output screen reference in visualize_button
+        if self.cpu_type == 7 or self.cpu_type == 8:
+            self.visualize_button.on_release = self.switch_to_cpu_output_multilevel
+        else:
+            self.visualize_button.on_release = self.switch_to_cpu_output
+
         # Update dispatch_latency and set to default value if empty
         if (self.dispatch_latency.text == ""):
             data_cpu['dispatch_latency'] = 0
@@ -456,8 +462,8 @@ class CPUInputScreen(Screen):
         if self.cpu_type == 7:
             # Iniatilize queue algo data_cpu dictionary lists
             data_cpu['queue_algo'] = [0] * data_cpu['num_queues']
-            data_cpu['queue_quantum'] = [0] * data_cpu['num_queues']
-            data_cpu['queue_assigned'] = [0] * data_cpu['num_processes']
+            data_cpu['queue_quantum'] = [2] * data_cpu['num_queues']
+            data_cpu['queue_assigned'] = [1] * data_cpu['num_processes']
 
             # Adding descriptive features
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -561,12 +567,15 @@ class CPUInputScreen(Screen):
         self.manager.transition.direction = 'left'
         self.manager.current = 'cpu_output'
 
+    def switch_to_cpu_output_multilevel(self, *args):
+        self.manager.transition.direction = 'left'
+        self.manager.current = 'cpu_output_multilevel'
+
     def switch_to_main_menu(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
 # Output Screen for CPU Scheduling algorithms
-
 class CPUOutputScreen(Screen):
     layout = ObjectProperty(None)
     gantt = ObjectProperty(None)
@@ -697,7 +706,7 @@ class CPUOutputScreen(Screen):
                     details_button.bind(on_release=popup.open)
                     popup.open()
                     popup.dismiss()
-                    print "Bound popup for process: "+str(label_name.text)
+                    # print "Bound popup for process: "+str(label_name.text)
                 else:
                     details_button.disabled = True
 
@@ -733,15 +742,250 @@ class CPUOutputScreen(Screen):
 
     def draw_gantt(self, *args):
         # Area for drawing gantt chart
-        gantt = self.manager.get_screen('cpu_output').gantt
-        gantt_queue = self.manager.get_screen('cpu_output').gantt_queue
+        gantt = self.gantt
+        chart_wid = Widget()
+
+        # Area for displaying time values
+        time = self.time
+
+        # Area for displaying description.
+        desc = self.desc
+
+        gantt.clear_widgets()
+        time.clear_widgets()
+        desc.clear_widgets()
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text='Visualization results' ))
+        desc.add_widget(box)
+
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
+        algo_desc = self.get_description()
+        desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+        desc_label.text_size = desc_label.size
+        box.add_widget(desc_label)
+        desc.add_widget(box)
+
+        # gantt.canvas.clear()
+        margin_left = kivy.metrics.dp(125)
+        margin_bottom = kivy.metrics.dp(50)
+
+        with chart_wid.canvas:
+            # Starting position of rectangle
+            pos_x = gantt.pos[0]+margin_left
+            # Increment in width per unit time
+            # inc = gantt.size[0]/(self.stats['sum_time']*2)
+            inc = gantt.size[0]/(self.cpu_schedule[-1]['end']*1.5)
+
+            # Add description labels
+            label = Label(text='Gantt Chart: ', size_hint_x=None, width=margin_left, valign='top')
+            gantt.add_widget(label)
+            t_label = Label(text='Time: ', size_hint_x=None, width=margin_left, valign='top', halign='center')
+            t_label.text_size = t_label.size
+            time.add_widget(t_label)
+
+            # Draw the gantt chart rectangles and add time labels
+            for process in self.cpu_schedule:
+                label = Label(text=process['name'], size_hint_x=None, width=inc*(process['end']-process['start']))
+                gantt.add_widget(label)
+
+                t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
+                t_label.text_size = t_label.size
+                time.add_widget(t_label)
+
+                Color(self.colors[process['name']][0], self.colors[process['name']][1], self.colors[process['name']][2], 0.4, mode='rgba')
+                Rectangle(pos=(pos_x, gantt.pos[1]+margin_bottom), size=(inc*(process['end']-process['start']), gantt.size[1]/2))
+                pos_x += (inc*(process['end']-process['start']))
+
+            # Add time label for the end time of last process
+            process = self.cpu_schedule[-1]
+            t_label = Label(text=str(process['end']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
+            t_label.text_size = t_label.size
+            time.add_widget(t_label)
+
+        # Add the widget used to draw the gantt chart on the screen
+        gantt.add_widget(chart_wid)
+                        
+# Output screen for Multilevel CPU Scheduling algorithms
+class CPUOutputScreenMultilevel(Screen):
+    layout = ObjectProperty(None)
+    gantt = ObjectProperty(None)
+    time = ObjectProperty(None)
+    # Stores the colours assigned to each process indexed by name
+    colors = {}
+    # Stores the colours assigned to each queue indexed by name
+    colors_queue = {}
+    # Stores the process schedule generated by scheduling algorithm
+    cpu_schedule = {}
+    # Stores the stats related to schedule like average waiting time
+    stats = {}
+    # Stores the individual per process stats
+    details = {}
+    # Stores information related to bad input data
+    error_status = {}
+
+    def get_description(self, *args):
+        if cpu_scheduling_type == 0:
+            return 'In First Come First Served Scheduling, the processor is allocated to the process which has arrived first.\nIt is a non-preemptive algorithm.'
+        elif cpu_scheduling_type == 1:
+            return 'In Round Robin Scheduling, the processor is allocated to a process for a small time quantum.\nThe processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
+        elif cpu_scheduling_type == 2:
+            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.'
+        elif cpu_scheduling_type == 3:
+            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
+        elif cpu_scheduling_type == 4:
+            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+        elif cpu_scheduling_type == 5:
+            return 'In Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+        elif cpu_scheduling_type == 7:
+            return 'In Multilevel Queue Scheduling, the ready queue is partitioned into several queues.\nA process is permanently assigned to a queue.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is often used for inter-queue scheduling.'
+        elif cpu_scheduling_type == 8:
+            return 'In Multilevel Feedback Queue Scheduling, the ready queue is partitioned into several queues.\nThe processes can move between the queues.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is typically used for inter-queue scheduling.'
+
+    # Prints the details of the process schedule and statistics
+    def calculate_schedule(self, *args):
+        layout = self.manager.get_screen('cpu_output_multilevel').layout
+        layout.clear_widgets()
+
+        formatted_data = []
+        for i in range(data_cpu['num_processes']):
+            process = {}
+            process['name'] = data_cpu['name'+str(i)]
+            process['arrival'] = int(data_cpu['arrival'+str(i)])
+            process['burst'] = int(data_cpu['burst'+str(i)])
+            if cpu_scheduling_type == 4 or cpu_scheduling_type == 5:
+                process['priority'] = int(data_cpu['priority'+str(i)])
+            elif cpu_scheduling_type == 7:
+                process['queue_assigned'] = data_cpu['queue_assigned'][i]
+            formatted_data.append(process)
+            self.colors[process['name']] = [random(), random(), random()]
+        self.colors['Idle'] = [0.2, 0.2, 0.2]
+        self.colors['DL'] = [0.2, 0.2, 0.2]
+        if cpu_scheduling_type == 7 or cpu_scheduling_type == 8:
+            for i in range(data_cpu['num_queues']):
+                self.colors_queue[i+1] = [random(), random(), random()]
+                self.colors_queue[0] = [0.2, 0.2, 0.2]
+        
+        if cpu_scheduling_type == 0:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.fcfs(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 1:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.round_robin(formatted_data, data_cpu['quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 2:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.shortest_job_non_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 3:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.shortest_job_prempted(formatted_data, dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 4:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_non_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 5:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.priority_preemptive(formatted_data, data_cpu['aging'], dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 7:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.multilevel(formatted_data, data_cpu['num_queues'], data_cpu['queue_algo'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+        elif cpu_scheduling_type == 8:
+            self.cpu_schedule, self.stats, self.details, self.error_status = cpu_scheduling.multilevel_feedback(formatted_data, data_cpu['num_queues'], data_cpu['queue_quantum'], dispatch_latency=data_cpu['dispatch_latency'])
+        
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        # Make sure the height is such that there is something to scroll
+        grid.bind(minimum_height=grid.setter('height'))
+
+        if self.error_status['error_number'] != -1:
+            # Inform the user
+            display_error(grid, self.error_status['error_message'])
+        else:
+            row_height = '30dp'
+
+            # Display process schedule details
+            for process in self.cpu_schedule:
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height='20dp')
+
+                if (process['name'] == 'DL'):
+                    label_name = Label(text='[ref=click]'+'Dispatch Latency'+':[/ref]', markup=True)
+                else:
+                    label_name = Label(text='[ref=click]'+process['name']+':[/ref]', markup=True)
+                box.add_widget(label_name)
+                label = Label(text=str(process['start']))
+                box.add_widget(label)
+                label = Label(text=str(process['end']))
+                box.add_widget(label)
+            
+                # Add view details button for each process
+                details_button = Button(text='Details', size_hint_x=None, width='100dp')
+                box.add_widget(details_button)
+
+                # Blank label for padding on right
+                box.add_widget(Label(text='', size_hint_x=None, width='20dp'))
+
+                # Popup showing details of process when box is clicked
+                if process['name'] != 'Idle' and process['name'] != 'DL':
+                    if cpu_scheduling_type != 8:
+                        content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                    else:
+                        if process['next_queue'] == 0:
+                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                            "Process "+process['name']+" is completed.")
+                        else:
+                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                            process['name']+" moved to queue Q"+str(process['next_queue']+1)+".") 
+                    content_label = Label(text=content_str)
+                    popup = Popup(title='Details of '+str(process['name']), content=content_label, size_hint=(None, None), size=(kivy.metrics.dp(200), kivy.metrics.dp(200)))
+                    label_name.bind(on_ref_press=popup.open)
+                    details_button.bind(on_release=popup.open)
+                    popup.open()
+                    popup.dismiss()
+                    # print "Bound popup for process: "+str(label_name.text)
+                else:
+                    details_button.disabled = True
+
+                grid.add_widget(box)
+
+            # Display statistics
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0)))
+            grid.add_widget(box)
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0)))
+            grid.add_widget(box)
+            
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0)))
+            grid.add_widget(box)
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0)))
+            grid.add_widget(box)
+
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
+            box.add_widget(Label(text='CPU Utilization: ' + str(int((self.stats['cpu_utilization']*100)+0.5)/100.0) + '%'))
+            grid.add_widget(box)
+
+            self.draw_gantt()
+
+        # Add ScrollView
+        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv.add_widget(grid)
+        layout.add_widget(sv)
+
+    def draw_gantt(self, *args):
+        # Area for drawing gantt chart
+        gantt = self.gantt
+        gantt_queue = self.gantt_queue
+
         chart_wid = Widget()
         queue_wid = Widget()
+
         # Area for displaying time values
-        time = self.manager.get_screen('cpu_output').time
-        time_queue = self.manager.get_screen('cpu_output').time_queue
+        time = self.time
+        time_queue = self.time_queue
+
         # Area for displaying description.
-        desc = self.manager.get_screen('cpu_output').desc
+        desc = self.desc
+
         gantt.clear_widgets()
         gantt_queue.clear_widgets()
         time.clear_widgets()
@@ -762,6 +1006,7 @@ class CPUOutputScreen(Screen):
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
         margin_bottom = kivy.metrics.dp(50)
+
         with chart_wid.canvas:
             # Starting position of rectangle
             pos_x = gantt.pos[0]+margin_left
@@ -867,7 +1112,6 @@ class CPUOutputScreen(Screen):
 
             # Add the widget used to draw the gantt chart on the screen
             gantt_queue.add_widget(queue_wid)
-                        
 
 
 # Input Screen for Deadlock Avoidance algorithm
@@ -2502,6 +2746,7 @@ sm = ScreenManager()
 sm.add_widget(MainMenuScreen(name='menu'))
 sm.add_widget(CPUInputScreen(name='cpu_form'))
 sm.add_widget(CPUOutputScreen(name='cpu_output'))
+sm.add_widget(CPUOutputScreenMultilevel(name='cpu_output_multilevel'))
 sm.add_widget(DeadlockAvoidanceInputScreen(name='da_form'))
 sm.add_widget(DeadlockAvoidanceOutputScreen(name='da_output'))
 sm.add_widget(DeadlockDetectionInputScreen(name='dd_form'))
