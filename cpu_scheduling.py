@@ -892,9 +892,9 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
             del temp_val
         # Calling fcfs or round robin cpu scheduling algorithm on every queue
         for i in range(num_queues):
-            if algo_queue[i] == 0:
+            if algo_queue[i] == 0 and len(queue_data[i])>0:
                 queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = fcfs(queue_data[i], 0)
-            elif algo_queue[i] == 1:
+            elif algo_queue[i] == 1 and len(queue_data[i])>0:
                 queue_cpu_schedule[i], queue_stats[i], queue_details[i], queue_error_status[i] = round_robin(queue_data[i], quantum_queue[i], 0)
         for i in range(num_queues):
             for index_queue ,process in enumerate(queue_cpu_schedule[i]):
