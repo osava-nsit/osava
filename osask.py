@@ -1752,7 +1752,7 @@ class MemoryInputScreen(Screen):
         box.add_widget(Label(text='Process name'))
         box.add_widget(Label(text='Size (KB)'))
         box.add_widget(Label(text='Arrival time (ms)'))
-        box.add_widget(Label(text='CPU-I/O burst time (ms)'))
+        box.add_widget(Label(text='Turnaround time (ms)'))
         grid.add_widget(box)
 
         # Add inputs

@@ -26,7 +26,7 @@
     background_color: 0, 0, 0, 1
 
 <ColoredButton>:
-    background_color: 0.091, 0.146, 0.334, 0.9
+    background_color: 0.110, 0.306, 0.643, 0.7
 
 <MainMenuScreen>:
     title: title
@@ -35,7 +35,7 @@
     FloatLayout:
         canvas:
             Color:
-                rgba: 0.071, 0.116, 0.314, 0.6
+                rgba: 0.071, 0.116, 0.314, 0.7
             Rectangle:
                 size: self.size
                 pos: self.pos
@@ -43,7 +43,7 @@
             id: title
             color: (1, 1, 1, 1)
             font_size: '24sp'
-            text: 'OS - Algo Visualization App'
+            text: 'Operating System Algorithms Visualization App'
             size_hint: 0.173, 0.07
             pos_hint: {'x': .42, 'y': 0.94}
         Button:
@@ -376,14 +376,15 @@
             size_hint_x: 0.3
             pos_hint: {'top': 1}
             Label:
-                size_hint_x: 0.6
-                text: 'No. of processes:'
+                size_hint_x: 0.9
+                text: 'Number of processes:'
                 text_size: self.size
                 halign: 'left'
             TextInput:
                 size_hint_x: 0.4
                 id: num_processes
                 multiline: 'False'
+                haligh: 'center'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
@@ -392,7 +393,7 @@
             Label:
                 size_hint_x: 0.25
                 valign: 'middle'
-                text: 'No. of resource types:'
+                text: 'Number of resource types:'
                 text_size: self.size
             TextInput:
                 size_hint_x: 0.125
@@ -472,14 +473,15 @@
             size_hint_x: 0.3
             pos_hint: {'top': 1}
             Label:
-                size_hint_x: 0.6
-                text: 'No. of processes:'
+                size_hint_x: 0.9
+                text: 'Number of processes:'
                 text_size: self.size
                 halign: 'left'
             TextInput:
                 size_hint_x: 0.4
                 id: num_processes
                 multiline: 'False'
+                halign: 'center'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
@@ -488,7 +490,7 @@
             Label:
                 size_hint_x: 0.25
                 valign: 'middle'
-                text: 'No. of resource types:'
+                text: 'Number of resource types:'
                 text_size: self.size
             TextInput:
                 size_hint_x: 0.125
@@ -561,14 +563,15 @@
             size_hint_x: 0.3
             pos_hint: {'top': 1}
             Label:
-                size_hint_x: 0.6
-                text: 'No. of processes:'
+                size_hint_x: 0.9
+                text: 'Number of processes:'
                 text_size: self.size
                 halign: 'left'
             TextInput:
                 size_hint_x: 0.4
                 id: num_processes
                 multiline: 'False'
+                halign: 'center'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
