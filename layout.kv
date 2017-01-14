@@ -42,49 +42,49 @@
     	Label:
             id: title
             color: (1, 1, 1, 1)
-            font_size: '24sp'
+            font_size: '22sp'
             text: 'Operating System Algorithms Visualization App'
             size_hint: 0.173, 0.07
-            pos_hint: {'x': .42, 'y': 0.94}
+            pos_hint: {'x': .42, 'y': 0.9}
         Button:
         	text: 'CPU Scheduling Algorithms'
             size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .85}
+            pos_hint: {'x': .2, 'y': .75}
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'cpu_form'
         Button:
         	text: 'Deadlock Avoidance Algorithm'
             size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .75}
+            pos_hint: {'x': .2, 'y': .65}
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'da_form'
         Button:
         	text: 'Deadlock Detection Algorithm'
             size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .65}
+            pos_hint: {'x': .2, 'y': .55}
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'dd_form'
         Button:
         	text: 'Contiguous Memory Allocation Strategies'
             size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .55}
+            pos_hint: {'x': .2, 'y': .45}
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'mem_form'
         Button:
             text: 'Page Replacement Algorithms'
             size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .45}
+            pos_hint: {'x': .2, 'y': .35}
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'page_form'
         Button:
             text: 'Disk Scheduling Algorithms'
             size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .35}
+            pos_hint: {'x': .2, 'y': .25}
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'disk_form'
@@ -94,7 +94,7 @@
             #pos_hint: {'x': .4, 'y': .1}
         Button:
             size_hint: 0.2, 0.05
-            pos_hint: {'x': 0.4, 'y': 0.2}
+            pos_hint: {'x': 0.4, 'y': 0.12}
             text: 'About'
             on_press:
                 root.about_label.text = 'Developers: Udit Arora, Namrata Mukhija, Priyanka, Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
@@ -102,7 +102,7 @@
             id: about_label
             text: ''
             size_hint: 0.6, 0.06
-            pos_hint: {'x': .2, 'y': .02}
+            pos_hint: {'x': .2, 'y': .04}
 
 <CPUInputScreen>:
     on_pre_enter: root.bind_widgets()
