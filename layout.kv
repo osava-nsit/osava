@@ -121,90 +121,87 @@
                 size: self.size
                 pos: self.pos
         orientation: 'vertical'
+        spacing: '10dp'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '10dp', '5dp'
-            size_hint_y: 0.15
-            #size_hint_x: 0.5
-            pos_hint: {'top': 1}
-            Label:
-                text: 'Number of processes: '
-                size_hint_x: 0.3
-            TextInput:
-                id: num_processes
-                multiline: 'False'
-                size_hint_x: 0.2
-            Label:
-                size_hint_x: 0.05
-                text: ''
-            Label:
-                text: 'Dispatch Latency: '
-                size_hint_x: 0.3
-            TextInput:
-                id: dispatch_latency
-                multiline: 'False'
-                size_hint_x: 0.2
-            Label:
-                size_hint_x: 0.05
-                text: ''
-            #Button:
-                #size_hint_x: 0.2
-                #size_hint_y: 0.8
-                #halign: 'center'
-                #valign: 'middle'
-                #text: 'Load form'
-                #on_release: root.load_form()
-        Label:
-            text: 'Information about the scheduling algorithm:'
-            size_hint_y: 0.1
-            text_size: self.size
-            padding: '10dp', 0
-            halign: 'left'
+            padding: '10dp', '2.5dp'
+            size_hint_y: None
+            height: '40dp'
+            spacing: '20dp'
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_x: 0.5
+                Label:
+                    text: 'Number of processes: '
+                    size_hint_x: 0.5
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'middle'
+                TextInput:
+                    id: num_processes
+                    multiline: 'False'
+                    size_hint_x: 0.5
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_x: 0.5
+                Label:
+                    text: 'Dispatch Latency: '
+                    size_hint_x: 0.5
+                    text_size: self.size
+                    halign: 'left'
+                    valign: 'middle'
+                TextInput:
+                    id: dispatch_latency
+                    multiline: 'False'
+                    size_hint_x: 0.5
         BoxLayout:
-            orientation: 'horizontal'
-            padding: '5dp', '20dp'
-            size_hint_x: 0.6
-            size_hint_y: 0.2
+            size_hint_y: None
+            height: '40dp'
             Label:
-                text: 'Algorithm:'
-                size_hint_x: 0.4
+                text: 'Information about the scheduling algorithm:'
                 text_size: self.size
-                #pos_hint: {'top': 1}
-                padding: '5dp', '5dp'
-            Spinner:
-                id: algo_spinner
-                text:'Select an algorithm'
-                size_hint_y: 'None'
-                height: '40dp'
-                values: ('First Come First Serve', 'Shortest Job First', 'Priority', 'Round Robin', 'Multilevel Queue', 'Multilevel Feedback Queue')
+                padding: '10dp', '0dp'
+                halign: 'left'
+                valign: 'middle'
         BoxLayout:
             orientation: 'horizontal'
-            size_hint_y: 0.15
-            size_hint_x: 0.5
-            padding: '5dp', '5dp'
-            Label:
-                text: 'Variant'
-                size_hint_x: 0.4
-                text_size: self.size
-                padding: '5dp', 0
-            Spinner:
-                id: variant_spinner
-                text:'-'
-                size_hint_y: 'None'
+            size_hint_y: None
+            height: '40dp'
+            BoxLayout:
+                orientation: 'horizontal'
+                padding: '5dp', '0dp'
+                size_hint_x: 0.5
+                size_hint_y: None
                 height: '40dp'
-                values: ('Preemptive', 'Non-Preemptive')
-                disabled: True
-            Label:
-                text: ''
-                size_hint_x: 0.05
-            #Button:
-                #text: 'Visualize'
-                #size_hint_x: 0.2
-                #size_hint_y: None
-                #height: '40dp'
-                #on_release: 
-                    #root.manager.transition.direction = 'left'
-                    #root.manager.current = 'cpu_output'
+                Label:
+                    text: 'Algorithm:'
+                    size_hint_x: 0.4
+                    valign: 'middle'
+                    text_size: self.size
+                    padding: '5dp', '5dp'
+                Spinner:
+                    id: algo_spinner
+                    text:'Select an algorithm'
+                    size_hint_x: 0.6
+                    values: ('First Come First Serve', 'Shortest Job First', 'Priority', 'Round Robin', 'Multilevel Queue', 'Multilevel Feedback Queue')
+            BoxLayout:
+                orientation: 'horizontal'
+                size_hint_y: None
+                height: '40dp'
+                size_hint_x: 0.5
+                padding: '5dp', '0dp'
+                Label:
+                    text: 'Variant'
+                    size_hint_x: 0.4
+                    valign: 'middle'
+                    text_size: self.size
+                    padding: '5dp', '0dp'
+                Spinner:
+                    id: variant_spinner
+                    text:'-'
+                    size_hint_x: 0.6
+                    values: ('Preemptive', 'Non-Preemptive')
+                    disabled: True
         # For adding scroll view directly from KV file (also need to call bind function)
         #ScrollView
            #size: self.size
@@ -371,40 +368,35 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '10dp', '2.5dp'
-            size_hint_y: 0.08
-            size_hint_x: 0.3
-            pos_hint: {'top': 1}
+            padding: '10dp', '5dp'
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.9
+                size_hint_x: 0.5
                 text: 'Number of processes:'
                 text_size: self.size
                 halign: 'left'
             TextInput:
-                size_hint_x: 0.4
+                size_hint_x: 0.5
                 id: num_processes
                 multiline: 'False'
-                haligh: 'center'
+                haligh: 'left'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.08
-            size_hint_x: 0.7
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.25
+                #size_hint_x: 0.5
                 valign: 'middle'
                 text: 'Number of resource types:'
                 text_size: self.size
             TextInput:
-                size_hint_x: 0.125
+                #size_hint_x: 0.5
                 id: num_resource_types
                 multiline: 'False'
-            Label:
-                size_hint_x: 0.3
-            #Button:
-                #size_hint_x: 0.15
-                #text: 'Load form'
-                #on_release: root.load_form()
         #Label:
             #text: 'Information about the current state -'
             #size_hint_y: 0.07
@@ -468,40 +460,35 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '10dp', '2.5dp'
-            size_hint_y: 0.08
-            size_hint_x: 0.3
-            pos_hint: {'top': 1}
+            padding: '10dp', '5dp'
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.9
+                size_hint_x: 0.5
                 text: 'Number of processes:'
                 text_size: self.size
                 halign: 'left'
             TextInput:
-                size_hint_x: 0.4
+                size_hint_x: 0.5
                 id: num_processes
                 multiline: 'False'
                 halign: 'center'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.08
-            size_hint_x: 0.7
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.25
+                size_hint_x: 0.5
                 valign: 'middle'
                 text: 'Number of resource types:'
                 text_size: self.size
             TextInput:
-                size_hint_x: 0.125
+                size_hint_x: 0.5
                 id: num_resource_types
                 multiline: 'False'
-            Label:
-                size_hint_x: 0.3
-            #Button:
-                #size_hint_x: 0.15
-                #text: 'Load form'
-                #on_release: root.load_form()
         BoxLayout:
             orientation: 'vertical'
             id: form
@@ -556,57 +543,56 @@
                 size: self.size
                 pos: self.pos
         orientation: 'vertical'
+        spacing: '10dp'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.1
-            size_hint_x: 0.3
-            pos_hint: {'top': 1}
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.9
+                size_hint_x: 0.5
                 text: 'Number of processes:'
                 text_size: self.size
                 halign: 'left'
             TextInput:
-                size_hint_x: 0.4
+                size_hint_x: 0.5
                 id: num_processes
                 multiline: 'False'
                 halign: 'center'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.1
-            size_hint_x: 0.7
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.3
+                size_hint_x: 0.5
                 valign: 'middle'
                 text: 'Size of Main Memory (KB):'
                 text_size: self.size
             TextInput:
-                size_hint_x: 0.125
+                size_hint_x: 0.5
                 id: mem_size
                 multiline: 'False'
-            Label:
-                size_hint_x: 0.3
         BoxLayout:
             orientation: 'horizontal'
-            padding: '5dp', '10dp'
-            size_hint_y: 0.2
-            #height: '100dp'
+            padding: '10dp', '0dp'
+            size_hint_x: 0.6
+            size_hint_y: None
+            height: '40dp'
             Label:
                 text: 'Algorithm:'
-                size_hint_x: 0.3
+                size_hint_x: 0.5
                 text_size: self.size
-                #pos_hint: {'top': 1}
-                padding: '10dp', '10dp'
+                valign: 'middle'
             Spinner:
                 id: algo_spinner
                 text:'Select an algorithm'
+                size_hint_x: 0.5
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('First Fit', 'Best Fit', 'Worst Fit')
-            Label:
-                size_hint_x: 0.3
         BoxLayout:
             orientation: 'vertical'
             id: form
@@ -662,38 +648,38 @@
                 size: self.size
                 pos: self.pos
         orientation: 'vertical'
+        spacing: '10dp'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '30dp', '5dp'
-            size_hint_y: 0.1
-            size_hint_x: 0.7
+            padding: '10dp', '5dp'
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
-                size_hint_x: 0.25
+                size_hint_x: 0.4
                 valign: 'middle'
                 text: 'Number of frames:'
                 text_size: self.size
             TextInput:
-                size_hint_x: 0.125
+                size_hint_x: 0.6
                 id: num_frames
                 multiline: 'False'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '5dp', '10dp'
-            size_hint_y: 0.2
+            padding: '10dp', '0dp'
+            size_hint_x: 0.6
+            size_hint_y: None
+            height: '40dp'
             Label:
                 text: 'Algorithm:'
-                size_hint_x: 0.3
+                size_hint_x: 0.4
                 text_size: self.size
-                #pos_hint: {'top': 1}
-                padding: '10dp', '10dp'
+                valign: 'middle'
             Spinner:
                 id: algo_spinner
                 text:'Select an algorithm'
-                size_hint_y: 'None'
-                height: '40dp'
+                size_hint_x: 0.6
                 values: ('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used')
-            Label:
-                size_hint_x: 0.3
         BoxLayout:
             orientation: 'vertical'
             id: form
@@ -751,52 +737,54 @@
                 size: self.size
                 pos: self.pos
         orientation: 'vertical'
+        spacing: '10dp'
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.15
-            #size_hint_x: 0.5
-            pos_hint: {'top': 1}
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
                 text: 'Number of cylinders in disk: '
-                size_hint_x: 0.3
+                size_hint_x: 0.6
+                text_size: self.size
+                halign: 'left'
             TextInput:
                 id: num_cylinders
                 multiline: 'False'
-                size_hint_x: 0.2
-            Label:
-                size_hint_x: 0.05
-                text: ''
+                size_hint_x: 0.4
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
-            size_hint_y: 0.15
-            #size_hint_x: 0.5
-            pos_hint: {'top': 1}
+            size_hint_y: None
+            height: '40dp'
+            size_hint_x: 0.6
             Label:
                 text: 'Current Position of read/write head: '
-                size_hint_x: 0.3
+                size_hint_x: 0.6
+                text_size: self.size
+                halign: 'left'
             TextInput:
                 id: pos_head
                 multiline: 'False'
-                size_hint_x: 0.2
-            Label:
-                size_hint_x: 0.05
-                text: ''
+                size_hint_x: 0.4
         BoxLayout:
             orientation: 'horizontal'
-            padding: '5dp', '20dp'
-            height: '100dp'
+            padding: '10dp', '0dp'
+            size_hint_x: 0.6
             size_hint_y: None
+            height: '40dp'
             Label:
                 text: 'Algorithm:'
-                size_hint_x: 0.3
+                size_hint_x: 0.4
                 text_size: self.size
-                #pos_hint: {'top': 1}
-                padding: '10dp', '10dp'
+                halign: 'left'
+                valign: 'middle'
+                padding: '0dp', '5dp'
             Spinner:
                 id: algo_spinner
                 text:'Select an algorithm'
+                size_hint_x: 0.6
                 size_hint_y: 'None'
                 height: '40dp'
                 values: ('First Come First Served', 'Shortest Seek Time First', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK')
