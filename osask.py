@@ -200,7 +200,7 @@ class CPUInputScreen(Screen):
     # Update dispatch_latency and set to default value if empty
     def update_dispatch_latency(self, *args):
         if not self.dispatch_latency.text.isdigit():
-            data_cpu['dispatch_latency'] = 0
+            data_cpu['dispatch_latency'] = -1
         else:
             data_cpu['dispatch_latency'] = int(self.dispatch_latency.text)
 
@@ -631,6 +631,8 @@ class CPUOutputScreen(Screen):
     def calculate_schedule(self, *args):
         layout = self.manager.get_screen('cpu_output').layout
         layout.clear_widgets()
+        self.gantt.clear_widgets()
+        self.time.clear_widgets()
 
         formatted_data = []
         for i in range(data_cpu['num_processes']):
@@ -674,7 +676,8 @@ class CPUOutputScreen(Screen):
 
         if self.error_status['error_number'] != -1:
             # Inform the user
-            display_error(grid, self.error_status['error_message'])
+            # display_error(self.gantt, self.error_status['error_message'])
+            pass
         else:
             row_height = '30dp'
 
@@ -757,6 +760,7 @@ class CPUOutputScreen(Screen):
         layout.add_widget(sv)
 
     def draw_gantt(self, *args):
+        
         # Area for drawing gantt chart
         gantt = self.gantt
         chart_wid = Widget()
@@ -771,9 +775,9 @@ class CPUOutputScreen(Screen):
         time.clear_widgets()
         desc.clear_widgets()
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Visualization results' ))
-        desc.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        # box.add_widget(Label(text='Visualization results' ))
+        # desc.add_widget(box)
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
@@ -781,6 +785,11 @@ class CPUOutputScreen(Screen):
         desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
+
+        # Error checking 
+        if self.error_status['error_number'] != -1:
+            display_error(self.gantt, self.error_status['error_message'], box_height='120dp')
+            return
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
@@ -862,6 +871,10 @@ class CPUOutputScreenMultilevel(Screen):
     def calculate_schedule(self, *args):
         layout = self.manager.get_screen('cpu_output_multilevel').layout
         layout.clear_widgets()
+        self.gantt.clear_widgets()
+        self.gantt_queue.clear_widgets()
+        self.time.clear_widgets()
+        self.time_queue.clear_widgets()
 
         formatted_data = []
         for i in range(data_cpu['num_processes']):
@@ -905,7 +918,8 @@ class CPUOutputScreenMultilevel(Screen):
 
         if self.error_status['error_number'] != -1:
             # Inform the user
-            display_error(grid, self.error_status['error_message'])
+            #display_error(grid, self.error_status['error_message'])
+            pass
         else:
             row_height = '30dp'
 
@@ -1008,9 +1022,9 @@ class CPUOutputScreenMultilevel(Screen):
         time_queue.clear_widgets()
         desc.clear_widgets()
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Visualization results' ))
-        desc.add_widget(box)
+        # box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        # box.add_widget(Label(text='Visualization results' ))
+        # desc.add_widget(box)
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
@@ -1018,6 +1032,11 @@ class CPUOutputScreenMultilevel(Screen):
         desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
+
+        # Error checking 
+        if self.error_status['error_number'] != -1:
+            display_error(self.gantt, self.error_status['error_message'], box_height='40dp')
+            return
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
@@ -1702,7 +1721,7 @@ class MemoryInputScreen(Screen):
 
     margin_right = '15dp'
 
-    # Update dispatch_latency and set to default value if empty
+    # Update memory size and set to default value if empty
     def update_mem_size(self, *args):
         if not self.mem_size.text.isdigit():
             data_mem['mem_size'] = 0
