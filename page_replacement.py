@@ -35,24 +35,32 @@ def check_for_bad_input(data):
         error_status = get_error_message(0, -1)
         error = 1
     else:
-        for idx,page_number in enumerate(page_numbers):
-            if int(page_number) < 0:
-                print "Error detected"
-                error_status = get_error_message(1, idx+1)
-                error = 1
-                break
+        if len(page_numbers) == 0:
+            error_status = get_error_message(1, 1)
+            error = 1
+        else:
+            for idx,page_number in enumerate(page_numbers):
+                if int(page_number) < 0:
+                    # print "Error detected"
+                    error_status = get_error_message(1, idx+1)
+                    error = 1
+                    break
     if(error == 1):
         status = (error, error_status);
-        print "Error detected"
+        #print "Error detected"
         return status
     else:
         if data['algo'] == 4:
             modify_bit_string = data['modify_bits'] 
-            for idx,modify_bit in enumerate(modify_bit_string):
-                if int(modify_bit) != 0 and int(modify_bit) != 1:
-                    error_status = get_error_message(2, idx+1)
-                    error = 1
-                    break
+            if len(modify_bit_string) == 0:
+                error_status = get_error_message(2, 1)
+                error = 1
+            else:
+                for idx,modify_bit in enumerate(modify_bit_string):
+                    if int(modify_bit) != 0 and int(modify_bit) != 1:
+                        error_status = get_error_message(2, idx+1)
+                        error = 1
+                        break
         if(error == 0):
             error_status = get_error_message(-1, -1) # No error in input data
             error = 0

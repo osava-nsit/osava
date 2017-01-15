@@ -43,15 +43,19 @@ def check_for_bad_input(data):
         error_status = get_error_message(3,-1)
         error = 1
     else:
-        for cylinder in disk_queue:
-            if int(cylinder) > num_cylinders - 1:
-                error_status = get_error_message(1, int(cylinder))
-                error = 1
-                break
-            if int(cylinder) < 0:
-                error_status = get_error_message(2,int(cylinder))
-                error = 1
-                break
+        if len(disk_queue) == 0:
+            error_status = get_error_message(2, 'The')
+            error = 1
+        else:
+            for cylinder in disk_queue:
+                if int(cylinder) > num_cylinders - 1:
+                    error_status = get_error_message(1, int(cylinder))
+                    error = 1
+                    break
+                if int(cylinder) < 0:
+                    error_status = get_error_message(2,int(cylinder))
+                    error = 1
+                    break
         if(error == 0):
             error_status = get_error_message(-1, -1) # No error in input data
             error = 0

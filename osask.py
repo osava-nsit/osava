@@ -59,101 +59,167 @@ def cpu_on_name(instance, value, i):
     data_cpu['name'+str(i)] = value
 def cpu_on_arrival(instance, value, i):
     if value == '':
-        value = 1
+        if DEBUG_MODE:
+            value = 1
+        else:
+            value = -1
     data_cpu['arrival'+str(i)] = value
 def cpu_on_burst(instance, value, i):
     if value == '':
-        value = 4
+        if DEBUG_MODE:
+            value = 4
+        else:
+            value = -1
     data_cpu['burst'+str(i)] = value
 def cpu_on_priority(instance, value, i):
     if value == '':
-        value = 10
+        if DEBUG_MODE:
+            value = 10
+        else:
+            value = -1
     data_cpu['priority'+str(i)] = value
 def cpu_on_quantum(instance, value):
     if value == '':
-        value = 2
+        if DEBUG_MODE:
+            value = 2
+        else:
+            value = -1
     data_cpu['quantum'] = int(value)
 def cpu_on_aging(instance, value):
     if value == '':
-        value = 4
+        if DEBUG_MODE:
+            value = 4
+        else:
+            value = -1
     data_cpu['aging'] = int(value)
 def cpu_on_num_queues(instance, value):
     if value == '':
-        value = 2
+        if DEBUG_MODE:
+            value = 2
+        else:
+            value = -1
     data_cpu['num_queues'] = int(value)
 def cpu_on_queue_quantum(instance, value, i):
     if value == '':
-        value = 2
+        if DEBUG_MODE:
+            value = 2
+        else:
+            value = -1
     data_cpu['queue_quantum'][i] = int(value)
 def cpu_on_queue_assigned(instance, value, i):
     if value == '':
-        value = 1
+        if DEBUG_MODE:
+            value = 1
+        else:
+            value = -1
     data_cpu['queue_assigned'][i] = int(value)
 
 # Binder functions for Deadlock Avoidance Algorithm form
 def da_on_available(instance, value, i):
     if (value == ''):
-        value = 5
+        if DEBUG_MODE:
+            value = 5
+        else:
+            value = -1
     data_da['available'][i] = int(value)
 def da_on_request(instance, value, i):
     if (value == ''):
-        value = 0
+        if DEBUG_MODE:
+            value = 0
+        else:
+            value = -1
     data_da['request'][i] = int(value)
 def da_on_max(instance, value, i, j):
     if (value == ''):
-        value = 8
+        if DEBUG_MODE:
+            value = 8
+        else:
+            value = -1
     data_da['max'][i][j] = int(value)
 def da_on_allocation(instance, value, i, j):
     if (value == ''):
-        value = 4
+        if DEBUG_MODE:
+            value = 4
+        else:
+            value = -1
     data_da['allocation'][i][j] = int(value)
 def da_request_on_process_id(instance, value):
     if (value == ''):
-        value = 1
+        if DEBUG_MODE:
+            value = 1
+        else:
+            value = -1
     data_da['request_process'] = int(value)-1
 
 # Binder functions for Deadlock Detection Algorithm form
 def dd_on_available(instance, value, i):
     if (value == ''):
-        value = 5
+        if DEBUG_MODE:
+            value = 5
+        else:
+            value = -1
     data_dd['available'][i] = int(value)
 def dd_on_request(instance, value, i, j):
     if (value == ''):
-        value = 2
+        if DEBUG_MODE:
+            value = 2
+        else:
+            value = -1
     data_dd['request'][i][j] = int(value)
 def dd_on_allocation(instance, value, i, j):
     if (value == ''):
-        value = 4
+        if DEBUG_MODE:
+            value = 4
+        else:
+            value = -1
     data_dd['allocation'][i][j] = int(value)
 
 # Binder functions for Contiguous Memory Allocation Strategies form
 def mem_on_size(instance, value, i):
     if (value == ''):
-        value = 128
+        if DEBUG_MODE:
+            value = 128
+        else:
+            value = -1
     data_mem['size'][i] = value
 def mem_on_arrival(instance, value, i):
     if (value == ''):
-        value = 0
+        if DEBUG_MODE:
+            value = 0
+        else:
+            value = -1
     data_mem['arrival'][i] = value
 def mem_on_termination(instance, value, i):
     if (value == ''):
-        value = 10
+        if DEBUG_MODE:
+            value = 10
+        else:
+            value = -1
     data_mem['burst'][i] = value
 
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value):
     if(value == ''):
-        value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1' 
+        if DEBUG_MODE:
+            value = '7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1' 
+        else:
+            value = ''
     data_page['ref_str'] = str(value)
 def page_on_modify(instance, value):
     if value == '':
-        value = '0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1'
+        if DEBUG_MODE:
+            value = '0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1'
+        else:
+            value = ''
     data_page['modify_bit'] = str(value)
 
 # Binder functions for Disk Scheduling Algorithms
 def disk_on_queue(instance, value):
     if(value == ''):
-        value = '98,183,37,122,14,124,65,67'
+        if DEBUG_MODE:
+            value = '98,183,37,122,14,124,65,67'
+        else:
+            value = ''
     data_disk['disk_queue'] = str(value)
 
 # For labels with colored border
@@ -2445,7 +2511,7 @@ class DiskInputScreen(Screen):
 
     def update_pos_head(self, *args):
         if not self.pos_head.text.isdigit():
-            data_disk['pos_head'] = 0
+            data_disk['pos_head'] = -1
         else:
             data_disk['pos_head'] = int(self.pos_head.text)
 
@@ -2527,7 +2593,7 @@ class DiskInputScreen(Screen):
         if 'num_cylinders' not in data_disk:
             data_disk['num_cylinders'] = 0
         if 'pos_head' not in data_disk:
-            data_disk['pos_head'] = 0
+            data_disk['pos_head'] = -1
         if 'algo' not in data_disk:
             data_disk['algo'] = 0
         if 'disk_queue' not in data_disk:
