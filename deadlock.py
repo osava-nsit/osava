@@ -158,9 +158,9 @@ def is_safe(available, maximum, allocation, n, m):
         num_left -= 1
 
     if num_left == 0:
-        return True, schedule
+        return True, schedule, need
     else:
-        return False, schedule
+        return False, schedule, need
 
 
 def dispatchable(need, work, m):

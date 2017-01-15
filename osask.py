@@ -1353,7 +1353,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
                     box.add_widget(Label(text=need_text))
                     grid.add_widget(box)
 
-                safe, schedule = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
+                safe, schedule, need = deadlock.is_safe(available, maximum, allocation, data_da['num_processes'], data_da['num_resource_types'])
                 work = deepcopy(available)
                 finish = ['F'] * data_da['num_processes']
 
@@ -1366,6 +1366,8 @@ class DeadlockAvoidanceOutputScreen(Screen):
                     # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
                     box.add_widget(Label(text='Process'))
+                    box.add_widget(Label(text='Need'))
+                    box.add_widget(Label(text='Allocation'))
                     box.add_widget(Label(text='Work'))
                     box.add_widget(Label(text='Finish'))
                     grid.add_widget(box)
@@ -1374,13 +1376,19 @@ class DeadlockAvoidanceOutputScreen(Screen):
                     # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
                     box.add_widget(Label(text='Initial'))
+
+                    # Need for current process
+                    box.add_widget(Label(text='-'))
+                    # Allocation for current process
+                    box.add_widget(Label(text='-'))
+
                     work_text = ''
                     for i in range(len(work)):
-                        work_text += (str(work[i])+'   ')
+                        work_text += (str(work[i])+'  ')
                     box.add_widget(Label(text=work_text))
                     finish_text = ''
                     for i in range(len(finish)):
-                        finish_text += (finish[i]+'   ')
+                        finish_text += (finish[i]+'  ')
                     box.add_widget(Label(text=finish_text))
                     grid.add_widget(box)
 
@@ -1392,13 +1400,29 @@ class DeadlockAvoidanceOutputScreen(Screen):
                         # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
                         box.add_widget(Label(text='P'+str(schedule[i]+1)))
+
+                        # Need for current process
+                        need_text = ''
+                        for j in range(len(need[i])):
+                            need_text += (str(need[i][j])+'  ')
+                        box.add_widget(Label(text=need_text))
+
+                        # Allocation for current process
+                        allocation_text = ''
+                        for j in range(len(allocation[i])):
+                            allocation_text += (str(allocation[i][j])+'  ')
+                        box.add_widget(Label(text=allocation_text))
+
+                        # Work vector after current process is allocated resources
                         work_text = ''
                         for j in range(len(work)):
-                            work_text += (str(work[j])+'   ')
+                            work_text += (str(work[j])+'  ')
                         box.add_widget(Label(text=work_text))
+
+                        # Finish vector after current process is allocated resources
                         finish_text = ''
                         for j in range(len(finish)):
-                            finish_text += (finish[j]+'   ')
+                            finish_text += (finish[j]+'  ')
                         box.add_widget(Label(text=finish_text))
                         grid.add_widget(box)
                 else:
