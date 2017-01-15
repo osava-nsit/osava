@@ -39,7 +39,7 @@ def check_for_bad_input(data):
     if  num_cylinders <= 0:
         error_status = get_error_message(0,-1)
         error = 1 
-    elif curr_head_pos <= 0 or curr_head_pos >= num_cylinders:
+    elif curr_head_pos < 0 or curr_head_pos >= num_cylinders:
         error_status = get_error_message(3,-1)
         error = 1
     else:

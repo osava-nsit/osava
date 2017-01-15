@@ -2588,6 +2588,8 @@ class DiskOutputScreen(Screen):
     # Increment in width per unit size
     inc = 0
 
+    arrow_head_num = 0
+
     def get_description(self, *args):
         if data_disk['algo'] == 0:
             return 'In First Come First Served Scheduling, the i/o requests are processed in the order in which they arrive.'
@@ -2604,6 +2606,8 @@ class DiskOutputScreen(Screen):
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
+        self.arrow_head_num = 0
+
         formatted_data = {}
         formatted_data['curr_pos'] = int(data_disk['pos_head'])
         formatted_data['total_cylinders']= int(data_disk['num_cylinders'])
@@ -2759,6 +2763,8 @@ class DiskOutputScreen(Screen):
 
     # Drawing the arrow head        
     def add_arrow_head(self, x1, y1, x2, y2, *args):
+        self.arrow_head_num += 1
+
         # Intialising end coordinates and slope for arrow head
         x3 = 0
         y3 = 0
@@ -2779,6 +2785,11 @@ class DiskOutputScreen(Screen):
         else:
             m = (float(y2-y1))/(float(x2-x1))
 
+        if m > 0:
+            sign = -1
+        else:
+            sign = 1
+
         # print "x2 = {} m = {}".format(x2,m)
 
         # Coordinates for right half of the head
@@ -2786,19 +2797,40 @@ class DiskOutputScreen(Screen):
         # m3 = m * cos(radians(deg))#/120
         m3 = tan(atan(m) + radians(arrow_angle))
 
+        if m >= 1.0:
+            sign3 = -1*sign
+        else:
+            sign3 = sign
+
         # c,s = Cos and Sine of the slope angle
         c = 1/(sqrt(1 + (m3*m3)))
         s = m3 * c
-        x3 = x2 - len_head * c
-        y3 = y2 - len_head * s
+        x3 = x2 - sign3 * len_head * c
+        y3 = y2 - sign3 * len_head * s
+
+        # print str(self.arrow_head_num) + "----------------------------------"
+
+        # print "m = {}, m3 = {}, c = {}, s = {}".format(m, m3, c, s)
 
         # Coordinates for left half of the head
         # m4 = m * cos(radians(70))#\70
         m4 = tan(atan(m) - radians(arrow_angle))
+
+        if m <= -1.0:
+            sign4 = -1*sign
+        else:
+            sign4 = sign
+
         c = 1/(sqrt(1 + (m4*m4)))
         s = m4 * c
-        x4 = x2 - len_head * c
-        y4 = y2 - len_head * s
+        x4 = x2 - sign4 * len_head * c
+        y4 = y2 - sign4 * len_head * s
+
+        # print "m = {}, m4 = {}, c = {}, s = {}".format(m, m4, c, s)
+
+        # print "x2 = {}, y2 = {}, x3 = {}, y3 = {}, x4 = {}, y4 = {}".format(x2, y2, x3, y3, x4, y4)
+
+        # print str(self.arrow_head_num) + "----------------------------------\n\n"
 
         # Drawing the arrow head on each side
         with self.arrows_widget.canvas:
