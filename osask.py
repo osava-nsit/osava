@@ -458,11 +458,11 @@ class CPUInputScreen(Screen):
         # If Priority scheduling selected
         elif self.cpu_type == 4 or self.cpu_type == 5:
             box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
-            inp = TextInput(id='aging', size_hint_x=0.3)
+            inp = TextInput(id='aging', size_hint_x=0.25)
             inp.bind(text=cpu_on_aging)
             # inp.font_size = inp.size[1]
-            label = Label(text='Aging: Promote priority by 1 unit each time after waiting (ms) - ', size_hint_x=0.7)
-            # label.text_size = label.size
+            label = Label(text='Aging (Promote priority by 1 unit each time after waiting (ms)):', size_hint_x=0.75, halign='left', padding=(kivy.metrics.dp(10),0))
+            label.bind(size=label.setter('text_size'))
             box.add_widget(label)
             box.add_widget(inp)
 
