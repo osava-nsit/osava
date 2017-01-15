@@ -946,12 +946,13 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
 
                             # Add dispatch latency
                             if (dispatch_latency > 0):
-                                dl_cpu = dict()
-                                dl_cpu['name'] = 'DL'
-                                dl_cpu['start'] = curr_time
-                                dl_cpu['end'] = curr_time + dispatch_latency
-                                process_chart += [dl_cpu]
-                                curr_time += dispatch_latency
+                                if len(process_chart) == 0 or (len(process_chart) > 0 and temp_process['name'] != process_chart[-1]['name']):
+                                    dl_cpu = dict()
+                                    dl_cpu['name'] = 'DL'
+                                    dl_cpu['start'] = curr_time
+                                    dl_cpu['end'] = curr_time + dispatch_latency
+                                    process_chart += [dl_cpu]
+                                    curr_time += dispatch_latency
                             temp_process['start'] = curr_time  
                             for details in details_process:
                                 if details['name'] == temp_process['name']: 
@@ -1044,13 +1045,14 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
                         chart_details['queue_name'] = i+1
                         # Add dispatch latency
                         if (dispatch_latency > 0):
-                            dl_cpu = dict()
-                            dl_cpu['name'] = 'DL'
-                            dl_cpu['start'] = time_present
-                            dl_cpu['end'] = time_present + dispatch_latency
-                            dl_cpu['queue_name'] = 0
-                            process_chart += [dl_cpu]
-                            time_present += dispatch_latency
+                            if len(process_chart) == 0 or (len(process_chart) > 0 and process['name'] != process_chart[-1]['name']):
+                                dl_cpu = dict()
+                                dl_cpu['name'] = 'DL'
+                                dl_cpu['start'] = time_present
+                                dl_cpu['end'] = time_present + dispatch_latency
+                                dl_cpu['queue_name'] = 0
+                                process_chart += [dl_cpu]
+                                time_present += dispatch_latency
                         for data in details_process:
                             if data['name'] == process['name'] and data['flag'] == 0:
                                 data['start'] = time_present
@@ -1121,13 +1123,14 @@ def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
                 time_present = process['arrival']
             # Add dispatch latency
             if (dispatch_latency > 0):
-                dl_cpu = dict()
-                dl_cpu['name'] = 'DL'
-                dl_cpu['start'] = time_present
-                dl_cpu['end'] = time_present + dispatch_latency
-                dl_cpu['queue_name'] = 0
-                process_chart += [dl_cpu]
-                time_present += dispatch_latency
+                if len(process_chart) == 0 or (len(process_chart) > 0 and process['name'] != process_chart[-1]['name']):
+                    dl_cpu = dict()
+                    dl_cpu['name'] = 'DL'
+                    dl_cpu['start'] = time_present
+                    dl_cpu['end'] = time_present + dispatch_latency
+                    dl_cpu['queue_name'] = 0
+                    process_chart += [dl_cpu]
+                    time_present += dispatch_latency
             for data in details_process:
                 if data['name'] == process['name'] and data['flag'] == 0:
                     data['start'] = time_present
