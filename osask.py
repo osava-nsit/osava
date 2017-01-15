@@ -404,17 +404,21 @@ class CPUInputScreen(Screen):
         # If Multilevel Queue scheduling is selected
         elif self.cpu_type == 7 or self.cpu_type == 8:
             self.visualize_button.disabled = True
-            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(10),0), size_hint_y=None, height=form_row_height, size_hint_x=0.5)
-            inp = TextInput(id='num_queues')
-            label = Label(text='Number of queues:', halign='left')
-            label.bind(size=label.setter('text_size'))
+
+            layout.add_widget(BoxLayout(size_hint_y=None, height='10dp'))
+
+            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(10),0), size_hint_y=None, height=form_row_height, size_hint_x=0.67)
+            label = Label(text='Number of queues:', valign='middle', size_hint_x=0.513)
+            # label.bind(size=label.setter('text_size'))
+            inp = TextInput(id='num_queues', size_hint_x=0.487)
+
             box.add_widget(label)
             box.add_widget(inp)
 
             parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             parent_box.add_widget(box)
             # For occupying space on right side
-            parent_box.add_widget(BoxLayout(size_hint_x=0.5))
+            parent_box.add_widget(BoxLayout(size_hint_x=0.33))
 
             layout.add_widget(parent_box)
 
@@ -1189,7 +1193,7 @@ class DeadlockAvoidanceInputScreen(Screen):
 
         # Add form labels for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Available:'))
+        box.add_widget(Label(text=''))
         for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
         box.add_widget(Label(size_hint_x=None, width=self.margin_right))
@@ -1197,7 +1201,7 @@ class DeadlockAvoidanceInputScreen(Screen):
 
         # Add input fields for Available array (n)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text=''))
+        box.add_widget(Label(text='Available:'))
         for i in range(data_da['num_resource_types']):
             inp = TextInput(id='available'+str(i))
             inp.bind(text=partial(da_on_available, i=i))
@@ -1247,7 +1251,7 @@ class DeadlockAvoidanceInputScreen(Screen):
 
         # Add labels for resource types in request form:
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Request:'))
+        box.add_widget(Label(text=''))
         box.add_widget(Label(text='Process No.'))
         for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
@@ -1256,7 +1260,7 @@ class DeadlockAvoidanceInputScreen(Screen):
 
         # Add input fields for resource form
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text=''))
+        box.add_widget(Label(text='Request:'))
         inp = TextInput(id='process_id')
         inp.bind(text=da_request_on_process_id)
         box.add_widget(inp)
@@ -1510,7 +1514,7 @@ class DeadlockDetectionInputScreen(Screen):
 
         # Add form labels for Available array (m)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text='Available:'))
+        box.add_widget(Label(text=''))
         for i in range(data_dd['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
         box.add_widget(Label(size_hint_x=None, width=self.margin_right))
@@ -1518,7 +1522,7 @@ class DeadlockDetectionInputScreen(Screen):
 
         # Add input fields for Available array (m)
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-        box.add_widget(Label(text=''))
+        box.add_widget(Label(text='Available:'))
         for i in range(data_dd['num_resource_types']):
             inp = TextInput(id='available'+str(i))
             inp.bind(text=partial(dd_on_available, i=i))
@@ -2598,11 +2602,11 @@ class DiskOutputScreen(Screen):
         elif data_disk['algo'] == 2:
             return 'In SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.'
         elif data_disk['algo'] == 3:
-            return 'In C-SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.\nOn reaching the end, the r/w head immediately returns to the beginning without servicing any request on the return trip.'
+            return 'In C-SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder. On reaching the end, the r/w head immediately returns to the beginning without servicing any request on the return trip.'
         elif data_disk['algo'] == 4:
             return 'In LOOK scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.'
         elif data_disk['algo'] == 5:
-            return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.\nOn reaching the end, the r/w head immediately returns to the beginning, if need be, without servicing any request on the return trip.'
+            return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.On reaching the end, the r/w head immediately returns to the beginning, if need be, without servicing any request on the return trip.'
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
@@ -2641,8 +2645,9 @@ class DiskOutputScreen(Screen):
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
-            desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
-            desc_label.text_size = desc_label.size
+            desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), size_hint_x=None, width=Window.width, valign='middle', halign='center')
+            desc_label.bind(size=desc_label.setter('text_size'))
+
             box.add_widget(desc_label)
             grid.add_widget(box)
 
@@ -2753,13 +2758,13 @@ class DiskOutputScreen(Screen):
     def add_arrow(self, x1, y1, x2, y2, *args):
         with self.arrows_widget.canvas:
             Color(1, 1, 1)
-            Line(points=[x1,y1,x2,y2], width=1.3)
+            Line(points=[x1,y1,x2,y2], width=1.5)
 
     # Drawing the dotted arrow line in circular algorithms
     def add_dashed_arrow(self, x1, y1, x2, y2, *args):
         with self.arrows_widget.canvas:
             Color(1, 1, 1)
-            Line(points=[x1,y1,x2,y2], width=1, dash_length=1, dash_offset=3)
+            Line(points=[x1,y1,x2,y2], width=1, dash_length=kivy.metrics.dp(10), dash_offset=kivy.metrics.dp(20))
 
     # Drawing the arrow head        
     def add_arrow_head(self, x1, y1, x2, y2, *args):
@@ -2834,9 +2839,9 @@ class DiskOutputScreen(Screen):
 
         # Drawing the arrow head on each side
         with self.arrows_widget.canvas:
-            Color(0, 0.5, 1)
-            Line(points=[x2,y2,x3,y3], width=1.1)
-            Line(points=[x2,y2,x4,y4], width=1.1)
+            Color(0.110, 0.306, 0.643)
+            Line(points=[x2,y2,x3,y3], width=1.6)
+            Line(points=[x2,y2,x4,y4], width=1.6)
 
     def calc_normalised_angle(self, slope, *args):
         return abs(slope*30)
