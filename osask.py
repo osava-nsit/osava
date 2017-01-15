@@ -30,7 +30,7 @@ Builder.load_file('layout.kv')
 DEBUG_MODE = False
 
 # Global fixed height of form rows within scroll view
-form_row_height = '40dp'
+form_row_height = '30dp'
 
 # Global data for CPU Scheduling Algorithms
 cpu_scheduling_types = ['FCFS', 'Round Robin', 'SJF Non-Preemptive', 'SJF Preemptive', 'Priority Non-Preemptive', 'Priority Preemptive', 'Multilevel Queue', 'Multilevel Feedback Queue']
@@ -399,16 +399,24 @@ class CPUInputScreen(Screen):
             # label.text_size = label.size
             box.add_widget(label)
             box.add_widget(inp)
+
             layout.add_widget(box)
         # If Multilevel Queue scheduling is selected
         elif self.cpu_type == 7 or self.cpu_type == 8:
             self.visualize_button.disabled = True
-            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
+            box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(10),0), size_hint_y=None, height=form_row_height, size_hint_x=0.5)
             inp = TextInput(id='num_queues')
-            label = Label(text='Number of queues')
+            label = Label(text='Number of queues:', halign='left')
+            label.bind(size=label.setter('text_size'))
             box.add_widget(label)
             box.add_widget(inp)
-            layout.add_widget(box)
+
+            parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            parent_box.add_widget(box)
+            # For occupying space on right side
+            parent_box.add_widget(BoxLayout(size_hint_x=0.5))
+
+            layout.add_widget(parent_box)
 
             inp.bind(text=partial(self.update_multilevel_form, layout, inp))
 
@@ -2125,7 +2133,7 @@ class PageInputScreen(Screen):
         if 'modify_bit' not in data_page:
             data_page['modify_bit'] = ''
 
-        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
+        grid = GridLayout(cols=1, spacing=kivy.metrics.dp(15), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
@@ -2139,29 +2147,45 @@ class PageInputScreen(Screen):
         #box.add_widget(algo_spinner)
         #grid.add_widget(box)
 
-        # Add labels for input
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
-        box.add_widget(Label(text='Reference String'))
-        grid.add_widget(box)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10), 0), size_hint_x=0.6)
+        
+        # Add label for input
+        label = Label(text='Reference String:', size_hint_x=0.4, halign='left')
+        label.bind(size=label.setter('text_size'))
+        box.add_widget(label)
 
         # Add input
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
-        inp = TextInput(id='ref_str'+str(0), text=data_page['ref_str'])
+        inp = TextInput(id='ref_str'+str(0), text=data_page['ref_str'], size_hint_x=0.6)
         inp.bind(text=page_on_ref)
         box.add_widget(inp)
-        grid.add_widget(box)
+
+        parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        parent_box.add_widget(box)
+        # For occypying space on right
+        parent_box.add_widget(BoxLayout(size_hint_x=0.4))
+
+        grid.add_widget(parent_box)
 
         # Modify bit for enhanced second chance algo
         if self.algo_type == 4:
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
-            box.add_widget(Label(text='Modify Bit String '))
-            grid.add_widget(box)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10), 0), size_hint_x=0.6)
+        
+            # Add label for input
+            label = Label(text='Modify Bit String:', size_hint_x=0.4, halign='left')
+            label.bind(size=label.setter('text_size'))
+            box.add_widget(label)
 
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
-            inp = TextInput(id='modify_bit'+str(0), text=data_page['modify_bit'])
+            # Add input
+            inp = TextInput(id='modify_bit'+str(0), text=data_page['modify_bit'], size_hint_x=0.6)
             inp.bind(text=page_on_modify)
             box.add_widget(inp)
-            grid.add_widget(box)
+
+            parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            parent_box.add_widget(box)
+            # For occypying space on right
+            parent_box.add_widget(BoxLayout(size_hint_x=0.4))
+
+            grid.add_widget(parent_box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
@@ -2466,28 +2490,47 @@ class DiskInputScreen(Screen):
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10),0), size_hint_x=0.7)
+
         # Add labels for input
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5), 0))
-        box.add_widget(Label(text='Disk queue (starts from 0):'))
-        grid.add_widget(box)
+        label = Label(text='Disk queue (starts from 0):', size_hint_x=0.5)
+        label.bind(size=label.setter('text_size'))
+        box.add_widget(label)
 
         # Add input
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(200), 0))
-        inp = TextInput(id='disk_queue'+str(0), text=data_disk['disk_queue'])
+        inp = TextInput(id='disk_queue'+str(0), text=data_disk['disk_queue'], size_hint_x=0.5)
         inp.bind(text=disk_on_queue)
         box.add_widget(inp)
-        grid.add_widget(box)
+
+        parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        parent_box.add_widget(box)
+        # For occypying space on right
+        parent_box.add_widget(BoxLayout(size_hint_x=0.3))
+
+        grid.add_widget(parent_box)
 
         if self.algo_type !=0 and self.algo_type != 1:
             # Box for direction spinner 
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(5),0))
-            box.add_widget(Label(text='Current direction of movement of read/write head:'))
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp', padding=(kivy.metrics.dp(10),0), size_hint_x=0.7)
+
+            label = Label(text='Current direction of movement of read/write head:', size_hint_x=0.5)
+            label.bind(size=label.setter('text_size'))
+            box.add_widget(label)
             direction_spinner = Spinner(
                 text='-',
+                size_hint_x=0.5,
+                size_hint_y=None,
+                height='40dp',
                 values=('Inward','Outward'))
             direction_spinner.bind(text=self.show_direction)
             box.add_widget(direction_spinner)
-            grid.add_widget(box)
+
+            parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp')
+            parent_box.add_widget(box)
+            # For occypying space on right
+            parent_box.add_widget(BoxLayout(size_hint_x=0.3))
+
+            grid.add_widget(parent_box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')

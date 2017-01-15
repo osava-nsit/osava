@@ -124,7 +124,7 @@
         spacing: '10dp'
         BoxLayout:
             orientation: 'horizontal'
-            padding: '10dp', '2.5dp'
+            padding: '10dp', '5dp'
             size_hint_y: None
             height: '40dp'
             spacing: '20dp'
@@ -743,40 +743,40 @@
             padding: '10dp', '5dp'
             size_hint_y: None
             height: '40dp'
-            size_hint_x: 0.6
+            size_hint_x: 0.7
             Label:
                 text: 'Number of cylinders in disk: '
-                size_hint_x: 0.6
+                size_hint_x: 0.5
                 text_size: self.size
                 halign: 'left'
             TextInput:
                 id: num_cylinders
                 multiline: 'False'
-                size_hint_x: 0.4
+                size_hint_x: 0.5
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '5dp'
             size_hint_y: None
             height: '40dp'
-            size_hint_x: 0.6
+            size_hint_x: 0.7
             Label:
                 text: 'Current Position of read/write head: '
-                size_hint_x: 0.6
+                size_hint_x: 0.5
                 text_size: self.size
                 halign: 'left'
             TextInput:
                 id: pos_head
                 multiline: 'False'
-                size_hint_x: 0.4
+                size_hint_x: 0.5
         BoxLayout:
             orientation: 'horizontal'
             padding: '10dp', '0dp'
-            size_hint_x: 0.6
+            size_hint_x: 0.7
             size_hint_y: None
             height: '40dp'
             Label:
                 text: 'Algorithm:'
-                size_hint_x: 0.4
+                size_hint_x: 0.5
                 text_size: self.size
                 halign: 'left'
                 valign: 'middle'
@@ -784,9 +784,7 @@
             Spinner:
                 id: algo_spinner
                 text:'Select an algorithm'
-                size_hint_x: 0.6
-                size_hint_y: 'None'
-                height: '40dp'
+                size_hint_x: 0.5
                 values: ('First Come First Served', 'Shortest Seek Time First', 'SCAN', 'C-SCAN', 'LOOK', 'C-LOOK')
         BoxLayout:
             id: form
