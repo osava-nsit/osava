@@ -196,7 +196,7 @@ def round_robin(data, quantum=4, dispatch_latency=0):
         details_process[process['name']]['resp_time'] = 0
 
     process_queue = []
-    rr_add_processes_to_queue(all_processes, process_queue)
+    add_processes_to_queue(all_processes, process_queue)
 
     robin_idx = 0
     prev_robin_idx = -1
@@ -287,7 +287,7 @@ def rr_get_next_process(robin_idx, curr_time, process_queue):
     else:
         return robin_idx
 
-def rr_add_processes_to_queue(processes, queue):
+def add_processes_to_queue(processes, queue):
     for orig_process in processes:
         process = deepcopy(orig_process)
         process['time_given'] = 0
@@ -526,8 +526,148 @@ def shortest_job_non_prempted(data, dispatch_latency = 0):
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
-    
-def shortest_job_prempted(data, dispatch_latency = 0):
+
+def shortest_job_prempted(data, dispatch_latency=0):
+    # For bad input handling
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 2, -1, -1, -1)
+    if(error):
+        return -1, -1, -1, error_status
+
+    all_processes = sorted(data, key=itemgetter('arrival'))
+    curr_time = 0
+    total_wait_time = 0
+    total_resp_time = 0
+    total_turn_time = 0
+    sum_time = 0
+
+    # The list of process objects in the gantt chart
+    process_chart = []
+
+    # Process wise details
+    details_process = {}
+    for process in all_processes:
+        details_process[process['name']] = {}
+        details_process[process['name']]['arrival'] = process['arrival']
+        details_process[process['name']]['burst'] = process['burst']
+        details_process[process['name']]['wait_time'] = 0
+        details_process[process['name']]['turn_time'] = 0
+        details_process[process['name']]['resp_time'] = 0
+
+    process_queue = []
+    add_processes_to_queue(all_processes, process_queue)
+
+    curr_process_idx = 0
+    last_process_name = ''
+
+    while process_queue:
+        if curr_time < process_queue[0]['arrival']:
+            # Add idle process
+            idle_cpu = dict()
+            idle_cpu['name'] = 'Idle'
+            idle_cpu['start'] = curr_time
+            idle_cpu['end'] = process_queue[0]['arrival']
+            process_chart += [idle_cpu]
+
+            curr_time = process_queue[0]['arrival']
+
+        curr_process_idx = get_shortest(curr_time, process_queue)
+        process = process_queue[curr_process_idx]
+
+        dispatch_latency_added = False
+        # Add dispatch latency
+        if dispatch_latency > 0 and last_process_name != process['name']:
+            dl_cpu = create_dl_process(dispatch_latency, curr_time)
+            process_chart += [dl_cpu]
+            curr_time += dispatch_latency
+            dispatch_latency_added = True
+
+        if dispatch_latency_added:
+            next_arrival_time = get_next_arrival_time(curr_time-dispatch_latency, process_queue)
+        else:
+            next_arrival_time = get_next_arrival_time(curr_time, process_queue)
+
+        while next_arrival_time != -1 and get_shortest(next_arrival_time, process_queue) == curr_process_idx:
+            next_arrival_time = get_next_arrival_time(next_arrival_time, process_queue)
+
+        # No other shorter process to preempt current process
+        if next_arrival_time == -1:
+            time_added = process['burst'] - process['time_given']
+        elif next_arrival_time > curr_time + process['burst'] - process['time_given']:
+            time_added = process['burst'] - process['time_given']
+        else:
+            time_added = next_arrival_time - curr_time
+
+        # To handle cases with odd behaviour due to dispatch_latency
+        # That is, by the time a process is dispatched, a new process arrives with shorter remaining burst
+        if time_added < 0:
+            time_added = 0
+
+        process['time_given'] += time_added
+
+        if process['last_time'] == 0:
+            process['start_time'] = curr_time
+            process['resp_time'] = curr_time - process['arrival']
+            process['wait_time'] += curr_time - process['arrival']
+        else:
+            process['wait_time'] += curr_time - process['last_time']
+
+        # Add process segment to gantt chart
+        chart_details = {}
+        chart_details['name'] = process['name']
+        chart_details['start'] = curr_time
+        chart_details['end'] = curr_time+time_added
+        process_chart += [chart_details]
+        last_process_name = chart_details['name']
+
+        curr_time += time_added
+        process['last_time'] = curr_time
+
+        if process['time_given'] == process['burst']: # Process has finished execution
+            process['turn_time'] = curr_time - process['arrival']
+
+            details_process[process['name']]['wait_time'] = process['wait_time']
+            details_process[process['name']]['turn_time'] = process['turn_time']
+            details_process[process['name']]['resp_time'] = process['resp_time']
+
+            total_wait_time += process['wait_time']
+            total_turn_time += process['turn_time']
+            total_resp_time += process['resp_time']
+            sum_time += process['burst']
+
+            process_queue.remove(process)
+
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(total_wait_time)/len(all_processes)
+    stats['resp_time'] = float(total_resp_time)/len(all_processes)
+    stats['turn_time'] = float(total_turn_time)/len(all_processes)
+    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
+
+    return process_chart, stats, details_process, error_status
+
+def get_shortest(curr_time, process_queue):
+    shortest_burst = -1
+    shortest_idx = -1
+
+    for idx, process in enumerate(process_queue):
+        if process['arrival'] <= curr_time and process['time_given'] != process['burst']:
+            if shortest_burst == -1 or (process['burst'] - process['time_given'] < shortest_burst):
+                shortest_burst = process['burst'] - process['time_given']
+                shortest_idx = idx
+
+    return shortest_idx
+
+def get_next_arrival_time(curr_time, process_queue):
+    for process in process_queue:
+        if process['arrival'] <= curr_time:
+            continue
+        if process['time_given'] != process['burst']:
+            return process['arrival']
+
+    return -1
+
+def shortest_job_prempted_old(data, dispatch_latency = 0):
     # For bad input handling
     error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 2, -1, -1, -1)
     if(error):
@@ -737,8 +877,190 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
         
         return process_chart, stats, process_details, error_status
-    
-def priority_preemptive(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
+
+def priority_preemptive(data, increment_after_time=4, upper_limit_priority=0, dispatch_latency=0):
+    # For bad input handling
+    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, increment_after_time, -1, 3, -1, -1, -1)
+    if(error):
+        return -1, -1, -1, error_status
+
+    all_processes = sorted(data, key=itemgetter('arrival'))
+    curr_time = 0
+    total_wait_time = 0
+    total_resp_time = 0
+    total_turn_time = 0
+    sum_time = 0
+
+    # The list of process objects in the gantt chart
+    process_chart = []
+
+    # Process wise details
+    details_process = {}
+    for process in all_processes:
+        details_process[process['name']] = {}
+        details_process[process['name']]['arrival'] = process['arrival']
+        details_process[process['name']]['burst'] = process['burst']
+        details_process[process['name']]['wait_time'] = 0
+        details_process[process['name']]['turn_time'] = 0
+        details_process[process['name']]['resp_time'] = 0
+
+    # To handle aging
+    aging_wait_time = {}
+    for process in all_processes:
+        aging_wait_time[process['name']] = 0
+
+    # Enforce priority limit
+    for process in all_processes:
+        if process['priority'] < upper_limit_priority:
+            process['priority'] = upper_limit_priority
+
+    process_queue = []
+    add_processes_to_queue(all_processes, process_queue)
+
+    curr_process_idx = 0
+    last_process_name = ''
+
+    while process_queue:
+        if curr_time < process_queue[0]['arrival']:
+            # Add idle process
+            idle_cpu = dict()
+            idle_cpu['name'] = 'Idle'
+            idle_cpu['start'] = curr_time
+            idle_cpu['end'] = process_queue[0]['arrival']
+            process_chart += [idle_cpu]
+
+            curr_time = process_queue[0]['arrival']
+
+        curr_process_idx = get_most_priority(curr_time, process_queue)
+        process = process_queue[curr_process_idx]
+
+        dispatch_latency_added = False
+        # Add dispatch latency
+        if dispatch_latency > 0 and last_process_name != process['name']:
+            dl_cpu = create_dl_process(dispatch_latency, curr_time)
+            process_chart += [dl_cpu]
+            curr_time += dispatch_latency
+            dispatch_latency_added = True
+
+        if dispatch_latency_added:
+            next_arrival_time = get_next_arrival_time(curr_time-dispatch_latency, process_queue)
+        else:
+            next_arrival_time = get_next_arrival_time(curr_time, process_queue)
+
+        while next_arrival_time != -1 and get_most_priority(next_arrival_time, process_queue) == curr_process_idx:
+            next_arrival_time = get_next_arrival_time(next_arrival_time, process_queue)
+
+        # No other high priority process to preempt current process
+        if next_arrival_time == -1:
+            time_added = process['burst'] - process['time_given']
+        elif next_arrival_time > curr_time + process['burst'] - process['time_given']:
+            time_added = process['burst'] - process['time_given']
+        else:
+            time_added = next_arrival_time - curr_time
+
+        # To handle cases with odd behaviour due to dispatch_latency
+        # That is, by the time a process is dispatched, a new process arrives with shorter remaining burst
+        if time_added < 0:
+            time_added = 0
+
+        # Handle aging
+        # Find candidates which might preempt current process before curr_time + time_added
+        aging_disrupt_idx, aging_disrupt_time = get_aging_process(curr_process_idx, curr_time, time_added, increment_after_time, process_queue, aging_wait_time)
+
+        # Found a candidate
+        if aging_disrupt_idx != -1:
+            time_added = aging_disrupt_time
+
+        process['time_given'] += time_added
+
+        if process['last_time'] == 0:
+            process['start_time'] = curr_time
+            process['resp_time'] = curr_time - process['arrival']
+            process['wait_time'] += curr_time - process['arrival']
+        else:
+            process['wait_time'] += curr_time - process['last_time']
+
+        # Add process segment to gantt chart
+        chart_details = {}
+        chart_details['name'] = process['name']
+        chart_details['start'] = curr_time
+        chart_details['end'] = curr_time+time_added
+        process_chart += [chart_details]
+        last_process_name = chart_details['name']
+
+        curr_time += time_added
+        process['last_time'] = curr_time
+
+        if process['time_given'] == process['burst']: # Process has finished execution
+            process['turn_time'] = curr_time - process['arrival']
+
+            details_process[process['name']]['wait_time'] = process['wait_time']
+            details_process[process['name']]['turn_time'] = process['turn_time']
+            details_process[process['name']]['resp_time'] = process['resp_time']
+
+            total_wait_time += process['wait_time']
+            total_turn_time += process['turn_time']
+            total_resp_time += process['resp_time']
+            sum_time += process['burst']
+
+            process_queue.remove(process)
+
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(total_wait_time)/len(all_processes)
+    stats['resp_time'] = float(total_resp_time)/len(all_processes)
+    stats['turn_time'] = float(total_turn_time)/len(all_processes)
+    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
+
+    return process_chart, stats, details_process, error_status
+
+def get_most_priority(curr_time, process_queue):
+    shortest_priority = -1
+    shortest_idx = -1
+
+    for idx, process in enumerate(process_queue):
+        if process['arrival'] <= curr_time and process['time_given'] != process['burst']:
+            if shortest_priority == -1 or process['priority'] < shortest_priority:
+                shortest_priority = process['priority']
+                shortest_idx = idx
+
+    return shortest_idx
+
+def get_aging_process(curr_process_idx, curr_time, time_added, increment_after_time, process_queue, aging_wait_time):
+    aging_disrupt_idx = -1
+    aging_disrupt_time = -1
+
+    if process_queue[curr_process_idx]['priority'] == 0:
+        return aging_disrupt_idx, aging_disrupt_time
+
+    for idx, process in enumerate(process_queue):
+        if idx == curr_process_idx:
+            continue
+        if process['arrival'] >= curr_time + time_added:
+            continue
+
+        wait_time = curr_time + time_added - process['arrival']
+        aging_wait_time[process['name']] += wait_time
+
+        # Time needed to get this process's priority higher than currently executing process
+        time_needed = (process['priority'] - (process_queue[curr_process_idx]['priority'] - 1)) * increment_after_time
+
+        if aging_wait_time[process['name']] >= time_needed:
+            aging_disrupt_idx = idx
+            aging_disrupt_time = time_needed
+
+            aging_wait_time[process['name']] -= time_needed
+            process['priority'] -= time_needed/increment_after_time
+
+            return aging_disrupt_idx, aging_disrupt_time
+        else:
+            process['priority'] -= aging_wait_time[process['name']]/increment_after_time
+            aging_wait_time[process['name']] %= increment_after_time
+
+    return aging_disrupt_idx, aging_disrupt_time
+
+def priority_preemptive_old(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
     # For bad input handling
     error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, increment_after_time, -1, 3, -1, -1, -1)
     if(error):

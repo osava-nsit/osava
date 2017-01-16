@@ -877,16 +877,19 @@ class CPUOutputScreen(Screen):
 
             # Draw the gantt chart rectangles and add time labels
             for process in self.cpu_schedule:
-                label = Label(text=process['name'], size_hint_x=None, width=inc*(process['end']-process['start']))
-                gantt.add_widget(label)
+                if process['end'] > process['start']:
+                    label = Label(text=process['name'], size_hint_x=None, width=inc*(process['end']-process['start']))
+                    gantt.add_widget(label)
 
-                t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
-                t_label.text_size = t_label.size
-                time.add_widget(t_label)
+                    t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
+                    t_label.text_size = t_label.size
+                    time.add_widget(t_label)
 
-                Color(self.colors[process['name']][0], self.colors[process['name']][1], self.colors[process['name']][2], 0.4, mode='rgba')
-                Rectangle(pos=(pos_x, gantt.pos[1]+margin_bottom), size=(inc*(process['end']-process['start']), gantt.size[1]/2))
-                pos_x += (inc*(process['end']-process['start']))
+                    Color(self.colors[process['name']][0], self.colors[process['name']][1], self.colors[process['name']][2], 0.4, mode='rgba')
+                    Rectangle(pos=(pos_x, gantt.pos[1]+margin_bottom), size=(inc*(process['end']-process['start']), gantt.size[1]/2))
+                    pos_x += (inc*(process['end']-process['start']))
+                else: # Odd behaviour due to dispatch_latency
+                    pass
 
             # Add time label for the end time of last process
             process = self.cpu_schedule[-1]
