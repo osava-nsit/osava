@@ -969,9 +969,14 @@ def priority_preemptive(data, increment_after_time=4, upper_limit_priority=0, di
 
         # Found a candidate
         if aging_disrupt_idx != -1:
-            time_added = aging_disrupt_time
+            # To prevent time_given from exceeding burst_time
+            if aging_disrupt_time < time_added:
+                time_added = aging_disrupt_time
 
         process['time_given'] += time_added
+
+        # print "aging_disrupt_idx: {}, aging_disrupt_time: {}".format(aging_disrupt_idx, aging_disrupt_time)
+        # print "time_added: {}, {}['time_given']: {}".format(time_added, process['name'], process['time_given'])
 
         if process['last_time'] == 0:
             process['start_time'] = curr_time
