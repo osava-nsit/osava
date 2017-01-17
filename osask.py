@@ -1928,7 +1928,7 @@ class MemoryOutputScreen(Screen):
 
     # Margins for memory chart output
     margin_left = kivy.metrics.dp(125)
-    margin_bottom = kivy.metrics.dp(255)
+    margin_bottom = kivy.metrics.dp(175)
 
     # Increment in width per unit size
     inc = 0
@@ -2017,7 +2017,7 @@ class MemoryOutputScreen(Screen):
                 grid.add_widget(status_box)
                 grid.add_widget(wait_to_memory_box)
                 # TODO: Better tracking of total height
-                start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(330))
+                start_height = self.get_start_height(idx, len(self.memory_chart), kivy.metrics.dp(280))
                 self.draw_memory_state(mem_box, size_box, start_height, temp_memory)
                 self.draw_wait_queue(wait_box, status_box, wait_to_memory_box, start_height, temp_memory)
 
