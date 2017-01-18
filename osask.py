@@ -2954,9 +2954,9 @@ sm.add_widget(PageOutputScreen(name='page_output'))
 sm.add_widget(DiskInputScreen(name='disk_form'))
 sm.add_widget(DiskOutputScreen(name='disk_output'))
 
-class OSASK(App):
+class OSAVA(App):
     def build(self):
         return sm
 
 if __name__ == '__main__':
-    OSASK().run()
+    OSAVA().run()
