@@ -243,15 +243,14 @@ def display_error(grid, error, box_height='400dp'):
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
-    ribbon_added = False
-    def load_ribbon(self, *args):
-        title = self.manager.get_screen('menu').title
-        if not self.ribbon_added:
-            with title.canvas:
-                Color(0.071, 0.106, 0.314, 0.001, mode='rgba')
-                Rectangle(pos=(0,Window.height-kivy.metrics.dp(40)), size=(Window.width,kivy.metrics.dp(40)))
-                self.ribbon_added = True
-        # title.add_widget(Label(text='OS - Algo Visualization App'))
+    about_visible = False
+    def toggle_about_text(self, *args):
+        if self.about_visible:
+            self.about_label.text = ""
+            self.about_visible = False
+        else:
+            self.about_label.text = 'Developers: Udit Arora, Namrata Mukhija, Priyanka, Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
+            self.about_visible = True
 
 # Input Screen for CPU Scheduling Algorithms with partial scrolling
 class CPUInputScreen(Screen):

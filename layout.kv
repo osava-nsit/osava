@@ -31,7 +31,6 @@
 <MainMenuScreen>:
     title: title
     about_label: about_label
-    on_enter: root.load_ribbon()
     FloatLayout:
         canvas:
             Color:
@@ -97,7 +96,7 @@
             pos_hint: {'x': 0.4, 'y': 0.12}
             text: 'About'
             on_press:
-                root.about_label.text = 'Developers: Udit Arora, Namrata Mukhija, Priyanka, Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
+                root.toggle_about_text()
         Label:
             id: about_label
             text: ''
