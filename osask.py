@@ -90,7 +90,7 @@ def cpu_on_aging(instance, value):
         if DEBUG_MODE:
             value = 4
         else:
-            value = -1
+            value = 1000000000000000
     data_cpu['aging'] = int(value)
 def cpu_on_num_queues(instance, value):
     if value == '':
@@ -457,10 +457,10 @@ class CPUInputScreen(Screen):
         # If Priority scheduling selected
         elif self.cpu_type == 4 or self.cpu_type == 5:
             box = BoxLayout(orientation='horizontal', padding=(kivy.metrics.dp(25),0), size_hint_y=None, height=form_row_height)
-            inp = TextInput(id='aging', size_hint_x=0.25)
+            inp = TextInput(id='aging', size_hint_x=0.5)
             inp.bind(text=cpu_on_aging)
             # inp.font_size = inp.size[1]
-            label = Label(text='Aging (Promote priority by 1 unit each time after waiting (ms)):', size_hint_x=0.75, halign='left', padding=(kivy.metrics.dp(10),0))
+            label = Label(text='Aging - Promote priority after (ms):', size_hint_x=0.5, halign='center', padding=(kivy.metrics.dp(10),0))
             label.bind(size=label.setter('text_size'))
             box.add_widget(label)
             box.add_widget(inp)
@@ -588,7 +588,7 @@ class CPUInputScreen(Screen):
 
             # Descriptive features for assigning a queue to every process
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            label = Label(text='Enter queues assigned:')
+            label = Label(text='Queue assigned:')
             box.add_widget(label)
             grid_layout.add_widget(box)
             self.multilevel_input_widgets.append(box)
@@ -614,6 +614,13 @@ class CPUInputScreen(Screen):
         elif self.cpu_type == 8:
             # Iniatilize queue algo data_cpu dictionary lists
             data_cpu['queue_quantum'] = [0] * (data_cpu['num_queues']-1)
+
+            # Descriptive features for assigning a queue to every process
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+            label = Label(text='Queue assigned:')
+            box.add_widget(label)
+            grid_layout.add_widget(box)
+            self.multilevel_input_widgets.append(box)
 
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             label = Label(text='Queue number')
@@ -1394,7 +1401,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
         grid.bind(minimum_height=grid.setter('height'))
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
-        box.add_widget(Label(text="Banker's Algorithm: When a process requests a set of resources,\nthe system must determine whether granting the request will keep the system in a safe state."))
+        box.add_widget(Label(text="Banker's Algorithm: When a process requests a set of resources, the system must\ndetermine whether granting the request will keep the system in a safe state."))
         grid.add_widget(box)
 
         # Check if the request can be granted or not
@@ -1757,7 +1764,7 @@ class DeadlockDetectionOutputScreen(Screen):
                 grid.add_widget(box)
             else:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='Deadlock Detected. Deadlocked processes: '))
+                box.add_widget(Label(text='Deadlock detected. Deadlocked processes: '))
                 grid.add_widget(box)
                 processes_string = ''
                 for j in range(data_dd['num_processes']):
@@ -2042,7 +2049,7 @@ class MemoryOutputScreen(Screen):
         self.inc = Window.width/(int(data_mem['mem_size'])*1.5)
 
         # Add description labels
-        label = Label(text='Memory State: ', size_hint_x=None, width=self.margin_left)
+        label = Label(text='Memory state: ', size_hint_x=None, width=self.margin_left)
         mem_box.add_widget(label)
         s_label = Label(text='Size: ', size_hint_x=None, width=self.margin_left, valign='top', halign='center')
         s_label.text_size = s_label.size
@@ -2265,7 +2272,7 @@ class PageInputScreen(Screen):
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10), 0), size_hint_x=0.6)
         
         # Add label for input
-        label = Label(text='Reference String:', size_hint_x=0.4, halign='left')
+        label = Label(text='Reference string:', size_hint_x=0.4, halign='left')
         label.bind(size=label.setter('text_size'))
         box.add_widget(label)
 
@@ -2286,7 +2293,7 @@ class PageInputScreen(Screen):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10), 0), size_hint_x=0.6)
         
             # Add label for input
-            label = Label(text='Modify Bit String:', size_hint_x=0.4, halign='left')
+            label = Label(text='Modify bit string:', size_hint_x=0.4, halign='left')
             label.bind(size=label.setter('text_size'))
             box.add_widget(label)
 
@@ -2468,7 +2475,7 @@ class PageOutputScreen(Screen):
         mem_label = Label(text='', size_hint_x=None, width=self.margin_left - kivy.metrics.dp(25), valign='middle', halign='center')
         mem_label.text_size = mem_label.size
         mem_box.add_widget(mem_label)
-        mem_label = Label(text='Memory State: ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(35), valign='middle', halign='left')
+        mem_label = Label(text='Memory state: ', size_hint_x=None, width=self.margin_left + kivy.metrics.dp(35), valign='middle', halign='left')
         mem_label.text_size = mem_label.size
         mem_box.add_widget(mem_label)
 
@@ -2488,7 +2495,7 @@ class PageOutputScreen(Screen):
         page_f_label.text_size = page_f_label.size
         page_fault_box.add_widget(page_f_label)
 
-        page_f_label = Label(text='Page Fault: ', size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
+        page_f_label = Label(text='Page fault: ', size_hint_x=None, width=self.margin_left, valign='middle', halign='center')
         page_f_label.text_size = page_f_label.size
         page_fault_box.add_widget(page_f_label)
 
@@ -2608,7 +2615,7 @@ class DiskInputScreen(Screen):
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10),0), size_hint_x=0.7)
 
         # Add labels for input
-        label = Label(text='Disk queue (starts from 0):', size_hint_x=0.5)
+        label = Label(text='Disk queue:', size_hint_x=0.5)
         label.bind(size=label.setter('text_size'))
         box.add_widget(label)
 
@@ -2804,10 +2811,10 @@ class DiskOutputScreen(Screen):
             cylinder_label = Label(text=str(cylinder), size_hint_x=None, width=width, halign='right', font_size='12sp')
             
             # Alternate valign for better visibility
-            if (i%2):
-                cylinder_label.valign = 'top'
-            else:
-                cylinder_label.valign = 'bottom'
+            # if (i%2):
+            #     cylinder_label.valign = 'top'
+            # else:
+            #     cylinder_label.valign = 'bottom'
 
             cylinder_label.text_size = (None, cylinder_label.height)
             cylinder_label.texture_update()
@@ -2866,7 +2873,7 @@ class DiskOutputScreen(Screen):
         m4 = 0
 
         # Length of the arrow head on each side
-        len_head = kivy.metrics.dp(13)
+        len_head = kivy.metrics.dp(8)
 
         # Angle of the arrow head from main line on each side
         arrow_angle = 45
@@ -2926,7 +2933,8 @@ class DiskOutputScreen(Screen):
 
         # Drawing the arrow head on each side
         with self.arrows_widget.canvas:
-            Color(0.110, 0.306, 0.643)
+            # Color(0.110, 0.306, 0.643)
+            Color(1,1,1,0.7)
             Line(points=[x2,y2,x3,y3], width=1.6)
             Line(points=[x2,y2,x4,y4], width=1.6)
 

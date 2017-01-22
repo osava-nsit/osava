@@ -144,7 +144,7 @@
                 orientation: 'horizontal'
                 size_hint_x: 0.5
                 Label:
-                    text: 'Dispatch Latency: '
+                    text: 'Dispatch latency: '
                     size_hint_x: 0.5
                     text_size: self.size
                     halign: 'left'
@@ -199,7 +199,7 @@
                     id: variant_spinner
                     text:'-'
                     size_hint_x: 0.6
-                    values: ('Preemptive', 'Non-Preemptive')
+                    values: ('Preemptive', 'Non-preemptive')
                     disabled: True
         # For adding scroll view directly from KV file (also need to call bind function)
         #ScrollView
@@ -262,9 +262,9 @@
             Label:
                 text: 'Process'
             Label:
-                text: 'Start/Resume time'
+                text: 'Start/resume time'
             Label:
-                text: 'Suspend/Termination time'
+                text: 'Suspend/termination time'
             Label:
                 text: ''
         BoxLayout:
@@ -568,7 +568,7 @@
             Label:
                 size_hint_x: 0.5
                 valign: 'middle'
-                text: 'Size of Main Memory (KB):'
+                text: 'Size of main memory (KB):'
                 text_size: self.size
             TextInput:
                 size_hint_x: 0.5
@@ -759,7 +759,7 @@
             height: '40dp'
             size_hint_x: 0.7
             Label:
-                text: 'Current Position of read/write head: '
+                text: 'Current position of read/write head: '
                 size_hint_x: 0.5
                 text_size: self.size
                 halign: 'left'
