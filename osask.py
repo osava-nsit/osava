@@ -263,11 +263,11 @@ class CPUInputScreen(Screen):
     multilevel_input_widgets = []
 
     # Update dispatch_latency and set to default value if empty
-    def update_dispatch_latency(self, *args):
-        if not self.dispatch_latency.text.isdigit():
-            data_cpu['dispatch_latency'] = -1
+    def update_dispatch_latency(self, instance, value, *args):
+        if not value.isdigit():
+            data_cpu['dispatch_latency'] = 0
         else:
-            data_cpu['dispatch_latency'] = int(self.dispatch_latency.text)
+            data_cpu['dispatch_latency'] = int(value)
 
     # Called when the number of processes input is changed
     # (Wrapper function to allow for condition checking if required)
@@ -292,8 +292,8 @@ class CPUInputScreen(Screen):
         self.num_processes.bind(text=self.update_form)
 
     # Binder function for dispatch latency input
-    def bind_dispatch_latency(self, *args):
-        self.dispatch_latency.bind(text=self.update_dispatch_latency)
+    # def bind_dispatch_latency(self, *args):
+    #     self.dispatch_latency.bind(text=self.update_dispatch_latency)
 
     # Binder function for algorithm type selection from Spinner (Dropdown)
     def bind_spinners(self, *args):
@@ -303,7 +303,7 @@ class CPUInputScreen(Screen):
     # Wrapper function that calls binder functions for the required widgets
     def bind_widgets(self, *args):
         self.bind_num_processes()
-        self.bind_dispatch_latency()
+        # self.bind_dispatch_latency()
         self.bind_spinners()
 
     # Call set_cpu_type method with appropriate index of scheduling algorithm
@@ -384,10 +384,10 @@ class CPUInputScreen(Screen):
             self.visualize_button.on_release = self.switch_to_cpu_output
 
         # Update dispatch_latency and set to default value if empty
-        if (self.dispatch_latency.text == ""):
-            data_cpu['dispatch_latency'] = 0
-        else:
-            data_cpu['dispatch_latency'] = int(self.dispatch_latency.text)
+        # if (self.dispatch_latency.text == ""):
+        #     data_cpu['dispatch_latency'] = 0
+        # else:
+        #     data_cpu['dispatch_latency'] = int(self.dispatch_latency.text)
 
         layout = GridLayout(cols=1, spacing=kivy.metrics.dp(5), size_hint_y=None)
         # Make sure the height is such that there is something to scroll.
@@ -496,6 +496,22 @@ class CPUInputScreen(Screen):
         #     button_box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
         #     button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
         #     layout.add_widget(button_box)
+
+        if self.cpu_type != 7 and self.cpu_type != 8:
+            # Add dispatch latency input
+            parent_box = BoxLayout(size_hint_y=None, height='60dp')
+            box = BoxLayout(orientation='horizontal', size_hint_x=0.5, size_hint_y=None, height='40dp', padding=(kivy.metrics.dp(10), kivy.metrics.dp(5)))
+            label = Label(text='Dispatch latency:', size_hint_x=0.5, halign='left', valign='middle')
+            label.bind(size=label.setter('text_size'))
+            inp = TextInput(size_hint_x=0.5)
+            inp.bind(text=self.update_dispatch_latency)
+            box.add_widget(label)
+            box.add_widget(inp)
+
+            parent_box.add_widget(box)
+            parent_box.add_widget(BoxLayout(size_hint_x=0.5))
+
+            layout.add_widget(parent_box)
 
         # Add ScrollView
         sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
@@ -650,6 +666,22 @@ class CPUInputScreen(Screen):
         # button_box.add_widget(Button(text='Visualize', on_release=self.switch_to_cpu_output))
         # grid_layout.add_widget(button_box)
         # self.multilevel_input_widgets.append(button_box)
+
+        # Add dispatch latency input
+        parent_box = BoxLayout(size_hint_y=None, height='60dp')
+        box = BoxLayout(orientation='horizontal', size_hint_x=0.5, size_hint_y=None, height='40dp', padding=(kivy.metrics.dp(10), kivy.metrics.dp(5)))
+        label = Label(text='Dispatch latency:', size_hint_x=0.5, halign='left', valign='middle')
+        label.bind(size=label.setter('text_size'))
+        inp = TextInput(size_hint_x=0.5)
+        inp.bind(text=self.update_dispatch_latency)
+        box.add_widget(label)
+        box.add_widget(inp)
+
+        parent_box.add_widget(box)
+        parent_box.add_widget(BoxLayout(size_hint_x=0.5))
+
+        grid_layout.add_widget(parent_box)
+        self.multilevel_input_widgets.append(parent_box)
         
     def switch_to_cpu_output(self, *args):
         self.manager.transition.direction = 'left'

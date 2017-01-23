@@ -107,10 +107,9 @@
     on_pre_enter: root.bind_widgets()
     layout_form: layout_form
     num_processes: num_processes
-    dispatch_latency: dispatch_latency
+    #dispatch_latency: dispatch_latency
     algo_spinner: algo_spinner
     variant_spinner: variant_spinner
-    #queue_spinner: queue_spinner
     visualize_button: visualize_button
     BoxLayout:
         canvas:
@@ -141,18 +140,21 @@
                     multiline: 'False'
                     size_hint_x: 0.5
             BoxLayout:
-                orientation: 'horizontal'
                 size_hint_x: 0.5
-                Label:
-                    text: 'Dispatch latency: '
-                    size_hint_x: 0.5
-                    text_size: self.size
-                    halign: 'left'
-                    valign: 'middle'
-                TextInput:
-                    id: dispatch_latency
-                    multiline: 'False'
-                    size_hint_x: 0.5
+            # Uncomment for static dispatch latency input
+            #BoxLayout:
+            #    orientation: 'horizontal'
+            #    size_hint_x: 0.5
+            #    Label:
+            #        text: 'Dispatch latency: '
+            #        size_hint_x: 0.5
+            #        text_size: self.size
+            #        halign: 'left'
+            #        valign: 'middle'
+            #    TextInput:
+            #        id: dispatch_latency
+            #        multiline: 'False'
+            #        size_hint_x: 0.5
         BoxLayout:
             size_hint_y: None
             height: '40dp'
