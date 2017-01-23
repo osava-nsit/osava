@@ -1388,10 +1388,10 @@ class DeadlockAvoidanceInputScreen(Screen):
 
 class DeadlockAvoidanceOutputScreen(Screen):
     def calculate(self, *args):
-        available = data_da['available']
-        maximum = data_da['max']
-        allocation = data_da['allocation']
-        request = data_da['request']
+        available = deepcopy(data_da['available'])
+        maximum = deepcopy(data_da['max'])
+        allocation = deepcopy(data_da['allocation'])
+        request = deepcopy(data_da['request'])
 
         layout = self.manager.get_screen('da_output').layout
         layout.clear_widgets()
