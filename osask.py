@@ -695,6 +695,7 @@ class CPUInputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
+
 # Output Screen for CPU Scheduling algorithms
 class CPUOutputScreen(Screen):
     layout = ObjectProperty(None)
@@ -937,7 +938,7 @@ class CPUOutputScreen(Screen):
 
         # Add the widget used to draw the gantt chart on the screen
         gantt.add_widget(chart_wid)
-                        
+
 # Output screen for Multilevel CPU Scheduling algorithms
 class CPUOutputScreenMultilevel(Screen):
     layout = ObjectProperty(None)
@@ -1418,6 +1419,8 @@ class DeadlockAvoidanceInputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
+
+# Output screen for Deadlock Avoidance algorithm
 class DeadlockAvoidanceOutputScreen(Screen):
     def calculate(self, *args):
         available = deepcopy(data_da['available'])
@@ -1555,6 +1558,21 @@ class DeadlockAvoidanceOutputScreen(Screen):
                             finish_text += (finish[j]+'  ')
                         box.add_widget(Label(text=finish_text))
                         grid.add_widget(box)
+
+                    # Show safe sequence
+                    grid.add_widget(BoxLayout(size_hint_y=None, height='10dp'))
+                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+
+                    safe_sequence_text = '<'
+                    for idx, process_no in enumerate(schedule):
+                        if idx > 0:
+                            safe_sequence_text += ',  P' + str(process_no+1)
+                        else:
+                            safe_sequence_text += 'P' +str(process_no+1)
+                    safe_sequence_text += '>'
+
+                    box.add_widget(Label(text='Safe sequence:  ' + safe_sequence_text))
+                    grid.add_widget(box)
                 else:
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
                     box.add_widget(Label(text='The state is unsafe and will result in a deadlock. Hence the request cannot be granted.'))
@@ -1578,6 +1596,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
     def switch_to_da_form(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'da_form'
+
 
 # Input Screen for Deadlock Detection algorithm
 class DeadlockDetectionInputScreen(Screen):
@@ -1715,7 +1734,8 @@ class DeadlockDetectionInputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'menu'
 
-# Output screen for Deadlock Detection Algorithm
+
+# Output screen for Deadlock Detection algorithm
 class DeadlockDetectionOutputScreen(Screen):
     def calculate(self, *args):
         available = data_dd['available']
@@ -1820,6 +1840,7 @@ class DeadlockDetectionOutputScreen(Screen):
     def switch_to_dd_form(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'dd_form'
+
 
 # Input screen for Contiguous Memory Allocation Strategies
 class MemoryInputScreen(Screen):
@@ -1955,6 +1976,7 @@ class MemoryInputScreen(Screen):
     def switch_to_mem_output(self, *args):
         self.manager.transition.direction = 'left'
         self.manager.current = 'mem_output'
+
 
 # Output screen for Continuous Memory Allocation Strategies
 class MemoryOutputScreen(Screen):
@@ -2201,6 +2223,7 @@ class MemoryOutputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'mem_form'
 
+
 #Input screen for Page Replacement Algorithms
 class PageInputScreen(Screen):
     strategy_type = NumericProperty(None)
@@ -2359,7 +2382,8 @@ class PageInputScreen(Screen):
     def switch_to_page_output(self, *args):
         self.manager.transition.direction = 'left'
         self.manager.current = 'page_output'
-    
+
+
 # Output screen for Page Replacement Algorithms
 class PageOutputScreen(Screen):
     
@@ -2543,6 +2567,7 @@ class PageOutputScreen(Screen):
         self.manager.transition.direction = 'right'
         self.manager.current = 'page_form'
 
+
 # Input Screen for Disk Scheduling Algorithms
 class DiskInputScreen(Screen):
     strategy_type = NumericProperty(None)
@@ -2704,6 +2729,7 @@ class DiskInputScreen(Screen):
     def switch_to_disk_output(self, *args):
         self.manager.transition.direction = 'left'
         self.manager.current = 'disk_output'
+
 
 # Output Screen for Disk Scheduling Algorithms
 class DiskOutputScreen(Screen):
@@ -2975,6 +3001,7 @@ class DiskOutputScreen(Screen):
     def switch_to_disk_form(self, *args):
         self.manager.transition.direction = 'right'
         self.manager.current = 'disk_form'
+
 
 # Create the screen manager and add all screens to it
 sm = ScreenManager()
