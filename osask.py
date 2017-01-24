@@ -501,7 +501,7 @@ class CPUInputScreen(Screen):
             # Add dispatch latency input
             parent_box = BoxLayout(size_hint_y=None, height='60dp')
             box = BoxLayout(orientation='horizontal', size_hint_x=0.5, size_hint_y=None, height='40dp', padding=(kivy.metrics.dp(10), kivy.metrics.dp(5)))
-            label = Label(text='Dispatch latency:', size_hint_x=0.5, halign='left', valign='middle')
+            label = Label(text='Dispatch latency (ms):', size_hint_x=0.5, halign='left', valign='middle')
             label.bind(size=label.setter('text_size'))
             inp = TextInput(size_hint_x=0.5)
             inp.bind(text=self.update_dispatch_latency)
@@ -670,7 +670,7 @@ class CPUInputScreen(Screen):
         # Add dispatch latency input
         parent_box = BoxLayout(size_hint_y=None, height='60dp')
         box = BoxLayout(orientation='horizontal', size_hint_x=0.5, size_hint_y=None, height='40dp', padding=(kivy.metrics.dp(10), kivy.metrics.dp(5)))
-        label = Label(text='Dispatch latency:', size_hint_x=0.5, halign='left', valign='middle')
+        label = Label(text='Dispatch latency (ms):', size_hint_x=0.5, halign='left', valign='middle')
         label.bind(size=label.setter('text_size'))
         inp = TextInput(size_hint_x=0.5)
         inp.bind(text=self.update_dispatch_latency)
@@ -1379,7 +1379,7 @@ class DeadlockAvoidanceInputScreen(Screen):
         # Add labels for resource types in request form:
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         box.add_widget(Label(text=''))
-        box.add_widget(Label(text='Process No.'))
+        box.add_widget(Label(text='Process no.'))
         for i in range(data_da['num_resource_types']):
             box.add_widget(Label(text=chr(ord('A')+i)))
         box.add_widget(Label(size_hint_x=None, width=self.margin_right))
@@ -1439,6 +1439,10 @@ class DeadlockAvoidanceOutputScreen(Screen):
         box.add_widget(Label(text="Banker's Algorithm: When a process requests a set of resources, the system must\ndetermine whether granting the request will keep the system in a safe state."))
         grid.add_widget(box)
 
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+        box.add_widget(Label(text="Resource-Request Algorithm -"))
+        grid.add_widget(box)
+
         # Check if the request can be granted or not
         grantable, message, error_status = deadlock.check_request(available, maximum, allocation, request, data_da['request_process'], data_da['num_processes'], data_da['num_resource_types'])
 
@@ -1449,7 +1453,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
             # If request is grantable, check if the state is safe or not
             if grantable:
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                box.add_widget(Label(text='If the request can be granted, the system will be in the following state -'))
+                box.add_widget(Label(text='If the request is granted, the system will be in the following state -'))
                 grid.add_widget(box)
 
                 for j in range(data_da['num_resource_types']):
@@ -1490,75 +1494,80 @@ class DeadlockAvoidanceOutputScreen(Screen):
                 work = deepcopy(available)
                 finish = ['F'] * data_da['num_processes']
 
-                if safe:
-                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text='The state is safe. Hence the request can be granted. The processes can be scheduled as follows:'))
-                    grid.add_widget(box)
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='Safety Algorithm -'))
+                grid.add_widget(box)
 
-                    # Output table labels
+                # Output table labels
+                # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='Process selected'))
+                # box.add_widget(Label(text='Need'))
+                # box.add_widget(Label(text='Allocation'))
+                box.add_widget(Label(text='Work'))
+                box.add_widget(Label(text='Finish'))
+                grid.add_widget(box)
+
+                # Display initial work vector
+                # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
+                box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
+                box.add_widget(Label(text='Initial'))
+
+                # Need for current process
+                # box.add_widget(Label(text='-'))
+                # Allocation for current process
+                # box.add_widget(Label(text='-'))
+
+                work_text = '[  '
+                for i in range(len(work)):
+                    work_text += (str(work[i])+'  ')
+                work_text += ']'
+                box.add_widget(Label(text=work_text))
+
+                finish_text = '[  '
+                for i in range(len(finish)):
+                    finish_text += (finish[i]+'  ')
+                finish_text += ']'
+                box.add_widget(Label(text=finish_text))
+                grid.add_widget(box)
+
+                # Display step by step changes in work vector according to process scheduled
+                for i in range(len(schedule)):
+                    for j in range(len(work)):
+                        work[j] += allocation[schedule[i]][j]
+                    finish[schedule[i]] = 'T'
                     # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text='Process'))
-                    box.add_widget(Label(text='Need'))
-                    box.add_widget(Label(text='Allocation'))
-                    box.add_widget(Label(text='Work'))
-                    box.add_widget(Label(text='Finish'))
-                    grid.add_widget(box)
-
-                    # Display initial work vector
-                    # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
-                    box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text='Initial'))
+                    box.add_widget(Label(text='P'+str(schedule[i]+1)))
 
                     # Need for current process
-                    box.add_widget(Label(text='-'))
-                    # Allocation for current process
-                    box.add_widget(Label(text='-'))
+                    # need_text = ''
+                    # for j in range(len(need[i])):
+                    #     need_text += (str(need[i][j])+'  ')
+                    # box.add_widget(Label(text=need_text))
 
-                    work_text = ''
-                    for i in range(len(work)):
-                        work_text += (str(work[i])+'  ')
+                    # # Allocation for current process
+                    # allocation_text = ''
+                    # for j in range(len(allocation[i])):
+                    #     allocation_text += (str(allocation[i][j])+'  ')
+                    # box.add_widget(Label(text=allocation_text))
+
+                    # Work vector after current process is allocated resources
+                    work_text = '[  '
+                    for j in range(len(work)):
+                        work_text += (str(work[j])+'  ')
+                    work_text += ']'
                     box.add_widget(Label(text=work_text))
-                    finish_text = ''
-                    for i in range(len(finish)):
-                        finish_text += (finish[i]+'  ')
+
+                    # Finish vector after current process is allocated resources
+                    finish_text = '[  '
+                    for j in range(len(finish)):
+                        finish_text += (finish[j]+'  ')
+                    finish_text += ']'
                     box.add_widget(Label(text=finish_text))
                     grid.add_widget(box)
 
-                    # Display step by step changes in work vector according to process scheduled
-                    for i in range(len(schedule)):
-                        for j in range(len(work)):
-                            work[j] += allocation[schedule[i]][j]
-                        finish[schedule[i]] = 'T'
-                        # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
-                        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                        box.add_widget(Label(text='P'+str(schedule[i]+1)))
-
-                        # Need for current process
-                        need_text = ''
-                        for j in range(len(need[i])):
-                            need_text += (str(need[i][j])+'  ')
-                        box.add_widget(Label(text=need_text))
-
-                        # Allocation for current process
-                        allocation_text = ''
-                        for j in range(len(allocation[i])):
-                            allocation_text += (str(allocation[i][j])+'  ')
-                        box.add_widget(Label(text=allocation_text))
-
-                        # Work vector after current process is allocated resources
-                        work_text = ''
-                        for j in range(len(work)):
-                            work_text += (str(work[j])+'  ')
-                        box.add_widget(Label(text=work_text))
-
-                        # Finish vector after current process is allocated resources
-                        finish_text = ''
-                        for j in range(len(finish)):
-                            finish_text += (finish[j]+'  ')
-                        box.add_widget(Label(text=finish_text))
-                        grid.add_widget(box)
-
+                if safe:
                     # Show safe sequence
                     grid.add_widget(BoxLayout(size_hint_y=None, height='10dp'))
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
@@ -1573,9 +1582,13 @@ class DeadlockAvoidanceOutputScreen(Screen):
 
                     box.add_widget(Label(text='Safe sequence:  ' + safe_sequence_text))
                     grid.add_widget(box)
+
+                    box = BoxLayout(size_hint_y=None, height=form_row_height)
+                    box.add_widget(Label(text="Safe state: Request should be granted."))
+                    grid.add_widget(box)
                 else:
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text='The state is unsafe and will result in a deadlock. Hence the request cannot be granted.'))
+                    box.add_widget(Label(text='Unsasfe state: Request should not be granted.'))
                     grid.add_widget(box)
             # Request not grantable
             else:
@@ -1780,13 +1793,16 @@ class DeadlockDetectionOutputScreen(Screen):
             # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
             box.add_widget(Label(text='Initial'))
-            work_text = ''
+            work_text = '[  '
             for i in range(len(work)):
-                work_text += (str(work[i])+'   ')
+                work_text += (str(work[i])+'  ')
+            work_text += ']'
             box.add_widget(Label(text=work_text))
-            finish_text = ''
+
+            finish_text = '[  '
             for i in range(len(finish)):
-                finish_text += (finish[i]+'   ')
+                finish_text += (finish[i]+'  ')
+            finish_text += ']'
             box.add_widget(Label(text=finish_text))
             grid.add_widget(box)
 
@@ -1799,13 +1815,17 @@ class DeadlockDetectionOutputScreen(Screen):
                 # box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))
                 box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
                 box.add_widget(Label(text='P'+str(schedule[i]+1)))
-                work_text = ''
+
+                work_text = '[  '
                 for j in range(len(work)):
-                    work_text += (str(work[j])+'   ')
+                    work_text += (str(work[j])+'  ')
+                work_text += ']'
                 box.add_widget(Label(text=work_text))
-                finish_text = ''
+
+                finish_text = '[  '
                 for j in range(len(finish)):
-                    finish_text += (finish[j]+'   ')
+                    finish_text += (finish[j]+'  ')
+                finish_text += ']'
                 box.add_widget(Label(text=finish_text))
                 grid.add_widget(box)
 
