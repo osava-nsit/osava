@@ -1340,8 +1340,236 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
-    
-def multilevel_feedback(data, num_queues, quantum_queue, dispatch_latency = 0):
+
+def add_processes_to_list_multilevel_feedback(processes):
+    process_list = []
+    for orig_process in processes:
+        process = deepcopy(orig_process)
+        process['time_given'] = 0
+        process['last_time'] = 0
+        process['wait_time'] = 0
+        process['turn_time'] = 0
+        process['resp_time'] = 0
+        process['queue_num'] = 0
+        process_list.append(process)
+
+    return process_list
+
+def get_highest_queue(curr_time, process_queue):
+    shortest_queue = -1
+    shortest_idx = -1
+
+    for idx, process in enumerate(process_queue):
+        if process['arrival'] <= curr_time and process['time_given'] != process['burst']:
+            if shortest_queue == -1 or process['queue_num'] < shortest_queue:
+                shortest_queue = process['queue_num']
+                shortest_idx = idx
+
+    return shortest_idx
+
+def multilevel_feedback(data, num_queues, queue_quantum, dispatch_latency=0):
+    # For bad input handling
+    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 6, num_queues, queue_quantum, -1)
+    if(error):
+        return -1, -1, -1, error_status
+
+    all_processes = sorted(data, key=itemgetter('arrival'))
+    curr_time = 0
+    total_wait_time = 0
+    total_resp_time = 0
+    total_turn_time = 0
+    sum_time = 0
+
+    # The list of process objects in the gantt chart
+    process_chart = []
+
+    # Process wise details
+    details_process = {}
+    for process in all_processes:
+        details_process[process['name']] = {}
+        details_process[process['name']]['arrival'] = process['arrival']
+        details_process[process['name']]['burst'] = process['burst']
+        details_process[process['name']]['wait_time'] = 0
+        details_process[process['name']]['turn_time'] = 0
+        details_process[process['name']]['resp_time'] = 0
+
+    process_queue = add_processes_to_list_multilevel_feedback(all_processes)
+
+    robin_idx = 0
+    last_process_name = ''
+
+    while process_queue:
+        # Not expected to happen, added for safety
+        if robin_idx < 0:
+            robin_idx = 0
+
+        process = process_queue[robin_idx]
+
+        if curr_time < process['arrival']:
+            # Add idle process
+            idle_cpu = dict()
+            idle_cpu['name'] = 'Idle'
+            idle_cpu['start'] = curr_time
+            idle_cpu['end'] = process['arrival']
+            process_chart += [idle_cpu]
+
+            curr_time = process['arrival']
+
+        dispatch_latency_added = False
+        # Add dispatch latency
+        if dispatch_latency > 0 and last_process_name != process['name']:
+            dl_cpu = create_dl_process(dispatch_latency, curr_time)
+            process_chart += [dl_cpu]
+            curr_time += dispatch_latency
+            dispatch_latency_added = True
+
+        if dispatch_latency_added:
+            next_arrival_time = get_next_arrival_time(curr_time-dispatch_latency, process_queue)
+        else:
+            next_arrival_time = get_next_arrival_time(curr_time, process_queue)
+
+        while next_arrival_time != -1 and get_highest_queue(next_arrival_time, process_queue) == robin_idx:
+            next_arrival_time = get_next_arrival_time(next_arrival_time, process_queue)
+
+        # No other process to preempt current process
+        if next_arrival_time == -1:
+            time_added = process['burst'] - process['time_given']
+        elif next_arrival_time > curr_time + process['burst'] - process['time_given']:
+            time_added = process['burst'] - process['time_given']
+        # Preemption
+        else:
+            time_added = next_arrival_time - curr_time
+
+        # Adjust for queue time quantum
+        if process['queue_num'] == len(queue_quantum):
+            # Pseudo infinite quantum to simulate FCFS
+            # TODO: Better implementation
+            quantum = 1000000000000000000
+        else:
+            quantum = queue_quantum[process['queue_num']]
+        if time_added > quantum:
+            time_added = quantum
+
+        # To handle cases with odd behaviour due to dispatch_latency
+        # That is, by the time a process is dispatched, a new process arrives with shorter remaining burst
+        if time_added < 0:
+            time_added = 0
+
+        process['time_given'] += time_added
+
+        if process['last_time'] == 0:
+            process['start_time'] = curr_time
+            process['resp_time'] = curr_time - process['arrival']
+            process['wait_time'] += curr_time - process['arrival']
+        else:
+            process['wait_time'] += curr_time - process['last_time']
+
+        # Add process segment to gantt chart
+        chart_details = {}
+        chart_details['name'] = process['name']
+        chart_details['start'] = curr_time
+        chart_details['end'] = curr_time + time_added
+        chart_details['queue_name'] = process['queue_num'] + 1
+        if process['time_given'] == process['burst']:
+            # Next queue == 0 marks process completion
+            chart_details['next_queue'] = 0
+        else:
+            chart_details['next_queue'] = process['queue_num'] + 1
+
+        process_chart += [chart_details]
+        last_process_name = chart_details['name']
+
+        prev_queue_num = process['queue_num']
+        # If the process wasn't picked from the last (fcfs) queue
+        if process['queue_num'] < len(queue_quantum):
+            process['queue_num'] += 1
+            # print "Moving process {} to Q{}".format(process['name'], process['queue_num']+1)
+
+        curr_time += time_added
+        process['last_time'] = curr_time
+
+        if process['time_given'] == process['burst']: # Process has finished execution
+            process['turn_time'] = curr_time - process['arrival']
+
+            details_process[process['name']]['wait_time'] = process['wait_time']
+            details_process[process['name']]['turn_time'] = process['turn_time']
+            details_process[process['name']]['resp_time'] = process['resp_time']
+
+            total_wait_time += process['wait_time']
+            total_turn_time += process['turn_time']
+            total_resp_time += process['resp_time']
+            sum_time += process['burst']
+
+            process_queue.remove(process)
+
+            force_dispatch_flag = True
+            # Happens when last idx process was completed and removed from process_queue
+            if robin_idx >= len(process_queue):
+                robin_idx = len(process_queue) - 1
+
+            if len(process_queue) > 0:
+                robin_idx = mf_get_next_process(robin_idx, curr_time, process_queue, prev_queue_num, queue_quantum)
+        else:
+            robin_idx = mf_get_next_process(robin_idx, curr_time, process_queue, prev_queue_num, queue_quantum)
+            force_dispatch_flag = False
+
+    stats = {}
+    stats['sum_time'] = sum_time
+    stats['wait_time'] = float(total_wait_time)/len(all_processes)
+    stats['resp_time'] = float(total_resp_time)/len(all_processes)
+    stats['turn_time'] = float(total_turn_time)/len(all_processes)
+    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
+
+    return process_chart, stats, details_process, error_status
+
+# Returns the index of the next process to be scheduled
+# If no process is found to be scheduled, we've reached the last queue, hence directly apply FCFS
+def mf_get_next_process(robin_idx, curr_time, process_queue, prev_queue_num, queue_quantum):
+    next_idx = (robin_idx + 1) % len(process_queue)
+
+    # Try to find a process with same queue number
+    same_idx = -1
+    while next_idx != robin_idx:
+        if process_queue[next_idx]['arrival'] > curr_time or process_queue[next_idx]['queue_num'] > prev_queue_num:
+            next_idx = (next_idx + 1) % len(process_queue)
+            continue
+
+        # Found a higher priority process (can only happen in case a new process enters the first queue
+        # while the previous process executed)
+        if process_queue[next_idx]['queue_num'] < prev_queue_num:
+            return next_idx
+
+        # Found a same priority process
+        if same_idx == -1 and process_queue[next_idx]['queue_num'] == prev_queue_num:
+            same_idx = next_idx
+
+        next_idx = (next_idx + 1) % len(process_queue)
+
+    # Found process in same queue
+    if same_idx != -1:
+        return same_idx
+    else:
+        highest_queue_idx = get_highest_queue(curr_time, process_queue)
+        if process_queue[highest_queue_idx]['queue_num'] == len(queue_quantum):
+            # FCFS: Start with process that arrived first
+            # print "Calling get_min_arrival_process at curr_time: {} for prev_queue_num: {}".format(curr_time, prev_queue_num)
+            return get_min_arrival_process(process_queue)
+        else:
+            return highest_queue_idx
+
+def get_min_arrival_process(process_queue):
+    min_arrival_time = -1
+    min_arrival_idx = -1
+
+    for idx,process in enumerate(process_queue):
+        if min_arrival_time == -1 or process['arrival'] < min_arrival_time:
+            min_arrival_time = process['arrival']
+            min_arrival_idx = idx
+
+    return min_arrival_idx
+
+def multilevel_feedback_old(data, num_queues, quantum_queue, dispatch_latency = 0):
     # For bad input handling
     error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 6, num_queues, quantum_queue, -1)
     if(error):

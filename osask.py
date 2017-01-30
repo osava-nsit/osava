@@ -1166,16 +1166,19 @@ class CPUOutputScreenMultilevel(Screen):
 
             # Draw the gantt chart rectangles and add time labels
             for process in self.cpu_schedule:
-                label = Label(text=process['name'], size_hint_x=None, width=inc*(process['end']-process['start']))
-                gantt.add_widget(label)
+                if process['end'] > process['start']:
+                    label = Label(text=process['name'], size_hint_x=None, width=inc*(process['end']-process['start']))
+                    gantt.add_widget(label)
 
-                t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
-                t_label.text_size = t_label.size
-                time.add_widget(t_label)
+                    t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
+                    t_label.text_size = t_label.size
+                    time.add_widget(t_label)
 
-                Color(self.colors[process['name']][0], self.colors[process['name']][1], self.colors[process['name']][2], 0.4, mode='rgba')
-                Rectangle(pos=(pos_x, gantt.pos[1]+margin_bottom), size=(inc*(process['end']-process['start']), gantt.size[1]/2))
-                pos_x += (inc*(process['end']-process['start']))
+                    Color(self.colors[process['name']][0], self.colors[process['name']][1], self.colors[process['name']][2], 0.4, mode='rgba')
+                    Rectangle(pos=(pos_x, gantt.pos[1]+margin_bottom), size=(inc*(process['end']-process['start']), gantt.size[1]/2))
+                    pos_x += (inc*(process['end']-process['start']))
+                else: #Odd behaviour due to dispatch latency
+                    pass
 
             # Add time label for the end time of last process
             process = self.cpu_schedule[-1]
@@ -1224,28 +1227,31 @@ class CPUOutputScreenMultilevel(Screen):
                     name = queue_schedule[i]['name']
                     start = queue_schedule[i]['start']
                     end = queue_schedule[i]['end']
-                    if queue_schedule[i]['name'] == 0:
-                        label = Label(text='-', size_hint_x=None, width=inc*(end - start))
-                        i = i+1
-                    else:
-                        j = i
-                        while (j < len(queue_schedule)):
-                            if name == queue_schedule[j]['name']:
-                                end = queue_schedule[j]['end']
-                                j = j+1
-                            else:
-                                break
-                        label = Label(text='Q' + str(name), size_hint_x=None, width=inc*(end - start))
-                        i = j
-                    gantt_queue.add_widget(label)
+                    if end > start:
+                        if queue_schedule[i]['name'] == 0:
+                            label = Label(text='-', size_hint_x=None, width=inc*(end - start))
+                            i = i+1
+                        else:
+                            j = i
+                            while (j < len(queue_schedule)):
+                                if name == queue_schedule[j]['name']:
+                                    end = queue_schedule[j]['end']
+                                    j = j+1
+                                else:
+                                    break
+                            label = Label(text='Q' + str(name), size_hint_x=None, width=inc*(end - start))
+                            i = j
+                        gantt_queue.add_widget(label)
 
-                    t_label = Label(text=str(start), size_hint_x=None, width=inc*(end - start), halign='left', valign='top')
-                    t_label.text_size = t_label.size
-                    time_queue.add_widget(t_label)
+                        t_label = Label(text=str(start), size_hint_x=None, width=inc*(end - start), halign='left', valign='top')
+                        t_label.text_size = t_label.size
+                        time_queue.add_widget(t_label)
 
-                    Color(self.colors_queue[name][0], self.colors_queue[name][1], self.colors_queue[name][2], 0.4, mode='rgba')
-                    Rectangle(pos=(pos_x, gantt_queue.pos[1]+margin_bottom), size=(inc*(end - start), gantt_queue.size[1]/2))
-                    pos_x += (inc*(end - start))
+                        Color(self.colors_queue[name][0], self.colors_queue[name][1], self.colors_queue[name][2], 0.4, mode='rgba')
+                        Rectangle(pos=(pos_x, gantt_queue.pos[1]+margin_bottom), size=(inc*(end - start), gantt_queue.size[1]/2))
+                        pos_x += (inc*(end - start))
+                    else:   # Odd behaviour due to dispatch latency
+                        i += 1
 
                 # Add time label for the end time of last process
                 queue = queue_schedule[-1]
