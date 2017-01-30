@@ -886,7 +886,7 @@ class CPUOutputScreen(Screen):
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
-        desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+        desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
         desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
@@ -1136,7 +1136,7 @@ class CPUOutputScreenMultilevel(Screen):
 
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
-        desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+        desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
         desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
@@ -2062,7 +2062,7 @@ class MemoryOutputScreen(Screen):
         else:
             algo_desc = 'In the Worst Fit Algorithm, a process is loaded in the largest hole.'
 
-        desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+        desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
         desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         grid.add_widget(box)
@@ -2483,7 +2483,7 @@ class PageOutputScreen(Screen):
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
-            desc_label = Label(text=algo_desc, width=Window.width, valign='top', halign='center')
+            desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
             desc_label.text_size = desc_label.size
             box.add_widget(desc_label)
             grid.add_widget(box)
@@ -2823,8 +2823,8 @@ class DiskOutputScreen(Screen):
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
-            desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), size_hint_x=None, width=Window.width, valign='middle', halign='center')
-            desc_label.bind(size=desc_label.setter('text_size'))
+            desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
+            desc_label.text_size = desc_label.size
 
             box.add_widget(desc_label)
             grid.add_widget(box)
