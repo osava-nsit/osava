@@ -1590,11 +1590,11 @@ class DeadlockAvoidanceOutputScreen(Screen):
                     grid.add_widget(box)
 
                     box = BoxLayout(size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text="Safe state: Request should be granted."))
+                    box.add_widget(Label(text="The resultant state is safe."))
                     grid.add_widget(box)
                 else:
                     box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-                    box.add_widget(Label(text='Unsasfe state: Request should not be granted.'))
+                    box.add_widget(Label(text='The resultant state is unsafe.'))
                     grid.add_widget(box)
             # Request not grantable
             else:
