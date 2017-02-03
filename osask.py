@@ -514,7 +514,7 @@ class CPUInputScreen(Screen):
             layout.add_widget(parent_box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(layout)
         layout_form.add_widget(sv)
 
@@ -716,17 +716,17 @@ class CPUOutputScreen(Screen):
 
     def get_description(self, *args):
         if cpu_scheduling_type == 0:
-            return 'In First Come First Served Scheduling, the processor is allocated to the process which has arrived first.\nIt is a non-preemptive algorithm.'
+            return 'In First Come First Served Scheduling, the processor is allocated to the process\nwhich has arrived first. It is a non-preemptive algorithm.'
         elif cpu_scheduling_type == 1:
-            return 'In Round Robin Scheduling, the processor is allocated to a process for a small time quantum.\nThe processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
+            return 'In Round Robin Scheduling, the processor is allocated to a process for a small\ntime quantum. The processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
         elif cpu_scheduling_type == 2:
-            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.'
+            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to\nthe process which has the shortest next CPU burst.'
         elif cpu_scheduling_type == 3:
-            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
+            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the\nprocess which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
         elif cpu_scheduling_type == 4:
-            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process\nwhich has the highest priority.'
         elif cpu_scheduling_type == 5:
-            return 'In Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+            return 'In Preemptive Priority Scheduling, the processor is allocated to the process\nwhich has the highest priority.'
         elif cpu_scheduling_type == 7:
             return 'In Multilevel Queue Scheduling, the ready queue is partitioned into several queues.\nA process is permanently assigned to a queue.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is often used for inter-queue scheduling.'
         elif cpu_scheduling_type == 8:
@@ -860,7 +860,7 @@ class CPUOutputScreen(Screen):
             self.draw_gantt()
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -887,7 +887,7 @@ class CPUOutputScreen(Screen):
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
         desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
-        desc_label.text_size = desc_label.size
+        # desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
 
@@ -898,7 +898,7 @@ class CPUOutputScreen(Screen):
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
-        margin_bottom = kivy.metrics.dp(50)
+        margin_bottom = kivy.metrics.dp(25)
 
         with chart_wid.canvas:
             # Starting position of rectangle
@@ -959,17 +959,17 @@ class CPUOutputScreenMultilevel(Screen):
 
     def get_description(self, *args):
         if cpu_scheduling_type == 0:
-            return 'In First Come First Served Scheduling, the processor is allocated to the process which has arrived first.\nIt is a non-preemptive algorithm.'
+            return 'In First Come First Served Scheduling, the processor is allocated to the process\nwhich has arrived first. It is a non-preemptive algorithm.'
         elif cpu_scheduling_type == 1:
-            return 'In Round Robin Scheduling, the processor is allocated to a process for a small time quantum.\nThe processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
+            return 'In Round Robin Scheduling, the processor is allocated to a process for a small\ntime quantum. The processes are logically arranged in a circular queue.\nIt is a preemptive algorithm.'
         elif cpu_scheduling_type == 2:
-            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.'
+            return 'In Non-Preemptive Shortest Job First Scheduling, the processor is allocated to\nthe process which has the shortest next CPU burst.'
         elif cpu_scheduling_type == 3:
-            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the process which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
+            return 'In  Preemptive Shortest Job First Scheduling, the processor is allocated to the\nprocess which has the shortest next CPU burst.\nIt is also known as shortest remaining time first scheduling.'
         elif cpu_scheduling_type == 4:
-            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+            return 'In Non-Preemptive Priority Scheduling, the processor is allocated to the process\nwhich has the highest priority.'
         elif cpu_scheduling_type == 5:
-            return 'In Preemptive Priority Scheduling, the processor is allocated to the process which has the highest priority.'
+            return 'In Preemptive Priority Scheduling, the processor is allocated to the process\nwhich has the highest priority.'
         elif cpu_scheduling_type == 7:
             return 'In Multilevel Queue Scheduling, the ready queue is partitioned into several queues.\nA process is permanently assigned to a queue.\nEach queue has its own scheduling algorithm.\nPreemptive priority scheduling is often used for inter-queue scheduling.'
         elif cpu_scheduling_type == 8:
@@ -1105,7 +1105,7 @@ class CPUOutputScreenMultilevel(Screen):
             self.draw_gantt()
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -1137,7 +1137,7 @@ class CPUOutputScreenMultilevel(Screen):
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='70dp')
         algo_desc = self.get_description()
         desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
-        desc_label.text_size = desc_label.size
+        # desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         desc.add_widget(box)
 
@@ -1148,7 +1148,7 @@ class CPUOutputScreenMultilevel(Screen):
 
         # gantt.canvas.clear()
         margin_left = kivy.metrics.dp(125)
-        margin_bottom = kivy.metrics.dp(50)
+        margin_bottom = kivy.metrics.dp(25)
 
         with chart_wid.canvas:
             # Starting position of rectangle
@@ -1405,7 +1405,7 @@ class DeadlockAvoidanceInputScreen(Screen):
         grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -1608,7 +1608,7 @@ class DeadlockAvoidanceOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -1735,7 +1735,7 @@ class DeadlockDetectionInputScreen(Screen):
             grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -1859,7 +1859,7 @@ class DeadlockDetectionOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -1985,7 +1985,7 @@ class MemoryInputScreen(Screen):
             grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -2056,14 +2056,14 @@ class MemoryOutputScreen(Screen):
         box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
         algo_desc = ''
         if data_mem['algo'] == 0:
-            algo_desc = 'In the First Fit Algorithm, a process is loaded in the first hole that is large enough for the process to be found.'
+            algo_desc = 'In the First Fit Algorithm, a process is loaded in the first hole that is\nlarge enough for the process to be found.'
         elif data_mem['algo'] == 1:
-            algo_desc = 'In the Best Fit Algorithm, a process is loaded in the smallest hole that is large enough for the process.'
+            algo_desc = 'In the Best Fit Algorithm, a process is loaded in the smallest hole that is\nlarge enough for the process.'
         else:
             algo_desc = 'In the Worst Fit Algorithm, a process is loaded in the largest hole.'
 
-        desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
-        desc_label.text_size = desc_label.size
+        desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center', size_hint_y=None, height='80dp')
+        # desc_label.text_size = desc_label.size
         box.add_widget(desc_label)
         grid.add_widget(box)
 
@@ -2113,7 +2113,7 @@ class MemoryOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -2391,7 +2391,7 @@ class PageInputScreen(Screen):
             grid.add_widget(parent_box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -2428,19 +2428,19 @@ class PageOutputScreen(Screen):
 
     def get_description(self, *args):
         if data_page['algo'] == 0:
-            return 'In First In First Out Page Replacement Algorithm, the page that was loaded earliest in the memory is replaced.'
+            return 'In First In First Out Page Replacement Algorithm, the page that\nwas loaded earliest in the memory is replaced.'
         elif data_page['algo'] == 1:
-            return 'In Optimal Page Replacement Algorithm,\nthe page that will not be referenced for the longest period of time is replaced.'
+            return 'In Optimal Page Replacement Algorithm, the page that will not\nbe referenced for the longest period of time is replaced.'
         elif data_page['algo'] == 2:
-            return 'In Least Recently Used Page Replacement Algorithm,\nthe page that has not been referenced for the longest period of time is replaced.'
+            return 'In Least Recently Used Page Replacement Algorithm, the page that\nhas not been referenced for the longest period of time is replaced.'
         elif data_page['algo'] == 3:
-            return 'In Second Chance Page Replacement Algorithm,\nthe page that was loaded earliest in the memory is replaced.\nHowever, if the reference bit of the page is set then that page is given a second chance and the next possible page is replaced.\nWhen a page is given a second chance, its reference bit is reset and its arrival time is set to the current time.'
+            return 'In Second Chance Page Replacement Algorithm, the page that was loaded earliest in the\nmemory is replaced. However, if the reference bit of the page is set then that page is\ngiven a second chance and the next possible page is replaced. When a page is given a\nsecond chance, its reference bit is reset and its arrival time is set to the current time.'
         elif data_page['algo'] == 4:
-            return 'In Enhanced Second Chance Page Replacement Algorithm,\nthe pages are divided in four classes using their reference bit and modify bit as ordered pairs.\nThe page of the lowest nonempty class which was loaded earliest in the memory is replaced.'
+            return 'In Enhanced Second Chance Page Replacement Algorithm, the pages are divided in four\nclasses using their reference bit and modify bit as ordered pairs.\nThe page of the lowest nonempty class which was loaded earliest in the memory is replaced.'
         elif data_page['algo'] == 5:
-            return 'In Least Frequently Used Page Replacement Algorithm,\nthe page that has been referenced the least number of times is replaced.'
+            return 'In Least Frequently Used Page Replacement Algorithm, the page\nthat has been referenced the least number of times is replaced.'
         elif data_page['algo'] == 6:
-            return 'In Most Frequently Used Page Replacement Algorithm,\nthe page that has been referenced the most number of times is replaced.'
+            return 'In Most Frequently Used Page Replacement Algorithm, the page\nthat has been referenced the most number of times is replaced.'
             
 
     # Generate formatted data for input to the algo
@@ -2484,7 +2484,7 @@ class PageOutputScreen(Screen):
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
             desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
-            desc_label.text_size = desc_label.size
+            # desc_label.text_size = desc_label.size
             box.add_widget(desc_label)
             grid.add_widget(box)
 
@@ -2544,7 +2544,7 @@ class PageOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp', bar_inactive_color=[0.7,0.7,0.7,0.45])
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp', bar_inactive_color=[0.7,0.7,0.7,0.45])
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -2738,7 +2738,7 @@ class DiskInputScreen(Screen):
             grid.add_widget(parent_box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         form.add_widget(sv)
 
@@ -2774,17 +2774,17 @@ class DiskOutputScreen(Screen):
 
     def get_description(self, *args):
         if data_disk['algo'] == 0:
-            return 'In First Come First Served Scheduling, the i/o requests are processed in the order in which they arrive.'
+            return 'In First Come First Served Scheduling, the i/o requests are processed\nin the order in which they arrive.'
         elif data_disk['algo'] == 1:
-            return 'In Shortest Seek Time First Scheduling, the i/o request which will need the minimum seek time is processed first.'
+            return 'In Shortest Seek Time First Scheduling, the i/o request which will need\nthe minimum seek time is processed first.'
         elif data_disk['algo'] == 2:
-            return 'In SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder.'
+            return 'In SCAN scheduling, the r/w head scans back and forth across the\ndisk servicing requests as it reaches each cylinder.'
         elif data_disk['algo'] == 3:
-            return 'In C-SCAN scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder. On reaching the end, the r/w head immediately returns to the beginning without servicing any request on the return trip.'
+            return 'In C-SCAN scheduling, the r/w head scans back and forth across the disk servicing\nrequests as it reaches each cylinder.\nOn reaching the end, the r/w head immediately returns to\nthe beginning without servicing any request on the return trip.'
         elif data_disk['algo'] == 4:
-            return 'In LOOK scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.'
+            return 'In LOOK scheduling, the r/w head scans back and forth across the disk servicing\nrequests as it reaches each cylinder moving only up to last requested cylinder\nin the given direction.'
         elif data_disk['algo'] == 5:
-            return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing requests as it reaches each cylinder moving only up to last requested cylinder in the given direction.On reaching the end, the r/w head immediately returns to the beginning, if need be, without servicing any request on the return trip.'
+            return 'In C-LOOK Scheduling, the r/w head scans back and forth across the disk servicing\nrequests as it reaches each cylinder moving only up to last requested cylinder in the\ngiven direction. On reaching the end, the r/w head immediately returns to the beginning,\nif need be, without servicing any request on the return trip.'
 
     # Generate formatted data for input to the algo
     def calculate(self, *args):
@@ -2823,8 +2823,9 @@ class DiskOutputScreen(Screen):
             # Output the algo description
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp')
             algo_desc = self.get_description()
+
             desc_label = Label(text=algo_desc, padding=(kivy.metrics.dp(20),kivy.metrics.dp(20)), width=Window.width, valign='top', halign='center')
-            desc_label.text_size = desc_label.size
+            # desc_label.text_size = desc_label.size
 
             box.add_widget(desc_label)
             grid.add_widget(box)
@@ -2849,7 +2850,7 @@ class DiskOutputScreen(Screen):
         # grid.add_widget(box)
 
         # Add ScrollView
-        sv = ScrollView(size=self.size, scroll_type=['bars'], bar_width='12dp')
+        sv = ScrollView(size=self.size, scroll_type=['bars', 'content'], bar_width='12dp')
         sv.add_widget(grid)
         layout.add_widget(sv)
 
@@ -3046,9 +3047,35 @@ sm.add_widget(PageOutputScreen(name='page_output'))
 sm.add_widget(DiskInputScreen(name='disk_form'))
 sm.add_widget(DiskOutputScreen(name='disk_output'))
 
+# Dictionary to store which screen to navigate to when back button is pressed in android
+back_screen = {
+    'menu': False,
+    'cpu_form': 'menu',
+    'cpu_output': 'cpu_form',
+    'cpu_output_multilevel': 'cpu_form',
+    'da_form': 'menu',
+    'da_output': 'da_form',
+    'dd_form': 'menu',
+    'dd_output': 'dd_form',
+    'mem_form': 'menu',
+    'mem_output': 'mem_form',
+    'page_form': 'menu',
+    'page_output': 'page_form',
+    'disk_form': 'menu',
+    'disk_output': 'disk_form'
+}
+
 class OSAVA(App):
     def build(self):
+        Window.bind(on_keyboard=self.handle_key)
         return sm
+
+    def handle_key(self, window, key, *args):
+        if key == 27: # Escape in desktop and back button in android
+            if sm.current != 'menu':
+                sm.transition.direction = 'right'
+                sm.current = back_screen[sm.current]
+                return True
 
 if __name__ == '__main__':
     OSAVA().run()

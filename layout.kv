@@ -241,25 +241,30 @@
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
-            size_hint_y: 0.3
+            size_hint_y: None
+            height: '80dp'
             orientation: 'vertical'
             id: desc
         BoxLayout:
-            size_hint_y: 0.4
+            size_hint_y: None
+            height: '100dp'
             orientation: 'horizontal'
             id: gantt
         BoxLayout:
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             orientation: 'horizontal'
             id: time
         Label:
             text: 'Timeline -'
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             #padding: 100, 0
             #text_size: self.size
             #halign: 'left'
         BoxLayout:
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             orientation: 'horizontal'
             Label:
                 text: 'Process'
@@ -298,33 +303,40 @@
     BoxLayout:
         orientation: 'vertical'
         BoxLayout:
-            size_hint_y: 0.3
+            size_hint_y: None
+            height: '80dp'
             orientation: 'vertical'
             id: desc
         BoxLayout:
-            size_hint_y: 0.35
+            size_hint_y: None
+            height: '100dp'
             orientation: 'horizontal'
             id: gantt
         BoxLayout:
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             orientation: 'horizontal'
             id: time
         BoxLayout:
-            size_hint_y: 0.35
+            size_hint_y: None
+            height: '100dp'
             orientation: 'horizontal'
             id: gantt_queue
         BoxLayout:
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             orientation: 'horizontal'
             id: time_queue
         Label:
             text: 'Timeline -'
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             #padding: 100, 0
             #text_size: self.size
             #halign: 'left'
         BoxLayout:
-            size_hint_y: 0.07
+            size_hint_y: None
+            height: '15dp'
             orientation: 'horizontal'
             Label:
                 text: 'Process'
@@ -428,7 +440,6 @@
         orientation: 'vertical'
         BoxLayout:
             orientation: 'vertical'
-            #size_hint_y: 0.9
             id: layout
         GridLayout:
             size_hint_y: None
@@ -515,19 +526,21 @@
     layout: layout
     BoxLayout:
         orientation: 'vertical'
-        id: layout
-    GridLayout:
-        size_hint_y: None
-        height: '35dp'
-        cols: 2
-        ColoredButton:
-            text: 'Back'
-            on_press:
-                root.manager.transition.direction = 'right'
-                root.manager.current = 'dd_form'
-        ColoredButton:
-            text: 'Exit'
-            on_press: app.stop()
+        BoxLayout:
+            orientation: 'vertical'
+            id: layout
+        GridLayout:
+            size_hint_y: None
+            height: '35dp'
+            cols: 2
+            ColoredButton:
+                text: 'Back'
+                on_press:
+                    root.manager.transition.direction = 'right'
+                    root.manager.current = 'dd_form'
+            ColoredButton:
+                text: 'Exit'
+                on_press: app.stop()
 
 <MemoryInputScreen>:
     on_pre_enter: root.bind_widgets()
