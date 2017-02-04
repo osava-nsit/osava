@@ -27,7 +27,7 @@ import cpu_scheduling, deadlock, memory_allocation, page_replacement, disk_sched
 Builder.load_file('layout.kv')
 
 # Global flag for debug mode
-DEBUG_MODE = True
+DEBUG_MODE = False
 
 # Global fixed height of form rows within scroll view
 form_row_height = '30dp'
@@ -2452,7 +2452,7 @@ class DiskInputScreen(Screen):
         # Make sure the height is such that there is something to scroll.
         grid.bind(minimum_height=grid.setter('height'))
 
-        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10),0), size_hint_x=0.7)
+        box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(kivy.metrics.dp(10),0), size_hint_x=0.8)
 
         # Add labels for input
         label = Label(text='Disk queue:', size_hint_x=0.5)
@@ -2467,13 +2467,13 @@ class DiskInputScreen(Screen):
         parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         parent_box.add_widget(box)
         # For occypying space on right
-        parent_box.add_widget(BoxLayout(size_hint_x=0.3))
+        parent_box.add_widget(BoxLayout(size_hint_x=0.2))
 
         grid.add_widget(parent_box)
 
         if self.algo_type !=0 and self.algo_type != 1:
             # Box for direction spinner 
-            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp', padding=(kivy.metrics.dp(10),0), size_hint_x=0.7)
+            box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp', padding=(kivy.metrics.dp(10),0), size_hint_x=0.8)
 
             label = Label(text='Current direction of movement of read/write head:', size_hint_x=0.5)
             label.bind(size=label.setter('text_size'))
@@ -2490,7 +2490,7 @@ class DiskInputScreen(Screen):
             parent_box = BoxLayout(orientation='horizontal', size_hint_y=None, height='50dp')
             parent_box.add_widget(box)
             # For occypying space on right
-            parent_box.add_widget(BoxLayout(size_hint_x=0.3))
+            parent_box.add_widget(BoxLayout(size_hint_x=0.2))
 
             grid.add_widget(parent_box)
 
@@ -2621,7 +2621,7 @@ class DiskOutputScreen(Screen):
         mem_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
         grid.add_widget(mem_box)
 
-        self.inc = Window.width/(int(data_disk['num_cylinders'])*1.1)
+        self.inc = Window.width/(int(data_disk['num_cylinders'])*1.15)
         movement_list = self.secondary_memory_chart['memory_state']
         new_heads = list(map(int, movement_list))
         sorted_heads=sorted(new_heads)
