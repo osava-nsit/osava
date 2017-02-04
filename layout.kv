@@ -31,77 +31,80 @@
 <MainMenuScreen>:
     title: title
     about_label: about_label
-    FloatLayout:
-        canvas:
-            Color:
-                rgba: 0.071, 0.116, 0.314, 0.7
-            Rectangle:
-                size: self.size
-                pos: self.pos
-    	Label:
-            id: title
-            color: (1, 1, 1, 1)
-            font_size: '22sp'
-            text: 'Operating System Algorithms Visualization App'
-            size_hint: 0.173, 0.07
-            pos_hint: {'x': .42, 'y': 0.9}
-        Button:
-        	text: 'CPU Scheduling Algorithms'
-            size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .75}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'cpu_form'
-        Button:
-        	text: 'Deadlock Avoidance Algorithm'
-            size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .65}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'da_form'
-        Button:
-        	text: 'Deadlock Detection Algorithm'
-            size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .55}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'dd_form'
-        Button:
-        	text: 'Contiguous Memory Allocation Strategies'
-            size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .45}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'mem_form'
-        Button:
-            text: 'Page Replacement Algorithms'
-            size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .35}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'page_form'
-        Button:
-            text: 'Disk Scheduling Algorithms'
-            size_hint: 0.6, 0.07
-            pos_hint: {'x': .2, 'y': .25}
-            on_press:
-                root.manager.transition.direction = 'left'
-                root.manager.current = 'disk_form'
-        #Image:
-            #source: "images/nsit_logo.png"
-            #size_hint: 0.2, 0.2
-            #pos_hint: {'x': .4, 'y': .1}
-        Button:
-            size_hint: 0.2, 0.05
-            pos_hint: {'x': 0.4, 'y': 0.12}
-            text: 'About'
-            on_press:
-                root.toggle_about_text()
-        Label:
-            id: about_label
-            text: ''
-            size_hint: 0.6, 0.06
-            pos_hint: {'x': .2, 'y': .04}
+    ScrollView
+        GridLayout:
+            cols: 1
+            spacing: '20dp'
+            padding: '150dp', 0
+            size_hint_y: None
+            height: self.minimum_height
+            canvas:
+                Color:
+                    rgba: 0.071, 0.116, 0.314, 0.7
+                Rectangle:
+                    size: self.size
+                    pos: self.pos
+            Label:
+                id: title
+                size_hint_y: None
+                height: '100dp'
+                font_size: '22sp'
+                text: 'Operating System Algorithms Visualization App'
+            Button:
+                text: 'CPU Scheduling Algorithms'
+                size_hint_y: None
+                height: root.module_button_height
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'cpu_form'
+            Button:
+                text: 'Deadlock Avoidance Algorithm'
+                size_hint_y: None
+                height: root.module_button_height
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'da_form'
+            Button:
+                text: 'Deadlock Detection Algorithm'
+                size_hint_y: None
+                height: root.module_button_height
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'dd_form'
+            Button:
+                text: 'Contiguous Memory Allocation Strategies'
+                size_hint_y: None
+                height: root.module_button_height
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'mem_form'
+            Button:
+                text: 'Page Replacement Algorithms'
+                size_hint_y: None
+                height: root.module_button_height
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'page_form'
+            Button:
+                text: 'Disk Scheduling Algorithms'
+                size_hint_y: None
+                height: root.module_button_height
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.manager.current = 'disk_form'
+            BoxLayout:
+                size_hint_y: None
+                height: '60dp'
+                padding: '150dp', '15dp'
+                Button:
+                    text: 'About'
+                    on_press:
+                        root.toggle_about_text()
+            Label:
+                id: about_label
+                text: ''
+                size_hint_y: None
+                height: '40dp'
 
 <CPUInputScreen>:
     on_pre_enter: root.bind_widgets()
@@ -493,7 +496,7 @@
                 id: algo_spinner
                 text:'Select an algorithm'
                 size_hint_x: 0.5
-                size_hint_y: 'None'
+                size_hint_y: None
                 height: '40dp'
                 values: ('First Fit', 'Best Fit', 'Worst Fit')
         BoxLayout:

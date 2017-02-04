@@ -243,13 +243,15 @@ def display_error(grid, error, box_height='400dp'):
 
 # Main Menu Screen with options to choose an OS Algorithm
 class MainMenuScreen(Screen):
+    module_button_height = kivy.metrics.dp(42)
     about_visible = False
+
     def toggle_about_text(self, *args):
         if self.about_visible:
             self.about_label.text = ""
             self.about_visible = False
         else:
-            self.about_label.text = 'Developers: Udit Arora, Namrata Mukhija, Priyanka, Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty'
+            self.about_label.text = 'Developers: Udit Arora, Namrata Mukhija, Priyanka, Rohit Takhar\nAdvisor: Dr. Pinaki Chakraborty\n'
             self.about_visible = True
 
 # Input Screen for CPU Scheduling Algorithms with partial scrolling
