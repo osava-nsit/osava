@@ -30,19 +30,27 @@ The application is available for both Desktop and Android.
 
 * Install Kivy - https://kivy.org/docs/gettingstarted/installation.html
 
-* Run the app using -
+* Clone the repository
+
+```bash
+$ git clone https://github.com/osava-nsit/osava.git
+```
+
+* Run the app
 
 ###### Windows/Linux:
 
 ```bash
-python main.py
+$ python main.py
 ```
 
 ###### MacOS:
 
 ```bash
-Kivy main.py
+$ kivy main.py
 ```
+
+* You can turn on DEBUG mode to run the app with test input data by updating the `DEBUG_MODE` flag in `main.py`.
 
 
 ## Screenshots
