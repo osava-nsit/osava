@@ -2,14 +2,20 @@
 
 ### Table of Contents
 1. [About](#about)
-2. [Description](#description)
-3. [Built With](#built-with)
-4. [Demo](#demo)
-5. [License](#license)
+2. [Download](#download)
+3. [Description](#description)
+4. [Built With](#built-with)
+5. [Demo](#demo)
+6. [License](#license)
 
 ## About
 
 OSAVA is an application that allows users to visualize various Operating System algorithms.
+
+## Download
+
+OSAVA Android: https://play.google.com/store/apps/details?id=org.nsit.osava
+OSAVA Windows: https://github.com/osava-nsit/osava/releases/latest
 
 ## Description
 
