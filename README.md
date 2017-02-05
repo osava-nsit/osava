@@ -1,11 +1,11 @@
-# :computer: OSAVA - Visualize different types of algorithms used in operating systems.
+# :computer: OSAVA - Operating System Algorithms Visualization App
 
 ### Table of Contents
 1. [About](#about)
 2. [Download](#download)
 3. [Description](#description)
-4. [Built With](#built-with)
-5. [Demo](#demo)
+3. [Quick Start](#quick-start)
+5. [Screenshots](#screenshots)
 6. [License](#license)
 
 ## About
@@ -26,36 +26,28 @@ The different variants and all parameters of the algorithms have been considered
 
 The application is available for both Desktop and Android.
 
-## Built With
+## Quick Start
 
-* Python 2.7
-* Kivy
+* Install Kivy - https://kivy.org/docs/gettingstarted/installation.html
 
-## Demo
+* Run the app using -
 
-* ##### Main Menu Screen
-![](/images/desktop_screenshots/menu.png)
+###### Windows/Linux:
 
-* ##### CPU Scheduling Algorithms Input Screen
-![](/images/desktop_screenshots/cpu_input.png)
+```bash
+python main.py
+```
 
-* ##### CPU Scheduling Algorithms Output Screen
-![](/images/desktop_screenshots/cpu_output.png)
+###### MacOS:
 
-* ##### Deadlock Avoidance Algorithm Output Screen
-![](/images/desktop_screenshots/deadlock_avoidance_output.png)
+```bash
+Kivy main.py
+```
 
-* ##### Deadlock Detection Algorithm Output Screen
-![](/images/desktop_screenshots/deadlock_detection_output.png)
 
-* ##### Contiguous Memory Allocation Strategies Output Screen
-![](/images/desktop_screenshots/memory_output.png)
+## Screenshots
 
-* ##### Page Replacement Algorithms Output Screen
-![](/images/desktop_screenshots/page_output.png)
-
-* ##### Disk Scheduling Algorithms Output Screen
-![](/images/desktop_screenshots/disk_output.png)
+See [SCREENSHOTS.md](SCREENSHOTS.md).
 
 ## License
 
