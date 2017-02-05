@@ -48,7 +48,7 @@ The application is available for both Desktop and Android.
 ![](/images/desktop_screenshots/page_output.png)
 
 * ##### Disk Scheduling Algorithms Output Screen
-![](/images/desktop_screenshots/cpu_input.png)
+![](/images/desktop_screenshots/disk_output.png)
 
 ## License
 
