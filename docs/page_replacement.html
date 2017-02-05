@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>page_replacement.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>page_replacement.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">maxint</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Bad input case(s):
+0. 1 &lt;= Frame number
+1. 0 &lt; Page number
+2. 0 &lt;= modify_bit &lt;= 1</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>Bad input handling and error message for the user</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">default_message</span> <span class="o">=</span> <span class="s2">&quot;Press back button to go back to the input form.&quot;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_error_message</span><span class="p">(</span><span class="n">error_number</span><span class="p">,</span> <span class="n">page_num_or_modify_bit_pos</span><span class="p">):</span>
+    <span class="n">ERROR</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">error_number</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">error_number</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Please enter valid number of frames.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">default_message</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">error_number</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Page number at position &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">page_num_or_modify_bit_pos</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; in reference string is invalid.</span><span class="se">\n</span><span class="s2">Please enter a valid page number.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">default_message</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">error_number</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Modify bit at position &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">page_num_or_modify_bit_pos</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; in modify bit string is invalid.</span><span class="se">\n</span><span class="s2">Please enter a valid modify bit ( 0 or 1 ).</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">default_message</span>
+        <span class="n">ERROR</span><span class="p">[</span><span class="s1">&#39;error_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">ERROR</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">check_for_bad_input</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Boolean to check if bad input entered</span>
+    <span class="n">error_status</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># Dictionary to store error number and error message</span>
+    <span class="n">frames_number</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span>
+    <span class="n">page_numbers</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">frames_number</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">page_numbers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">page_number</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">page_numbers</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">page_number</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>print "Error detected"</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                    <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">break</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">error</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">error_status</span><span class="p">);</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>print "Error detected"</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">status</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">modify_bit_string</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;modify_bits&#39;</span><span class="p">]</span> 
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">modify_bit_string</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">idx</span><span class="p">,</span><span class="n">modify_bit</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">modify_bit_string</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">modify_bit</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">modify_bit</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">idx</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                        <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">break</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">error</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># No error in input data</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">error_status</span><span class="p">);</span>
+        <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Utility function to check if referenced page is already in memory</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">page_in_memory</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">page_n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>If page is already in memory, return frame_number and set in_memory bit</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">page_n</span> <span class="o">==</span> <span class="n">page_number</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_number</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+            <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>If page is not already in memory </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using fifo algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_fifo</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">last_replaced_frame</span><span class="p">):</span>
+    <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">)</span>
+    <span class="n">memory_frames</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using optimal algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_optimal</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">reference_string</span><span class="p">,</span> <span class="n">pos_ref_str</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>To keep track of page number with farthest future reference</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># To check if an empty frame is available</span>
+    
+    <span class="n">future_reference_pos</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># To keep track of each page&#39;s farthest future reference</span>
+    <span class="k">for</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">):</span>
+        <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">page_n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reference_string</span><span class="p">[</span><span class="n">pos_ref_str</span><span class="p">:]):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Empty frame is available</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">page</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="n">page_n</span><span class="p">:</span>
+                <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="n">idx</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">elif</span> <span class="n">last_reference_pos</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">:</span>
+            <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="n">maxint</span> 
+        <span class="n">pair</span> <span class="o">=</span><span class="p">(</span><span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">last_reference_pos</span><span class="p">);</span>
+        <span class="n">future_reference_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+
+     
+    <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>To find page with farthest reference in future</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">max_pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">future_reference_pos</span><span class="p">:</span>
+            <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="n">pair</span>
+            <span class="k">if</span> <span class="n">max_pos</span> <span class="o">&lt;</span> <span class="n">last_reference_pos</span><span class="p">:</span>
+                <span class="n">max_pos</span> <span class="o">=</span> <span class="n">last_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+            <span class="k">elif</span> <span class="n">max_pos</span> <span class="o">==</span> <span class="n">last_reference_pos</span><span class="p">:</span>
+                <span class="n">max_pos</span> <span class="o">=</span> <span class="n">last_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span><span class="n">randint</span><span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span><span class="n">frame_number</span><span class="p">)</span>
+
+    <span class="n">memory_frames</span><span class="p">[</span><span class="n">frame_to_be_replaced</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using lru algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_lru</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">reference_string</span><span class="p">,</span> <span class="n">pos_ref_str</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>To keep track of page number with nearest past reference</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># To check if an empty frame is available</span>
+    
+    <span class="n">past_reference_pos</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># To keep track of each page&#39;s farthest past reference</span>
+    <span class="k">for</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">):</span>
+        <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">page_n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reference_string</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">pos_ref_str</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>Empty frame is available</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">page</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="n">page_n</span><span class="p">:</span>
+                <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="n">idx</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">pair</span> <span class="o">=</span><span class="p">(</span><span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">last_reference_pos</span><span class="p">);</span>
+        <span class="n">past_reference_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+
+    
+    <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>To find page with farthest reference in past</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">min_pos</span> <span class="o">=</span> <span class="n">maxint</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">past_reference_pos</span><span class="p">:</span>
+            <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">last_reference_pos</span> <span class="o">=</span> <span class="n">pair</span>
+            <span class="k">if</span> <span class="n">min_pos</span> <span class="o">&gt;</span> <span class="n">last_reference_pos</span><span class="p">:</span>
+                <span class="n">min_pos</span> <span class="o">=</span> <span class="n">last_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+            <span class="k">elif</span> <span class="n">min_pos</span> <span class="o">==</span> <span class="n">last_reference_pos</span><span class="p">:</span>
+                <span class="n">min_pos</span> <span class="o">=</span> <span class="n">last_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span><span class="n">randint</span><span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span><span class="n">frame_number</span><span class="p">)</span>
+    <span class="n">memory_frames</span><span class="p">[</span><span class="n">frame_to_be_replaced</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using second chance algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_second_chance</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">reference_bit</span><span class="p">):</span>
+
+    <span class="n">flag</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># to find a frame that is to be replaced</span>
+    <span class="k">while</span><span class="p">(</span><span class="n">flag</span><span class="o">==</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reference_bit</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">reference_bit</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">continue</span>
+        <span class="n">memory_frames</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using enhanced second chance algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_enhanced_second_chance</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">reference_bit</span><span class="p">,</span> <span class="n">modify_bit</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span><span class="n">modify_bit_string</span><span class="p">):</span>
+    <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># to find a frame that is to be replaced</span>
+    <span class="k">while</span> <span class="p">(</span><span class="n">flag</span><span class="o">==</span><span class="bp">False</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>If an empty frame is available in memory</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)):</span>
+            <span class="n">frame_number</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="n">idx</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">memory_frames</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">break</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Select frame to be replaced if reference bit and modify bit are both 0</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)):</span>
+            <span class="n">frame_number</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="n">idx</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">reference_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">modify_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">break</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>Select frame to be replaced if reference bit is 0 and modify bit is 1</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)):</span>
+            <span class="n">frame_number</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="n">idx</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">reference_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">modify_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">break</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>Select frame to be replaced if reference bit is 1 and modify bit is 0</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)):</span>
+            <span class="n">frame_number</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="n">idx</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">reference_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">modify_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">break</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>Select frame to be replaced if reference bit and modify bit are both 1</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span><span class="p">)):</span>
+            <span class="n">frame_number</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span> <span class="o">+</span> <span class="n">idx</span><span class="p">)</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">reference_bit</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">reference_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">modify_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">modify_bit_string</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">reference_bit</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">modify_bit</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">reference_bit</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">modify_bit</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>  
+
+    <span class="n">memory_frames</span><span class="p">[</span><span class="n">last_replaced_frame</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using lfu algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_least_frequently_used</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">reference_string</span><span class="p">,</span> <span class="n">pos_ref_str</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p>To keep track of page number with minimum reference in past</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># To check if an empty frame is available</span>
+    
+    <span class="n">freq_reference_pos</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># To keep track of each page&#39;s number of references</span>
+    <span class="k">for</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">):</span>
+        <span class="n">num_reference_pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">page_n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reference_string</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">pos_ref_str</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      <p>Empty frame is available</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">page</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="n">page_n</span><span class="p">:</span>
+                <span class="n">num_reference_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">pair</span> <span class="o">=</span><span class="p">(</span><span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">num_reference_pos</span><span class="p">);</span>
+        <span class="n">freq_reference_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+
+     
+    <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p>To find page with minimum reference in past</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">min_pos</span> <span class="o">=</span> <span class="n">maxint</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">freq_reference_pos</span><span class="p">:</span>
+            <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">num_reference_pos</span> <span class="o">=</span> <span class="n">pair</span>
+            <span class="k">if</span> <span class="n">min_pos</span> <span class="o">&gt;</span> <span class="n">num_reference_pos</span><span class="p">:</span>
+                <span class="n">min_pos</span> <span class="o">=</span> <span class="n">num_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+            <span class="k">elif</span> <span class="n">min_pos</span> <span class="o">==</span> <span class="n">num_reference_pos</span><span class="p">:</span>
+                <span class="n">min_pos</span> <span class="o">=</span> <span class="n">num_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span><span class="n">randint</span><span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span><span class="n">frame_number</span><span class="p">)</span>
+
+    <span class="n">memory_frames</span><span class="p">[</span><span class="n">frame_to_be_replaced</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>Funtion to find and replace a page using mfu algorithm </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_and_replace_page_most_frequently_used</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">reference_string</span><span class="p">,</span> <span class="n">pos_ref_str</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p>To keep track of page number with maximum reference in past</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">flag</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># To check if an empty frame is available</span>
+    
+    <span class="n">freq_reference_pos</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># To keep track of each page&#39;s number of references</span>
+    <span class="k">for</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">):</span>
+        <span class="n">num_reference_pos</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">page_n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reference_string</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">pos_ref_str</span><span class="o">+</span><span class="mi">1</span><span class="p">]):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p>Empty frame is available</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">page</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+                <span class="n">flag</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="k">elif</span> <span class="n">page</span> <span class="o">==</span> <span class="n">page_n</span><span class="p">:</span>
+                <span class="n">num_reference_pos</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">pair</span> <span class="o">=</span><span class="p">(</span><span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">num_reference_pos</span><span class="p">);</span>
+        <span class="n">freq_reference_pos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pair</span><span class="p">)</span>
+
+     
+    <span class="k">if</span> <span class="n">flag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p>To find page with maximum reference in past</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">max_pos</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">pair</span> <span class="ow">in</span> <span class="n">freq_reference_pos</span><span class="p">:</span>
+            <span class="n">frame_number</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">num_reference_pos</span> <span class="o">=</span> <span class="n">pair</span>
+            <span class="k">if</span> <span class="n">max_pos</span> <span class="o">&lt;</span> <span class="n">num_reference_pos</span><span class="p">:</span>
+                <span class="n">max_pos</span> <span class="o">=</span> <span class="n">num_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span> <span class="n">frame_number</span>
+            <span class="k">elif</span> <span class="n">max_pos</span> <span class="o">==</span> <span class="n">num_reference_pos</span><span class="p">:</span>
+                <span class="n">max_pos</span> <span class="o">=</span> <span class="n">num_reference_pos</span>
+                <span class="n">frame_to_be_replaced</span> <span class="o">=</span><span class="n">randint</span><span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span><span class="n">frame_number</span><span class="p">)</span>
+
+    <span class="n">memory_frames</span><span class="p">[</span><span class="n">frame_to_be_replaced</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="p">(</span><span class="n">frame_to_be_replaced</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">));</span>
+    <span class="k">return</span> <span class="n">status</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">construct_output</span><span class="p">(</span><span class="n">error_status</span><span class="p">,</span> <span class="n">page_number</span><span class="p">,</span> <span class="n">frame_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">page_fault</span><span class="p">,</span> <span class="n">page_fault_count</span><span class="p">):</span>
+    <span class="n">temp_memory</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+    <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;frame_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_number</span> 
+    <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;memory_frames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">memory_frames</span>
+    <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_fault&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_fault</span>
+    <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_fault_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_fault_count</span>
+    <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;error_status&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">error_status</span>
+    <span class="k">return</span> <span class="n">temp_memory</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      <p>Main function to call algo chosen by the user</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">page_replacement</span><span class="p">(</span><span class="n">data</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>To store the state of main memory(which is divided into frames) after each page arrives</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">memory_chart</span> <span class="o">=</span> <span class="p">[]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>For bad input handling</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">error</span><span class="p">,</span> <span class="n">error_status</span> <span class="o">=</span> <span class="n">check_for_bad_input</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">error</span><span class="p">):</span>
+        <span class="n">temp_memory</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">temp_memory</span> <span class="o">=</span> <span class="n">construct_output</span><span class="p">(</span><span class="n">error_status</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">memory_chart</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_memory</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">memory_chart</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">frames_number</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span>
+        <span class="n">page_numbers</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">]</span>
+        <span class="n">memory_frames</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">page_fault_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">reference_bit</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">modify_bit_string</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;modify_bits&#39;</span><span class="p">]</span> 
+            <span class="n">modify_bit</span> <span class="o">=</span> <span class="p">[]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p>variable for FIFO, Second Chance and Enhanced Second Chance Algorithmn</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="c1"># to track which page was allocated memory first</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p>Intialising all frames to empty </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">frames_number</span><span class="p">):</span>
+            <span class="n">memory_frames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">reference_bit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">modify_bit</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pos</span><span class="p">,</span> <span class="n">page_number</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">page_numbers</span><span class="p">):</span>
+            <span class="n">temp_memory</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">frame_number</span><span class="p">,</span> <span class="n">in_memory</span> <span class="o">=</span> <span class="n">page_in_memory</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">)</span> 
+            <span class="k">if</span> <span class="n">in_memory</span><span class="p">:</span>
+                <span class="n">temp_memory</span> <span class="o">=</span> <span class="n">construct_output</span><span class="p">(</span><span class="n">error_status</span><span class="p">,</span> <span class="n">page_number</span><span class="p">,</span> <span class="n">frame_number</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">memory_frames</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">page_fault_count</span><span class="p">)</span>
+                <span class="n">memory_chart</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_memory</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">reference_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">modify_bit_string</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">reference_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">modify_bit</span><span class="p">[</span><span class="n">frame_number</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_number</span>
+                <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_fifo</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">last_replaced_frame</span><span class="p">)</span>
+                    <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">allocated_frame</span> 
+                <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_optimal</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">page_numbers</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_lru</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">page_numbers</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_second_chance</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">reference_bit</span><span class="p">)</span>
+                    <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">allocated_frame</span>
+                <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_enhanced_second_chance</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">last_replaced_frame</span><span class="p">,</span> <span class="n">reference_bit</span><span class="p">,</span> <span class="n">modify_bit</span><span class="p">,</span><span class="n">pos</span><span class="p">,</span><span class="n">modify_bit_string</span><span class="p">)</span>
+                    <span class="n">last_replaced_frame</span> <span class="o">=</span> <span class="n">allocated_frame</span>
+                <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_least_frequently_used</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">page_numbers</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                    <span class="n">allocated_frame</span><span class="p">,</span> <span class="n">new_memory_frames</span> <span class="o">=</span> <span class="n">find_and_replace_page_most_frequently_used</span><span class="p">(</span><span class="n">page_number</span><span class="p">,</span> <span class="n">memory_frames</span><span class="p">,</span> <span class="n">page_numbers</span><span class="p">,</span> <span class="n">pos</span><span class="p">)</span>
+                <span class="n">temp_memory</span> <span class="o">=</span> <span class="n">construct_output</span><span class="p">(</span> <span class="n">error_status</span><span class="p">,</span> <span class="n">page_number</span><span class="p">,</span> <span class="n">allocated_frame</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">new_memory_frames</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">page_fault_count</span><span class="p">)</span>
+                <span class="n">page_fault_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">memory_chart</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp_memory</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">memory_chart</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
