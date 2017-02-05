@@ -20,10 +20,10 @@ def get_error_message(error_number, cylinder_number):
         ERROR['error_message'] = "Please enter valid total number of cylinders.\n" + default_message
         ERROR['error_number'] = 0
     elif error_number == 1:
-        ERROR['error_message'] = str(cylinder_number) + " cylinder entered in disk queue exceeds the total number of cylinders entered. Please enter a valid cylinder number.\n" + default_message
+        ERROR['error_message'] = str(cylinder_number) + " cylinder entered in disk queue exceeds the total number of cylinders entered.\nPlease enter a valid cylinder number.\n" + default_message
         ERROR['error_number'] = 1
     elif error_number == 2:
-        ERROR['error_message'] = str(cylinder_number) +  " cylinder is invalid. Please enter a valid cylinder number.\n" + default_message
+        ERROR['error_message'] = str(cylinder_number) +  " cylinder entered in disk queue is invalid. Please enter a valid cylinder number.\n" + default_message
         ERROR['error_number'] = 2
     elif error_number == 3:
         ERROR['error_message'] = "Please enter a valid current head position.\n" + default_message

@@ -33,7 +33,7 @@ def get_error_message(error_number, process_id, resource_type):
         ERROR['error_message'] = "Please enter a valid request for resource type " + str(resource_type) + "." + default_message
         ERROR['error_number'] = 4
     elif error_number == 5:
-        ERROR['error_message'] = "Process number exceeds number of processes in the system. Please enter request for a valid process." + default_message
+        ERROR['error_message'] = "Process number exceeds number of processes in the system.\nPlease enter request for a valid process.\n" + default_message
         ERROR['error_number'] = 5
     elif error_number == 6:
         ERROR['error_message'] = "Please enter valid number of allocated resources of resource type " + str(resource_type) + " for process P" + str(process_id) + ".\n" + default_message

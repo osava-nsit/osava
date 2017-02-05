@@ -236,7 +236,7 @@ class ColoredButton(Button):
 def display_error(grid, error, box_height='400dp'):
     error_box = BoxLayout(orientation='horizontal', size_hint_y=None, height=box_height)
     error_label = Label(text="Bad Input:\n" + error, size_hint_x=None, width=Window.width, valign='top', halign='center')
-    error_label.text_size = error_label.size
+    # error_label.text_size = error_label.size
     error_box.add_widget(error_label)
     grid.add_widget(error_box)
     return error_box

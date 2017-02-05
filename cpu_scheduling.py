@@ -21,7 +21,7 @@ def get_error_message(error_number, process_id, queue_number=-1):
         ERROR['error_message'] = " "
         ERROR['error_number'] = -1
     elif error_number == 0:
-        ERROR['error_message'] = "Queue assigned to process " + str(process_id) + " does not exist. Please assign a valid queue to the process." + default_message
+        ERROR['error_message'] = "Queue assigned to process " + str(process_id) + " does not exist. Please assign a valid queue to the process.\n" + default_message
         ERROR['error_number'] = 0
     elif error_number == 1:
         ERROR['error_message'] = "Please enter a valid CPU burst time for process " + str(process_id) + ".\n" + default_message

@@ -19,10 +19,10 @@ def get_error_message(error_number, page_num_or_modify_bit_pos):
         ERROR['error_message'] = "Please enter valid number of frames.\n" + default_message
         ERROR['error_number'] = 0
     elif error_number == 1:
-        ERROR['error_message'] = "Page number at " + str(page_num_or_modify_bit_pos) + " position in reference string is invalid. Please enter a valid page number.\n" + default_message
+        ERROR['error_message'] = "Page number at position " + str(page_num_or_modify_bit_pos) + " in reference string is invalid.\nPlease enter a valid page number.\n" + default_message
         ERROR['error_number'] = 1
     elif error_number == 2:
-        ERROR['error_message'] = "Modify bit at position " + str(page_num_or_modify_bit_pos) + " in modify bit string is invalid. Please enter a valid modify bit ( 0 or 1 ).\n" + default_message
+        ERROR['error_message'] = "Modify bit at position " + str(page_num_or_modify_bit_pos) + " in modify bit string is invalid.\nPlease enter a valid modify bit ( 0 or 1 ).\n" + default_message
         ERROR['error_number'] = 2
     return ERROR
 
