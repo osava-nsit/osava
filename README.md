@@ -15,6 +15,7 @@ OSAVA is an application that allows users to visualize various Operating System 
 ## Download
 
 OSAVA Android: https://play.google.com/store/apps/details?id=org.nsit.osava
+
 OSAVA Windows: https://github.com/osava-nsit/osava/releases/latest
 
 ## Description
