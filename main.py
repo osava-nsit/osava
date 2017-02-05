@@ -310,7 +310,7 @@ class CPUInputScreen(Screen):
 
     # Call set_cpu_type method with appropriate index of scheduling algorithm
     def show_selected_value(self, spinner, text, *arg):
-        if text == 'First Come First Serve':
+        if text == 'First Come First Served':
             self.set_cpu_type(0)
             self.variant_spinner.disabled = True
         elif text == 'Shortest Job First':
@@ -769,7 +769,7 @@ class CPUOutputScreen(Screen):
 
         if self.error_status['error_number'] != -1:
             # Inform the user
-            # display_error(self.gantt, self.error_status['error_message'])
+            display_error(self.layout, self.error_status['error_message'])
             pass
         else:
             row_height = '30dp'
