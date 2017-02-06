@@ -784,7 +784,8 @@ class CPUOutputScreen(Screen):
             box.add_widget(Label(text='Process'))
             box.add_widget(Label(text='Start/resume time'))
             box.add_widget(Label(text='Suspend/termination time'))
-            box.add_widget(Label(text=''))
+            box.add_widget(Label(text='', size_hint_x=None, width='120dp'))
+            grid.add_widget(box)
 
             # Display process schedule details
             for process in self.cpu_schedule:
@@ -888,10 +889,10 @@ class CPUOutputScreen(Screen):
             display_error(gantt, self.error_status['error_message'], box_height='120dp')
             return
 
-        start_height = 15   # For bottom buttons
+        start_height = 15   # For time labels
         start_height += 35*5    # For average stats
         start_height += len(self.cpu_schedule)*25   # For timeline
-        start_height += 35*2    # For other labels
+        start_height += 35*3    # For other labels
 
         margin_left = kivy.metrics.dp(125)
         margin_bottom = kivy.metrics.dp(start_height)
@@ -916,7 +917,7 @@ class CPUOutputScreen(Screen):
                 # Add description labels
                 label = Label(text='Gantt Chart: ', size_hint_x=None, width=margin_left)
                 gantt_queue.add_widget(label)
-                t_label = Label(text='Time: ', size_hint_x=None, width=margin_left, valign='top', halign='center')
+                t_label = Label(text='Time: ', size_hint_x=None, width=margin_left, valign='middle', halign='center')
                 t_label.text_size = t_label.size
                 time_queue.add_widget(t_label)
                 queue_schedule = list()
@@ -960,7 +961,7 @@ class CPUOutputScreen(Screen):
                             i = j
                         gantt_queue.add_widget(label)
 
-                        t_label = Label(text=str(start), size_hint_x=None, width=inc*(end - start), halign='left', valign='top')
+                        t_label = Label(text=str(start), size_hint_x=None, width=inc*(end - start), halign='left', valign='middle')
                         t_label.text_size = t_label.size
                         time_queue.add_widget(t_label)
 
@@ -972,7 +973,7 @@ class CPUOutputScreen(Screen):
 
                 # Add time label for the end time of last process
                 queue = queue_schedule[-1]
-                t_label = Label(text=str(queue['end']), size_hint_x=None, width=inc*(end - start), halign='left', valign='top')
+                t_label = Label(text=str(queue['end']), size_hint_x=None, width=inc*(end - start), halign='left', valign='middle')
                 t_label.text_size = t_label.size
                 time_queue.add_widget(t_label)
 
@@ -992,7 +993,7 @@ class CPUOutputScreen(Screen):
             # Add description labels
             label = Label(text='Gantt Chart: ', size_hint_x=None, width=margin_left, valign='top')
             gantt.add_widget(label)
-            t_label = Label(text='Time: ', size_hint_x=None, width=margin_left, valign='top', halign='center')
+            t_label = Label(text='Time: ', size_hint_x=None, width=margin_left, valign='middle', halign='center')
             t_label.text_size = t_label.size
             time.add_widget(t_label)
 
@@ -1002,7 +1003,7 @@ class CPUOutputScreen(Screen):
                     label = Label(text=process['name'], size_hint_x=None, width=inc*(process['end']-process['start']))
                     gantt.add_widget(label)
 
-                    t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
+                    t_label = Label(text=str(process['start']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='middle')
                     t_label.text_size = t_label.size
                     time.add_widget(t_label)
 
@@ -1014,7 +1015,7 @@ class CPUOutputScreen(Screen):
 
             # Add time label for the end time of last process
             process = self.cpu_schedule[-1]
-            t_label = Label(text=str(process['end']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='top')
+            t_label = Label(text=str(process['end']), size_hint_x=None, width=inc*(process['end']-process['start']), halign='left', valign='middle')
             t_label.text_size = t_label.size
             time.add_widget(t_label)
 
