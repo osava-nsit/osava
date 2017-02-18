@@ -811,19 +811,19 @@ class CPUOutputScreen(Screen):
                 # Popup showing details of process when box is clicked
                 if process['name'] != 'Idle' and process['name'] != 'DL':
                     if cpu_scheduling_type != 8:
-                        content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
-                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
-                            "Turnaround time: "+str(self.details[process['name']]['turn_time']))
+                        content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+" ms\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+" ms\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])) + " ms"
                     else:
                         if process['next_queue'] == 0:
-                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
-                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
-                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+" ms\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+" ms\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+" ms\n"+
                             "Process "+process['name']+" is completed.")
                         else:
-                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+"\n"+
-                            "Response time: "+str(self.details[process['name']]['resp_time'])+"\n"+
-                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+"\n"+
+                            content_str = ("Wait time: "+str(self.details[process['name']]['wait_time'])+" ms\n"+
+                            "Response time: "+str(self.details[process['name']]['resp_time'])+" ms\n"+
+                            "Turnaround time: "+str(self.details[process['name']]['turn_time'])+" ms\n"+
                             process['name']+" moved to queue Q"+str(process['next_queue']+1)+".")
 
                     content_label = Label(text=content_str)
@@ -839,19 +839,20 @@ class CPUOutputScreen(Screen):
 
             # Display statistics
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-            box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0)))
+            print "Stats turn_time: {}, computed: {}".format(self.stats['turn_time'], int((self.stats['turn_time']*100)+0.5)/100.0)
+            box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0) + ' ms'))
             grid.add_widget(box)
 
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-            box.add_widget(Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0)))
+            box.add_widget(Label(text='Average waiting time: ' + str(int((self.stats['wait_time']*100)+0.5)/100.0) + ' ms'))
             grid.add_widget(box)
             
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-            box.add_widget(Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0)))
+            box.add_widget(Label(text='Average response time: ' + str(int((self.stats['resp_time']*100)+0.5)/100.0) + ' ms'))
             grid.add_widget(box)
 
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-            box.add_widget(Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0)))
+            box.add_widget(Label(text='Throughput: ' + str(int((self.stats['throughput']*100)+0.5)/100.0) + ' processes/ms'))
             grid.add_widget(box)
 
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)

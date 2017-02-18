@@ -165,7 +165,7 @@ def fcfs(data, dispatch_latency = 0):
         stats['wait_time'] = float(wait_time)/len(processes)
         stats['resp_time'] = float(resp_time)/len(processes)
         stats['turn_time'] = float(turn_time)/len(processes)
-        stats['throughput'] = len(processes)*1000/float(curr_time)
+        stats['throughput'] = len(processes)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
         return process_chart, stats, details_process, error_status
 
@@ -274,7 +274,7 @@ def round_robin(data, quantum=4, dispatch_latency=0):
     stats['wait_time'] = float(total_wait_time)/len(all_processes)
     stats['resp_time'] = float(total_resp_time)/len(all_processes)
     stats['turn_time'] = float(total_turn_time)/len(all_processes)
-    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['throughput'] = len(all_processes)/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
@@ -428,7 +428,7 @@ def round_robin_old(data, max_quanta = 4, dispatch_latency = 0):
         stats['wait_time'] = float(wait_time)/len(details_process)
         stats['resp_time'] = float(resp_time)/len(details_process)
         stats['turn_time'] = float(turn_time)/len(details_process)
-        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['throughput'] = len(details_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
             
         return process_chart, stats, process_details, error_status
@@ -522,7 +522,7 @@ def shortest_job_non_prempted(data, dispatch_latency = 0):
         stats['wait_time'] = float(wait_time)/len(data_process)
         stats['resp_time'] = float(resp_time)/len(data_process)
         stats['turn_time'] = float(turn_time)/len(data_process)
-        stats['throughput'] = len(data_process)*1000/float(curr_time)
+        stats['throughput'] = len(data_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
@@ -641,7 +641,7 @@ def shortest_job_prempted(data, dispatch_latency=0):
     stats['wait_time'] = float(total_wait_time)/len(all_processes)
     stats['resp_time'] = float(total_resp_time)/len(all_processes)
     stats['turn_time'] = float(total_turn_time)/len(all_processes)
-    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['throughput'] = len(all_processes)/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
@@ -769,7 +769,7 @@ def shortest_job_prempted_old(data, dispatch_latency = 0):
         stats['wait_time'] = float(wait_time)/len(details_process)
         stats['resp_time'] = float(resp_time)/len(details_process)
         stats['turn_time'] = float(turn_time)/len(details_process)
-        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['throughput'] = len(details_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
@@ -873,7 +873,7 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
         stats['wait_time'] = float(wait_time)/len(data_process)
         stats['resp_time'] = float(resp_time)/len(data_process)
         stats['turn_time'] = float(turn_time)/len(data_process)
-        stats['throughput'] = len(data_process)*1000/float(curr_time)
+        stats['throughput'] = len(data_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
         
         return process_chart, stats, process_details, error_status
@@ -1015,7 +1015,7 @@ def priority_preemptive(data, increment_after_time=4, upper_limit_priority=0, di
     stats['wait_time'] = float(total_wait_time)/len(all_processes)
     stats['resp_time'] = float(total_resp_time)/len(all_processes)
     stats['turn_time'] = float(total_turn_time)/len(all_processes)
-    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['throughput'] = len(all_processes)/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
@@ -1179,7 +1179,7 @@ def priority_preemptive_old(data, increment_after_time = 4, upper_limit_priority
         stats['wait_time'] = float(wait_time)/len(details_process)
         stats['resp_time'] = float(resp_time)/len(details_process)
         stats['turn_time'] = float(turn_time)/len(details_process)
-        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['throughput'] = len(details_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
@@ -1336,7 +1336,7 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
         stats['wait_time'] = float(wait_time)/len(details_process)
         stats['resp_time'] = float(resp_time)/len(details_process)
         stats['turn_time'] = float(turn_time)/len(details_process)
-        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['throughput'] = len(details_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
@@ -1518,7 +1518,7 @@ def multilevel_feedback(data, num_queues, queue_quantum, dispatch_latency=0):
     stats['wait_time'] = float(total_wait_time)/len(all_processes)
     stats['resp_time'] = float(total_resp_time)/len(all_processes)
     stats['turn_time'] = float(total_turn_time)/len(all_processes)
-    stats['throughput'] = len(all_processes)*1000/float(curr_time)
+    stats['throughput'] = len(all_processes)/float(curr_time)
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
@@ -1741,7 +1741,7 @@ def multilevel_feedback_old(data, num_queues, quantum_queue, dispatch_latency = 
         stats['wait_time'] = float(wait_time)/len(details_process)
         stats['resp_time'] = float(resp_time)/len(details_process)
         stats['turn_time'] = float(turn_time)/len(details_process)
-        stats['throughput'] = len(details_process)*1000/float(curr_time)
+        stats['throughput'] = len(details_process)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
             
         return process_chart, stats, process_details, error_status
