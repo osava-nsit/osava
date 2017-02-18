@@ -4,7 +4,7 @@ import copy
 # 0. 0 < num_resources 
 # 1. 0 < num_processes 
 # 2. 0 <= available 
-# 3. 0 < maximum 
+# 3. 0 <= maximum 
 # 4. 0 <= request 
 # 5. 0 <= request_process_number <= num_processes 
 # 6. 0 <= allocation 
@@ -66,7 +66,7 @@ def check_for_bad_input_avoidance(available, maximum, allocation, request, proce
         if error == 0:
             for i in range(num_processes):
                 for j in range(num_resources):
-                    if int(maximum[i][j]) <= 0:
+                    if int(maximum[i][j]) < 0:
                         error_status = get_error_message(3, i+1, chr(ord('A')+j))
                         error = 1
                         break
