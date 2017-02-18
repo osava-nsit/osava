@@ -22,13 +22,13 @@ source.include_exts = py,kv,atlas
 #source.exclude_exts = spec
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = tests, bin, cpp_code, docs, images
+source.exclude_dirs = .git, tests, bin, cpp_code, docs, images
 
 # (list) List of exclusions using pattern matching
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 1.0
+version = 1.0.3
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
