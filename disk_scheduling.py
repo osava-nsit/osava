@@ -12,6 +12,9 @@ from random import randint
 default_message = "Press back button to go back to the input form."
 
 def get_error_message(error_number, cylinder_number):
+    if cylinder_number != 'The':
+        cylinder_number = "'" + str(cylinder_number) + "'"
+
     ERROR = {}
     if error_number == -1:
         ERROR['error_message'] = " "
@@ -29,6 +32,14 @@ def get_error_message(error_number, cylinder_number):
         ERROR['error_message'] = "Please enter a valid current head position.\n" + default_message
         ERROR['error_number'] = 3
     return ERROR
+
+def is_valid_value(value):
+    if isinstance(value, int):
+        return True
+    elif isinstance(value, str):
+        return value != '' and value.isdigit()
+    else:
+        return False
 
 def check_for_bad_input(data):
     error = 0 # Boolean to check bad input 
@@ -48,12 +59,12 @@ def check_for_bad_input(data):
             error = 1
         else:
             for cylinder in disk_queue:
-                if int(cylinder) > num_cylinders - 1:
-                    error_status = get_error_message(1, int(cylinder))
+                if not is_valid_value(cylinder) or int(cylinder) > num_cylinders - 1:
+                    error_status = get_error_message(1, cylinder)
                     error = 1
                     break
-                if int(cylinder) < 0:
-                    error_status = get_error_message(2,int(cylinder))
+                elif int(cylinder) < 0:
+                    error_status = get_error_message(2, cylinder)
                     error = 1
                     break
         if(error == 0):

@@ -52,6 +52,14 @@ data_page = dict()
 # Global data for Disk Scheduling Algorithms
 data_disk = dict()
 
+def is_valid_value(value):
+    if isinstance(value, int):
+        return True
+    elif isinstance(value, str):
+        return value != '' and value.isdigit()
+    else:
+        return False
+
 # Binder functions for CPU Scheduling Algorithms form, to store data in the global 'data_cpu' dictionary
 def cpu_on_name(instance, value, i):
     if value == '':
@@ -63,27 +71,35 @@ def cpu_on_arrival(instance, value, i):
             value = 1
         else:
             value = -1
-    data_cpu['arrival'+str(i)] = value
+    if not is_valid_value(value):
+        value = -1
+    data_cpu['arrival'+str(i)] = int(value)
 def cpu_on_burst(instance, value, i):
     if value == '':
         if DEBUG_MODE:
             value = 4
         else:
             value = -1
-    data_cpu['burst'+str(i)] = value
+    if not is_valid_value(value):
+        value = -1
+    data_cpu['burst'+str(i)] = int(value)
 def cpu_on_priority(instance, value, i):
     if value == '':
         if DEBUG_MODE:
             value = 10
         else:
             value = -1
-    data_cpu['priority'+str(i)] = value
+    if not is_valid_value(value):
+        value = -1
+    data_cpu['priority'+str(i)] = int(value)
 def cpu_on_quantum(instance, value):
     if value == '':
         if DEBUG_MODE:
             value = 2
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_cpu['quantum'] = int(value)
 def cpu_on_aging(instance, value):
     if value == '':
@@ -91,6 +107,8 @@ def cpu_on_aging(instance, value):
             value = 4
         else:
             value = 1000000000000000
+    if not is_valid_value(value):
+        value = -1
     data_cpu['aging'] = int(value)
 def cpu_on_num_queues(instance, value):
     if value == '':
@@ -98,6 +116,8 @@ def cpu_on_num_queues(instance, value):
             value = 2
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_cpu['num_queues'] = int(value)
 def cpu_on_queue_quantum(instance, value, i):
     if value == '':
@@ -105,6 +125,8 @@ def cpu_on_queue_quantum(instance, value, i):
             value = 2
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_cpu['queue_quantum'][i] = int(value)
 def cpu_on_queue_assigned(instance, value, i):
     if value == '':
@@ -112,6 +134,8 @@ def cpu_on_queue_assigned(instance, value, i):
             value = 1
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_cpu['queue_assigned'][i] = int(value)
 
 # Binder functions for Deadlock Avoidance Algorithm form
@@ -121,6 +145,8 @@ def da_on_available(instance, value, i):
             value = 5
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_da['available'][i] = int(value)
 def da_on_request(instance, value, i):
     if (value == ''):
@@ -128,6 +154,8 @@ def da_on_request(instance, value, i):
             value = 0
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_da['request'][i] = int(value)
 def da_on_max(instance, value, i, j):
     if (value == ''):
@@ -135,6 +163,8 @@ def da_on_max(instance, value, i, j):
             value = 8
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_da['max'][i][j] = int(value)
 def da_on_allocation(instance, value, i, j):
     if (value == ''):
@@ -142,6 +172,8 @@ def da_on_allocation(instance, value, i, j):
             value = 4
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_da['allocation'][i][j] = int(value)
 def da_request_on_process_id(instance, value):
     if (value == ''):
@@ -149,6 +181,8 @@ def da_request_on_process_id(instance, value):
             value = 1
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_da['request_process'] = int(value)-1
 
 # Binder functions for Deadlock Detection Algorithm form
@@ -158,6 +192,8 @@ def dd_on_available(instance, value, i):
             value = 5
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_dd['available'][i] = int(value)
 def dd_on_request(instance, value, i, j):
     if (value == ''):
@@ -165,6 +201,8 @@ def dd_on_request(instance, value, i, j):
             value = 2
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_dd['request'][i][j] = int(value)
 def dd_on_allocation(instance, value, i, j):
     if (value == ''):
@@ -172,6 +210,8 @@ def dd_on_allocation(instance, value, i, j):
             value = 4
         else:
             value = -1
+    if not is_valid_value(value):
+        value = -1
     data_dd['allocation'][i][j] = int(value)
 
 # Binder functions for Contiguous Memory Allocation Strategies form
@@ -181,21 +221,27 @@ def mem_on_size(instance, value, i):
             value = 128
         else:
             value = -1
-    data_mem['size'][i] = value
+    if not is_valid_value(value):
+        value = -1
+    data_mem['size'][i] = int(value)
 def mem_on_arrival(instance, value, i):
     if (value == ''):
         if DEBUG_MODE:
             value = 0
         else:
             value = -1
-    data_mem['arrival'][i] = value
+    if not is_valid_value(value):
+        value = -1
+    data_mem['arrival'][i] = int(value)
 def mem_on_termination(instance, value, i):
     if (value == ''):
         if DEBUG_MODE:
             value = 10
         else:
             value = -1
-    data_mem['burst'][i] = value
+    if not is_valid_value(value):
+        value = -1
+    data_mem['burst'][i] = int(value)
 
 # Binder functions for Page Replacement Algorithm form
 def page_on_ref(instance, value):
@@ -266,8 +312,10 @@ class CPUInputScreen(Screen):
 
     # Update dispatch_latency and set to default value if empty
     def update_dispatch_latency(self, instance, value, *args):
-        if not value.isdigit():
+        if value == '':
             data_cpu['dispatch_latency'] = 0
+        elif not is_valid_value(value):
+            data_cpu['dispatch_latency'] = -1
         else:
             data_cpu['dispatch_latency'] = int(value)
 

@@ -26,6 +26,14 @@ def get_error_message(error_number, page_num_or_modify_bit_pos):
         ERROR['error_number'] = 2
     return ERROR
 
+def is_valid_value(value):
+    if isinstance(value, int):
+        return True
+    elif isinstance(value, str):
+        return value != '' and value.isdigit()
+    else:
+        return False
+
 def check_for_bad_input(data):
     error = 0 # Boolean to check if bad input entered
     error_status = {} # Dictionary to store error number and error message
@@ -40,7 +48,7 @@ def check_for_bad_input(data):
             error = 1
         else:
             for idx,page_number in enumerate(page_numbers):
-                if int(page_number) < 0:
+                if not is_valid_value(page_number) or int(page_number) < 0:
                     # print "Error detected"
                     error_status = get_error_message(1, idx+1)
                     error = 1
@@ -57,7 +65,7 @@ def check_for_bad_input(data):
                 error = 1
             else:
                 for idx,modify_bit in enumerate(modify_bit_string):
-                    if int(modify_bit) != 0 and int(modify_bit) != 1:
+                    if not is_valid_value(modify_bit) or (int(modify_bit) != 0 and int(modify_bit) != 1):
                         error_status = get_error_message(2, idx+1)
                         error = 1
                         break
