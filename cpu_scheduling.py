@@ -282,10 +282,14 @@ def round_robin(data, quantum=4, dispatch_latency=0):
 # Returns the index of the next process to be scheduled
 def rr_get_next_process(robin_idx, curr_time, process_queue):
     next_idx = (robin_idx+1)%len(process_queue)
-    if process_queue[next_idx]['arrival'] <= curr_time:
-        return next_idx
-    else:
-        return robin_idx
+
+    while next_idx != robin_idx:
+        if process_queue[next_idx]['arrival'] <= curr_time:
+            return next_idx
+        else:
+            next_idx = (next_idx+1)%len(process_queue)
+
+    return robin_idx
 
 def add_processes_to_queue(processes, queue):
     for orig_process in processes:

@@ -887,7 +887,6 @@ class CPUOutputScreen(Screen):
 
             # Display statistics
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=row_height)
-            print "Stats turn_time: {}, computed: {}".format(self.stats['turn_time'], int((self.stats['turn_time']*100)+0.5)/100.0)
             box.add_widget(Label(text='Average turnaround time: ' + str(int((self.stats['turn_time']*100)+0.5)/100.0) + ' ms'))
             grid.add_widget(box)
 
