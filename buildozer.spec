@@ -28,7 +28,7 @@ source.exclude_dirs = .git, tests, bin, cpp_code, docs, images
 #source.exclude_patterns = license,images/*/*.jpg
 
 # (str) Application versioning (method 1)
-version = 1.0.4
+version = 1.0.4.1
 
 # (str) Application versioning (method 2)
 # version.regex = __version__ = ['"](.*)['"]
