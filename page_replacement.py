@@ -400,7 +400,9 @@ def page_replacement(data):
                     allocated_frame, new_memory_frames = find_and_replace_page_least_frequently_used(page_number, memory_frames, page_numbers, pos)
                 elif data['algo'] == 6:
                     allocated_frame, new_memory_frames = find_and_replace_page_most_frequently_used(page_number, memory_frames, page_numbers, pos)
-                temp_memory = construct_output( error_status, page_number, allocated_frame+1, new_memory_frames, 1, page_fault_count)
+
                 page_fault_count += 1
+                temp_memory = construct_output( error_status, page_number, allocated_frame+1, new_memory_frames, 1, page_fault_count)
                 memory_chart.append(temp_memory)
+
         return memory_chart
