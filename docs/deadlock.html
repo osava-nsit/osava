@@ -33,7 +33,7 @@
 0. 0 &lt; num_resources 
 1. 0 &lt; num_processes 
 2. 0 &lt;= available 
-3. 0 &lt; maximum 
+3. 0 &lt;= maximum 
 4. 0 &lt;= request 
 5. 0 &lt;= request_process_number &lt;= num_processes 
 6. 0 &lt;= allocation </p>
@@ -126,7 +126,7 @@
         <span class="k">if</span> <span class="n">error</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_processes</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_resources</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">maximum</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">error_status</span> <span class="o">=</span> <span class="n">get_error_message</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span><span class="o">+</span><span class="n">j</span><span class="p">))</span>
                         <span class="n">error</span> <span class="o">=</span> <span class="mi">1</span>
                         <span class="k">break</span>
