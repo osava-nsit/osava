@@ -84,7 +84,7 @@ def check_for_bad_input(data, dispatch_latency, priority, aging, quantum, algo, 
                     break
     if error == 0 and algo == 5:
         for i in range(len(quantum_queue)):
-            if quantum_queue[i] <= 0 and algo_queue == 1:
+            if quantum_queue[i] <= 0 and algo_queue[i] == 1:
                 error_status = get_error_message(6, -1, i+1)
                 error = 1
                 break

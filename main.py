@@ -55,7 +55,7 @@ data_disk = dict()
 def is_valid_value(value):
     if isinstance(value, int):
         return True
-    elif isinstance(value, str):
+    elif isinstance(value, str) or isinstance(value, unicode):
         return value != '' and value.isdigit()
     else:
         return False
@@ -671,7 +671,7 @@ class CPUInputScreen(Screen):
 
             # Descriptive features for assigning a queue to every process
             box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height)
-            label = Label(text='Queue assigned:')
+            label = Label(text='Information about intra queue scheduling algorithms:')
             box.add_widget(label)
             grid_layout.add_widget(box)
             self.multilevel_input_widgets.append(box)
