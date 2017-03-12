@@ -29,7 +29,7 @@ def get_error_message(error_number, page_num_or_modify_bit_pos):
 def is_valid_value(value):
     if isinstance(value, int):
         return True
-    elif isinstance(value, str):
+    elif isinstance(value, str) or isinstance(value, unicode):
         return value != '' and value.isdigit()
     else:
         return False
