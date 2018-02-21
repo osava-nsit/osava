@@ -1,5 +1,5 @@
 from sys import maxint
-from random import randint
+from random import choice
 
 # Bad input case(s):
 # 0. 1 <= total cylinders
@@ -213,8 +213,7 @@ def shortest_seek_time_first(curr_head_pos, disk_queue):
                 min_seek = abs(int(cylinder) - curr_head_pos)
                 min_idx = idx
             elif abs(int(cylinder) - curr_head_pos) == min_seek:
-                min_seek = abs(int(cylinder) - curr_head_pos) 
-                min_idx = randint(idx, min_idx)
+                min_idx = choice([idx, min_idx])
         chosen_cylinder = disk_queue[min_idx]
         memory_state.append(chosen_cylinder)
         difference = abs(int(chosen_cylinder) - curr_head_pos)
