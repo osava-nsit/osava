@@ -57,6 +57,9 @@ $ kivy main.py
 
 See [SCREENSHOTS.md](SCREENSHOTS.md).
 
+## Developers
+This project is developed and activetly maintained by Udit Arora, Namrata Mukhija, and Priyanka Singla. For any queries/questions or help, please drop an email to uditarora09@gmail.com or namratamukhija@gmail.com.
+
 ## License
 
 OSAVA is licensed under Apache 2.0 license. See [LICENSE.md](https://github.com/osava-nsit/osava/blob/master/LICENSE.md) for more details.
