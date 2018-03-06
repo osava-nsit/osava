@@ -50,7 +50,7 @@ $ python main.py
 $ kivy main.py
 ```
 
-* You can turn on DEBUG mode to run the app with test input data by updating the `DEBUG_MODE` flag in `main.py`.
+* You can turn on DEBUG mode to run the app with test input data by updating the `DEBUG_MODE` flag in `common.py`.
 
 
 ## Screenshots
@@ -58,7 +58,7 @@ $ kivy main.py
 See [SCREENSHOTS.md](SCREENSHOTS.md).
 
 ## Developers
-This project is developed and activetly maintained by Udit Arora, Namrata Mukhija, and Priyanka Singla. For any queries/questions or help, please drop an email to uditarora09@gmail.com or namratamukhija@gmail.com.
+This project is developed and activetly maintained by Udit Arora, Namrata Mukhija, and Priyanka Singla. For any queries/questions or help, please drop an email to uditara09@gmail.com or namratamukhija@gmail.com.
 
 ## License
 
