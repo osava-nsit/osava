@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>deadlock_detection_screens.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>deadlock_detection_screens.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>Kivy libraries</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kivy.properties</span> <span class="kn">import</span> <span class="n">ObjectProperty</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.scrollview</span> <span class="kn">import</span> <span class="n">ScrollView</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.boxlayout</span> <span class="kn">import</span> <span class="n">BoxLayout</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.gridlayout</span> <span class="kn">import</span> <span class="n">GridLayout</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.screenmanager</span> <span class="kn">import</span> <span class="n">Screen</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.textinput</span> <span class="kn">import</span> <span class="n">TextInput</span>
+<span class="kn">import</span> <span class="nn">kivy.metrics</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Python libraries</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>OS Algorithms</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">algos</span> <span class="kn">import</span> <span class="n">deadlock</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>OSAVA common constants and methods</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">common</span> <span class="kn">import</span> <span class="o">*</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Global data for Deadlock Detection Algorithm</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">data_dd</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Binder functions for Deadlock Detection Algorithm form</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">dd_on_available</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">DEBUG_MODE</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;available&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">dd_on_request</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">DEBUG_MODE</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">dd_on_allocation</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">DEBUG_MODE</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_valid_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;allocation&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>Input Screen for Deadlock Detection algorithm</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">DeadlockDetectionInputScreen</span><span class="p">(</span><span class="n">Screen</span><span class="p">):</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">ObjectProperty</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="n">margin_right</span> <span class="o">=</span> <span class="s1">&#39;15dp&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">bind_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_num_processes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_num_resource_types</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Binder function for number of processes input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">bind_num_processes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_processes</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_form</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Binder function for number of processes input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">bind_num_resource_types</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_resource_types</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_form</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>Called when the number of processes or number of resources input is changed
+(Wrapper function to allow for condition checking if required)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">update_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_processes</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_processes</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()):</span>
+            <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_processes</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_resource_types</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_resource_types</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()):</span>
+            <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_resource_types</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>If input is valid, load form else display error message</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_form</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_processes</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_resource_types</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;dd_form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">form</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">clear_widgets</span><span class="p">()</span>
+            <span class="n">display_error</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="s2">&quot;Invalid number of processes/resource types.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visualize_button</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">load_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;dd_form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">form</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">clear_widgets</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualize_button</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="bp">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Initialize the global data_dd dictionary</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;available&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]</span>
+        <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">10</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">])]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">])]</span>
+        <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;allocation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[[</span><span class="mi">4</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">])]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">])]</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">GridLayout</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Make sure the height is such that there is something to scroll.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">grid</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">minimum_height</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">setter</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>Add form labels for Available array (m)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]):</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span><span class="o">+</span><span class="n">i</span><span class="p">)))</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_right</span><span class="p">))</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>Add input fields for Available array (m)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Available:&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]):</span>
+            <span class="n">inp</span> <span class="o">=</span> <span class="n">TextInput</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;available&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">inp</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">dd_on_available</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">))</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_right</span><span class="p">))</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>Allocation Matrix (n x m)
+Add form labels for resource types</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Allocation:&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]):</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span><span class="o">+</span><span class="n">i</span><span class="p">)))</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_right</span><span class="p">))</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <h1>Add input fields for Allocation matrix (n x m)</h1>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]):</span>
+            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]):</span>
+                <span class="n">inp</span> <span class="o">=</span> <span class="n">TextInput</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;allocation&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                <span class="n">inp</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">dd_on_allocation</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">))</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_right</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>Request Matrix (n x m)
+Add form labels for resource types</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Request:&#39;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]):</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">chr</span><span class="p">(</span><span class="nb">ord</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span><span class="o">+</span><span class="n">i</span><span class="p">)))</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_right</span><span class="p">))</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Add input fields for Request matrix (n x m)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]):</span>
+            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">]):</span>
+                <span class="n">inp</span> <span class="o">=</span> <span class="n">TextInput</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;request&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="p">))</span>
+                <span class="n">inp</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">dd_on_request</span><span class="p">,</span> <span class="n">i</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="p">))</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_right</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>Add ScrollView</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">sv</span> <span class="o">=</span> <span class="n">ScrollView</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">scroll_type</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bars&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">],</span> <span class="n">bar_width</span><span class="o">=</span><span class="s1">&#39;12dp&#39;</span><span class="p">)</span>
+        <span class="n">sv</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">sv</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <h1>Add Visualize and back button at the end of form</h1>
+<p>box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+box.add_widget(Button(text='Visualize', on_release=self.switch_to_dd_output))
+form.add_widget(box)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">switch_to_dd_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="s1">&#39;dd_output&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">switch_to_main_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="s1">&#39;menu&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p>Output screen for Deadlock Detection algorithm</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">DeadlockDetectionOutputScreen</span><span class="p">(</span><span class="n">Screen</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;available&#39;</span><span class="p">]</span>
+        <span class="n">allocation</span> <span class="o">=</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;allocation&#39;</span><span class="p">]</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;request&#39;</span><span class="p">]</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;dd_output&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">layout</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">clear_widgets</span><span class="p">()</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">GridLayout</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p>Make sure the height is such that there is something to scroll.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">grid</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">minimum_height</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">setter</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">))</span>
+
+        <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;100dp&#39;</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Deadlock Detection Algorithm: This algorithm examines the state</span><span class="se">\n</span><span class="s1">of the system and determines whether a deadlock has occurred.&#39;</span><span class="p">))</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>Check if the system is deadlocked</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">deadlock_safe</span><span class="p">,</span> <span class="n">schedule</span><span class="p">,</span> <span class="n">error_status</span> <span class="o">=</span> <span class="n">deadlock</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">available</span><span class="p">,</span> <span class="n">allocation</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">],</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_resource_types&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">error_status</span><span class="p">[</span><span class="s1">&#39;error_number&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p>Inform the user</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">display_error</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">error_status</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">work</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">available</span><span class="p">)</span>
+            <span class="n">finish</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;F&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p>Display schedule</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;The processes can be scheduled as follows: &#39;</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p>Output table labels
+box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Process&#39;</span><span class="p">))</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Work&#39;</span><span class="p">))</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Finish&#39;</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      <p>Display initial work vector
+box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Initial&#39;</span><span class="p">))</span>
+            <span class="n">work_text</span> <span class="o">=</span> <span class="s1">&#39;[  &#39;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">work</span><span class="p">)):</span>
+                <span class="n">work_text</span> <span class="o">+=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;  &#39;</span><span class="p">)</span>
+            <span class="n">work_text</span> <span class="o">+=</span> <span class="s1">&#39;]&#39;</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">work_text</span><span class="p">))</span>
+
+            <span class="n">finish_text</span> <span class="o">=</span> <span class="s1">&#39;[  &#39;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">finish</span><span class="p">)):</span>
+                <span class="n">finish_text</span> <span class="o">+=</span> <span class="p">(</span><span class="n">finish</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;  &#39;</span><span class="p">)</span>
+            <span class="n">finish_text</span> <span class="o">+=</span> <span class="s1">&#39;]&#39;</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">finish_text</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      <p>Display step by step changes in work vector according to process scheduled</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">schedule</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">work</span><span class="p">)):</span>
+                    <span class="n">work</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+=</span> <span class="n">allocation</span><span class="p">[</span><span class="n">schedule</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">j</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>print "Schedule["+str(i)+"] = "+str(schedule[i])</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">finish</span><span class="p">[</span><span class="n">schedule</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;T&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>box = BoxLayout(orientation='horizontal', size_hint_x=0.6, padding=(20,0))</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">schedule</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+
+                <span class="n">work_text</span> <span class="o">=</span> <span class="s1">&#39;[  &#39;</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">work</span><span class="p">)):</span>
+                    <span class="n">work_text</span> <span class="o">+=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">work</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;  &#39;</span><span class="p">)</span>
+                <span class="n">work_text</span> <span class="o">+=</span> <span class="s1">&#39;]&#39;</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">work_text</span><span class="p">))</span>
+
+                <span class="n">finish_text</span> <span class="o">=</span> <span class="s1">&#39;[  &#39;</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">finish</span><span class="p">)):</span>
+                    <span class="n">finish_text</span> <span class="o">+=</span> <span class="p">(</span><span class="n">finish</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;  &#39;</span><span class="p">)</span>
+                <span class="n">finish_text</span> <span class="o">+=</span> <span class="s1">&#39;]&#39;</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">finish_text</span><span class="p">))</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p>Not deadlocked</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">deadlock_safe</span><span class="p">:</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;No deadlocked detected.&#39;</span><span class="p">))</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Deadlock detected. Deadlocked processes: &#39;</span><span class="p">))</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+                <span class="n">processes_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">data_dd</span><span class="p">[</span><span class="s1">&#39;num_processes&#39;</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">finish</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;F&#39;</span><span class="p">:</span>
+                        <span class="n">processes_string</span> <span class="o">+=</span> <span class="s2">&quot;P&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;, &quot;</span>
+                <span class="n">processes_string</span> <span class="o">=</span> <span class="n">processes_string</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">processes_string</span><span class="p">))</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p>Add back button
+box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+box.add_widget(Button(text='Back', on_release=self.switch_to_dd_form))
+grid.add_widget(box)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-40'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-40'>#</a>
+      </div>
+      <p>Add ScrollView</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">sv</span> <span class="o">=</span> <span class="n">ScrollView</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">scroll_type</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bars&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">],</span> <span class="n">bar_width</span><span class="o">=</span><span class="s1">&#39;12dp&#39;</span><span class="p">)</span>
+        <span class="n">sv</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">sv</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-41'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-41'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">switch_to_dd_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="s1">&#39;dd_form&#39;</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>

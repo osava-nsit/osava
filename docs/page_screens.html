@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>page_screens.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  <div class='section'>
+    <div class='docs'><h1>page_screens.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <p>Kivy libraries</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">kivy.core.window</span> <span class="kn">import</span> <span class="n">Window</span>
+<span class="kn">from</span> <span class="nn">kivy.properties</span> <span class="kn">import</span> <span class="n">ObjectProperty</span><span class="p">,</span> <span class="n">NumericProperty</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.scrollview</span> <span class="kn">import</span> <span class="n">ScrollView</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.boxlayout</span> <span class="kn">import</span> <span class="n">BoxLayout</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.gridlayout</span> <span class="kn">import</span> <span class="n">GridLayout</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.screenmanager</span> <span class="kn">import</span> <span class="n">Screen</span>
+<span class="kn">from</span> <span class="nn">kivy.uix.textinput</span> <span class="kn">import</span> <span class="n">TextInput</span>
+<span class="kn">import</span> <span class="nn">kivy.metrics</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Python libraries</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>OS Algorithms</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">algos</span> <span class="kn">import</span> <span class="n">page_replacement</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>OSAVA common constants and methods</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">common</span> <span class="kn">import</span> <span class="o">*</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Global data for Page Replacement Algorithms</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">data_page</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>Binder functions for Page Replacement Algorithm form</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">page_on_ref</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span><span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">DEBUG_MODE</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;7,0,1,2,0,3,0,4,2,3,0,3,2,1,2,0,1,7,0,1&#39;</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">page_on_modify</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">DEBUG_MODE</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1,0,0,1&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;modify_bit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Input screen for Page Replacement Algorithms</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">PageInputScreen</span><span class="p">(</span><span class="n">Screen</span><span class="p">):</span>
+    <span class="n">strategy_type</span> <span class="o">=</span> <span class="n">NumericProperty</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">form</span> <span class="o">=</span> <span class="n">ObjectProperty</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">algo_type</span> <span class="o">=</span> <span class="mi">0</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">update_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span><span class="o">.</span><span class="n">text</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()):</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span><span class="o">.</span><span class="n">text</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>If input is valid, load form else display error message</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="p">(</span><span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_form</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span><span class="o">.</span><span class="n">text</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">):</span>
+            <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;page_form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">form</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">clear_widgets</span><span class="p">()</span>
+            <span class="n">display_error</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="s2">&quot;Invalid number of processes/resource types.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">visualize_button</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Binder function for number of processes input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">bind_num_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_frames</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_form</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>Binder function for algorithm type selection from Spinner (Dropdown)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">bind_spinner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">spinner</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;page_form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">algo_spinner</span>
+        <span class="n">spinner</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">show_selected_value</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">bind_widgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_num_frames</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bind_spinner</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Set appropriate strategy type according to the chosen algorithm by the user</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">show_selected_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spinner</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">form_reload_flag</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">form_reload_flag</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;First In First Out&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">elif</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;Optimal&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;Least Recently Used&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;Second Chance&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="k">elif</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;Enhanced Second Chance&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">4</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">4</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>Toggle form reload flag for this algo since we require modify bit input here</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">form_reload_flag</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">form_reload_flag</span>
+        <span class="k">elif</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;Least Frequently Used&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">5</span>
+        <span class="k">elif</span> <span class="n">text</span> <span class="o">==</span> <span class="s1">&#39;Most Frequently Used&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span> <span class="o">=</span> <span class="mi">6</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">=</span> <span class="mi">6</span>
+        <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strategy_type</span>
+        <span class="k">if</span> <span class="n">form_reload_flag</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load_form</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Load the input form based on input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">load_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;page_form&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">form</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">clear_widgets</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">visualize_button</span><span class="o">.</span><span class="n">disabled</span> <span class="o">=</span> <span class="bp">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Initialize the global data_page dictionary</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="s1">&#39;algo&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_page</span><span class="p">:</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s1">&#39;num_frames&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_page</span><span class="p">:</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="s1">&#39;ref_str&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_page</span><span class="p">:</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">if</span> <span class="s1">&#39;modify_bit&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">data_page</span><span class="p">:</span>
+            <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;modify_bit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">GridLayout</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">15</span><span class="p">),</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>Make sure the height is such that there is something to scroll.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">grid</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">minimum_height</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">setter</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>Box for algo spinner
+box = BoxLayout(orientation='horizontal', size_hint_y=None, height='100dp', padding=(kivy.metrics.dp(5),kivy.metrics.dp(20)))
+box.add_widget(Label(text='Algorithm - ', padding=(10,10), size_hint_x=0.3))
+algo_spinner = Spinner(
+   text='Select an Algorithm',
+   values=('First In First Out', 'Optimal', 'Least Recently Used', 'Second Chance', 'Enhanced Second Chance', 'Least Frequently Used', 'Most Frequently Used'))
+algo_spinner.bind(text=self.show_selected_value)
+box.add_widget(algo_spinner)
+grid.add_widget(box)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>Add label for input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Reference string:&#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="n">label</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">label</span><span class="o">.</span><span class="n">setter</span><span class="p">(</span><span class="s1">&#39;text_size&#39;</span><span class="p">))</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>Add input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">inp</span> <span class="o">=</span> <span class="n">TextInput</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;ref_str&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">],</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+        <span class="n">inp</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">page_on_ref</span><span class="p">)</span>
+        <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+        <span class="n">parent_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+        <span class="n">parent_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>For occypying space on right</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">parent_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">BoxLayout</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.4</span><span class="p">))</span>
+
+        <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">parent_box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>Modify bit for enhanced second chance algo</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo_type</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>Add label for input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Modify bit string:&#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+            <span class="n">label</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">label</span><span class="o">.</span><span class="n">setter</span><span class="p">(</span><span class="s1">&#39;text_size&#39;</span><span class="p">))</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>Add input</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">inp</span> <span class="o">=</span> <span class="n">TextInput</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="s1">&#39;modify_bit&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;modify_bit&#39;</span><span class="p">],</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
+            <span class="n">inp</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">page_on_modify</span><span class="p">)</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+            <span class="n">parent_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">parent_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>For occypying space on right</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">parent_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">BoxLayout</span><span class="p">(</span><span class="n">size_hint_x</span><span class="o">=</span><span class="mf">0.4</span><span class="p">))</span>
+
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">parent_box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>Add ScrollView</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">sv</span> <span class="o">=</span> <span class="n">ScrollView</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">scroll_type</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bars&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">],</span> <span class="n">bar_width</span><span class="o">=</span><span class="s1">&#39;12dp&#39;</span><span class="p">)</span>
+        <span class="n">sv</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">form</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">sv</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p>Add Visualize and back button at the end of form
+box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+box.add_widget(Button(text='Back', on_release=self.switch_to_main_menu))
+box.add_widget(Button(text='Visualize', on_release=self.switch_to_page_output))
+form.add_widget(box)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">switch_to_main_menu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="s1">&#39;menu&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">switch_to_page_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="s1">&#39;page_output&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>Output screen for Page Replacement Algorithms</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">PageOutputScreen</span><span class="p">(</span><span class="n">Screen</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p>Stores the memory chart generated by algorithm</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">memory_chart</span> <span class="o">=</span> <span class="p">[]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p>Margins for memory chart output</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">margin_left</span> <span class="o">=</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">125</span><span class="p">)</span>
+    <span class="n">margin_bottom</span> <span class="o">=</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">255</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p>Width of frame box</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">frame_width</span> <span class="o">=</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">65</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      <p>Increment in width per unit size</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">inc</span> <span class="o">=</span> <span class="mi">0</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In First In First Out Page Replacement Algorithm, the page that</span><span class="se">\n</span><span class="s1">was loaded earliest in the memory is replaced.&#39;</span>
+        <span class="k">elif</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In Optimal Page Replacement Algorithm, the page that will not</span><span class="se">\n</span><span class="s1">be referenced for the longest period of time is replaced.&#39;</span>
+        <span class="k">elif</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In Least Recently Used Page Replacement Algorithm, the page that</span><span class="se">\n</span><span class="s1">has not been referenced for the longest period of time is replaced.&#39;</span>
+        <span class="k">elif</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In Second Chance Page Replacement Algorithm, the page that was loaded earliest in the</span><span class="se">\n</span><span class="s1">memory is replaced. However, if the reference bit of the page is set then that page is</span><span class="se">\n</span><span class="s1">given a second chance and the next possible page is replaced. When a page is given a</span><span class="se">\n</span><span class="s1">second chance, its reference bit is reset and its arrival time is set to the current time.&#39;</span>
+        <span class="k">elif</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In Enhanced Second Chance Page Replacement Algorithm, the pages are divided in four</span><span class="se">\n</span><span class="s1">classes using their reference bit and modify bit as ordered pairs.</span><span class="se">\n</span><span class="s1">The page of the lowest nonempty class which was loaded earliest in the memory is replaced.&#39;</span>
+        <span class="k">elif</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In Least Frequently Used Page Replacement Algorithm, the page</span><span class="se">\n</span><span class="s1">that has been referenced the least number of times is replaced.&#39;</span>
+        <span class="k">elif</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;In Most Frequently Used Page Replacement Algorithm, the page</span><span class="se">\n</span><span class="s1">that has been referenced the most number of times is replaced.&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>Generate formatted data for input to the algo</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">calculate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">formatted_data</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">formatted_data</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">])</span>
+        <span class="n">page_numbers_data</span> <span class="o">=</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">]</span>
+        <span class="n">page_numbers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">page_numbers_data</span><span class="p">:</span> <span class="c1"># Comma separated ref_str</span>
+            <span class="n">page_numbers</span> <span class="o">=</span> <span class="n">page_numbers_data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># Space separated ref_str</span>
+            <span class="n">page_numbers</span> <span class="o">=</span> <span class="n">page_numbers_data</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">formatted_data</span><span class="p">[</span><span class="s1">&#39;ref_str&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">page_numbers</span>
+        <span class="n">formatted_data</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;algo&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">modify_bits</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">modify_bits_data</span> <span class="o">=</span> <span class="n">data_page</span><span class="p">[</span><span class="s1">&#39;modify_bit&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s1">&#39;,&#39;</span> <span class="ow">in</span> <span class="n">page_numbers_data</span><span class="p">:</span> <span class="c1"># Comma separated ref_str</span>
+                <span class="n">modify_bits</span> <span class="o">=</span> <span class="n">modify_bits_data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># Space separated ref_str</span>
+                <span class="n">modify_bits</span> <span class="o">=</span> <span class="n">modify_bits_data</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">formatted_data</span><span class="p">[</span><span class="s1">&#39;modify_bits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">modify_bits</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">memory_chart</span> <span class="o">=</span> <span class="n">page_replacement</span><span class="o">.</span><span class="n">page_replacement</span><span class="p">(</span><span class="n">formatted_data</span><span class="p">)</span>
+
+        <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">get_screen</span><span class="p">(</span><span class="s1">&#39;page_output&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">layout</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">clear_widgets</span><span class="p">()</span>
+
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">GridLayout</span><span class="p">(</span><span class="n">cols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="o">=</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>Make sure the height is such that there is something to scroll.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">grid</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="n">minimum_height</span><span class="o">=</span><span class="n">grid</span><span class="o">.</span><span class="n">setter</span><span class="p">(</span><span class="s1">&#39;height&#39;</span><span class="p">))</span>
+
+
+        <span class="n">error</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_chart</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;error_status&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">error</span><span class="p">[</span><span class="s1">&#39;error_number&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p>Inform the user</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">display_error</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">error</span><span class="p">[</span><span class="s1">&#39;error_message&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p>Output the algo description</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;100dp&#39;</span><span class="p">)</span>
+            <span class="n">algo_desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_description</span><span class="p">()</span>
+            <span class="n">desc_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="n">algo_desc</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="p">(</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">20</span><span class="p">)),</span> <span class="n">width</span><span class="o">=</span><span class="n">Window</span><span class="o">.</span><span class="n">width</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-40'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-40'>#</a>
+      </div>
+      <p>desc_label.text_size = desc_label.size</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">desc_label</span><span class="p">)</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-41'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-41'>#</a>
+      </div>
+      <p>To add frame labels</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">box</span><span class="p">)</span>
+            <span class="n">frames_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span><span class="o">+</span><span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">125</span><span class="p">),</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+            <span class="n">frames_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">frames_label</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">frames_label</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">formatted_data</span><span class="p">[</span><span class="s1">&#39;num_frames&#39;</span><span class="p">]):</span>
+                <span class="n">frames_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Frame&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_width</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+                <span class="n">frames_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">frames_label</span><span class="o">.</span><span class="n">size</span>
+                <span class="n">box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">frames_label</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">temp_memory</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">memory_chart</span><span class="p">):</span>
+                <span class="n">page_number</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_number&#39;</span><span class="p">]</span>
+                <span class="n">page_fault</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_fault&#39;</span><span class="p">]</span>
+                <span class="n">allocated_frame</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;frame_number&#39;</span><span class="p">]</span>
+                <span class="n">memory_state</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;memory_frames&#39;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-42'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-42'>#</a>
+      </div>
+      <p>Add page referenced label</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">page_ref_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+                <span class="n">page_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Page number referenced:  &#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span> <span class="o">+</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">110</span><span class="p">),</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+                <span class="n">page_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">page_label</span><span class="o">.</span><span class="n">size</span>
+                <span class="n">page_ref_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_label</span><span class="p">)</span>
+                <span class="n">page_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">page_number</span><span class="p">),</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+                <span class="n">page_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">page_label</span><span class="o">.</span><span class="n">size</span>
+                <span class="n">page_ref_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_label</span><span class="p">)</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_ref_box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-43'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-43'>#</a>
+      </div>
+      <p>Draw the memory chart</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>                <span class="n">mem_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="s1">&#39;50dp&#39;</span><span class="p">)</span>
+                <span class="n">page_fault_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+                
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">mem_box</span><span class="p">)</span>
+                <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_fault_box</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">draw_memory_state</span><span class="p">(</span><span class="n">mem_box</span><span class="p">,</span> <span class="n">page_fault_box</span><span class="p">,</span> <span class="n">temp_memory</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-44'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-44'>#</a>
+      </div>
+      <p>Add total number of page faults   </p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memory_chart</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">total_page_fault_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">total_page_fault_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Total number of page faults: &#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="s1">&#39;page_fault_count&#39;</span><span class="p">])))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">total_page_fault_box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-45'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-45'>#</a>
+      </div>
+      <p>Add page fault ratio</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">total_hits</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">page_numbers</span><span class="p">)</span> <span class="o">-</span> <span class="n">temp</span><span class="p">[</span><span class="s1">&#39;page_fault_count&#39;</span><span class="p">]</span> 
+            <span class="n">output</span> <span class="o">=</span> <span class="n">Decimal</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_fault_count&#39;</span><span class="p">])</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">page_numbers</span><span class="p">))</span>
+            <span class="n">page_fault_ratio_box</span> <span class="o">=</span> <span class="n">BoxLayout</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">size_hint_y</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">form_row_height</span><span class="p">)</span>
+            <span class="n">page_fault_ratio_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Page fault ratio: &#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="mi">3</span><span class="p">))))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_fault_ratio_box</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-46'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-46'>#</a>
+      </div>
+      <p>Add back button
+box = BoxLayout(orientation='horizontal', size_hint_y=None, height=form_row_height, padding=(0, kivy.metrics.dp(5)))
+box.add_widget(Button(text='Back', on_release=self.switch_to_page_form))
+grid.add_widget(box)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-47'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-47'>#</a>
+      </div>
+      <p>Add ScrollView</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">sv</span> <span class="o">=</span> <span class="n">ScrollView</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">scroll_type</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;bars&#39;</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">],</span> <span class="n">bar_width</span><span class="o">=</span><span class="s1">&#39;12dp&#39;</span><span class="p">,</span> <span class="n">bar_inactive_color</span><span class="o">=</span><span class="p">[</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span><span class="mf">0.45</span><span class="p">])</span>
+        <span class="n">sv</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">sv</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-48'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-48'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">draw_memory_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mem_box</span><span class="p">,</span> <span class="n">page_fault_box</span><span class="p">,</span> <span class="n">temp_memory</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="n">page_number</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_number&#39;</span><span class="p">]</span>
+        <span class="n">page_fault</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;page_fault&#39;</span><span class="p">]</span>
+        <span class="n">allocated_frame</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;frame_number&#39;</span><span class="p">]</span>
+        <span class="n">memory_state</span> <span class="o">=</span> <span class="n">temp_memory</span><span class="p">[</span><span class="s1">&#39;memory_frames&#39;</span><span class="p">]</span>
+
+        <span class="n">mem_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span> <span class="o">-</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+        <span class="n">mem_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">mem_label</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">mem_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">mem_label</span><span class="p">)</span>
+        <span class="n">mem_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Memory state: &#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span> <span class="o">+</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">35</span><span class="p">),</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="n">mem_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">mem_label</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">mem_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">mem_label</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">state</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">memory_state</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;X&#39;</span>
+            <span class="k">if</span> <span class="n">allocated_frame</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">idx</span> <span class="ow">and</span> <span class="n">page_fault</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">mem_label</span> <span class="o">=</span> <span class="n">ColoredBorderedLabel</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;[b][color=DEC41B]&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;[/color][/b]&#39;</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_width</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mem_label</span> <span class="o">=</span> <span class="n">WhiteBorderedLabel</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">state</span><span class="p">),</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frame_width</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+
+            <span class="n">mem_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">mem_label</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">mem_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">mem_label</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-49'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-49'>#</a>
+      </div>
+      <p>To add page fault (Y/N)</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">page_f_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span> <span class="o">-</span> <span class="n">kivy</span><span class="o">.</span><span class="n">metrics</span><span class="o">.</span><span class="n">dp</span><span class="p">(</span><span class="mi">25</span><span class="p">),</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+        <span class="n">page_f_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">page_f_label</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">page_fault_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_f_label</span><span class="p">)</span>
+
+        <span class="n">page_f_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;Page fault: &#39;</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
+        <span class="n">page_f_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">page_f_label</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">page_fault_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_f_label</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">page_fault</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">page_f_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;[color=DEC41B]Yes[/color]&#39;</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">page_f_label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">text</span><span class="o">=</span><span class="s1">&#39;No&#39;</span><span class="p">,</span> <span class="n">markup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">size_hint_x</span><span class="o">=</span><span class="bp">None</span>
+                <span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">margin_left</span><span class="p">,</span> <span class="n">valign</span><span class="o">=</span><span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="n">halign</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+        <span class="n">page_f_label</span><span class="o">.</span><span class="n">text_size</span> <span class="o">=</span> <span class="n">page_f_label</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">page_fault_box</span><span class="o">.</span><span class="n">add_widget</span><span class="p">(</span><span class="n">page_f_label</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-50'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-50'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">switch_to_page_form</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">transition</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;right&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="s1">&#39;page_form&#39;</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+</div>
+</body>
