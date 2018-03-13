@@ -1,3 +1,7 @@
+'''
+This file contains the implementation of Disk Scheduling algorithms
+'''
+
 from sys import maxint
 from random import choice
 

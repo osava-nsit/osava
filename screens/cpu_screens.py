@@ -1,3 +1,8 @@
+'''
+This file contains the classes, functions and globals used for visualizing
+CPU Scheduling algorithms
+'''
+
 # Kivy libraries
 from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle

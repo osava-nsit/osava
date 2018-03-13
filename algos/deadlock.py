@@ -1,3 +1,7 @@
+'''
+This file contains the implementation of Deadlock Detection and Avoidance algorithms
+'''
+
 import copy
 
 # Bad input case(s):

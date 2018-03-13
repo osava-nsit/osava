@@ -1,3 +1,7 @@
+'''
+This file defines the Kivy app and loads the screens and their layouts
+'''
+
 # Kivy libraries
 from kivy.app import App
 from kivy.lang import Builder

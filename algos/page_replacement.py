@@ -1,3 +1,7 @@
+'''
+This file contains the implementation of Page Replacement algorithms
+'''
+
 from copy import deepcopy
 from sys import maxint
 from random import randint

@@ -1,3 +1,7 @@
+'''
+This file contains the implementation of CPU Scheduling algorithms
+'''
+
 from sys import maxsize
 from operator import itemgetter
 import Queue

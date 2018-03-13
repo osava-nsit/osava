@@ -1,3 +1,7 @@
+'''
+This file contains the implementation of Memory Allocation strategies
+'''
+
 from operator import itemgetter
 from copy import deepcopy
 

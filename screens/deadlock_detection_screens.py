@@ -1,3 +1,8 @@
+'''
+This file contains the classes, functions and globals used for visualizing
+Deadlock Detection algorithms
+'''
+
 # Kivy libraries
 from kivy.properties import ObjectProperty
 from kivy.uix.scrollview import ScrollView

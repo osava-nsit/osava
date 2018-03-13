@@ -1,3 +1,8 @@
+'''
+This file contains the classes, functions and globals used for visualizing
+Page Replacement algorithms
+'''
+
 # Kivy libraries
 from kivy.core.window import Window
 from kivy.properties import ObjectProperty, NumericProperty

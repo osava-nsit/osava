@@ -1,3 +1,8 @@
+'''
+This file contains the classes, functions and globals used for visualizing
+Contiguous Memory Allocation Strategios
+'''
+
 # Kivy libraries
 from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle
