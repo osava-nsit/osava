@@ -288,7 +288,7 @@ def rr_get_next_process(robin_idx, curr_time, process_queue):
     next_idx = (robin_idx+1)%len(process_queue)
 
     while next_idx != robin_idx:
-        if process_queue[next_idx]['arrival'] <= curr_time:
+        if process_queue[next_idx]['arrival'] < curr_time:
             return next_idx
         else:
             next_idx = (next_idx+1)%len(process_queue)
