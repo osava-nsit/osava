@@ -40,3 +40,9 @@ def display_error(grid, error, box_height='400dp'):
     error_box.add_widget(error_label)
     grid.add_widget(error_box)
     return error_box
+
+# Exception class which stores error status
+class OSAVAException(BaseException):
+    def __init__(self, error_status):
+        super(OSAVAException, self).__init__()
+        self.error_status = error_status
