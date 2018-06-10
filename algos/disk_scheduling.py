@@ -4,6 +4,7 @@ This file contains the implementation of Disk Scheduling algorithms
 
 from sys import maxint
 from random import choice
+from common import OSAVAException
 
 # Bad input case(s):
 # 0. 1 <= total cylinders
@@ -46,36 +47,32 @@ def is_valid_value(value):
         return False
 
 def check_for_bad_input(data):
-    error = 0 # Boolean to check bad input 
     error_status = {} # Dictionary to store error number and error message
     curr_head_pos = int(data['curr_pos'])
     num_cylinders = int(data['total_cylinders'])
     disk_queue = data['disk_queue']
     if  num_cylinders <= 0:
         error_status = get_error_message(0,-1)
-        error = 1 
+        raise OSAVAException(error_status)
     elif curr_head_pos < 0 or curr_head_pos >= num_cylinders:
         error_status = get_error_message(3,-1)
-        error = 1
+        raise OSAVAException(error_status)
     else:
         if len(disk_queue) == 0:
             error_status = get_error_message(2, 'The')
-            error = 1
+            raise OSAVAException(error_status)
         else:
             for cylinder in disk_queue:
                 if not is_valid_value(cylinder) or int(cylinder) < 0:
                     error_status = get_error_message(2, cylinder)
-                    error = 1
-                    break
+                    raise OSAVAException(error_status)
                 elif int(cylinder) > num_cylinders - 1:
                     error_status = get_error_message(1, cylinder)
-                    error = 1
-                    break
-        if(error == 0):
-            error_status = get_error_message(-1, -1) # No error in input data
-            error = 0
-    status = (error, error_status);
-    return status
+                    raise OSAVAException(error_status)
+
+    # No error in input data    
+    error_status = get_error_message(-1, -1) 
+    return error_status
 
 
 # For Scan and Look Algorithms
@@ -265,11 +262,8 @@ def disk_scheduling(data):
     # To store secondary memory chart and total number of head movements 
     secondary_storage_chart = {}
     # For bad input handling
-    error, error_status = check_for_bad_input(data)
-    if(error):
-        secondary_storage_chart = construct_output(error_status, -1, -1)
-        return secondary_storage_chart
-    else:
+    try:
+   	error_status = check_for_bad_input(data)
         curr_head_pos = int(data['curr_pos'])
         num_cylinders = int(data['total_cylinders'])
         disk_queue = data['disk_queue']
@@ -313,4 +307,7 @@ def disk_scheduling(data):
                 secondary_storage_memory.insert(0, curr_pos_memory)
 
         secondary_storage_chart = construct_output(error_status, secondary_storage_memory, total_head_movements)
+        return secondary_storage_chart
+    except OSAVAException as ex:
+	secondary_storage_chart = construct_output(ex.error_status, -1, -1)
         return secondary_storage_chart

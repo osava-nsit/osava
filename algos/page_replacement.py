@@ -5,6 +5,7 @@ This file contains the implementation of Page Replacement algorithms
 from copy import deepcopy
 from sys import maxint
 from random import randint
+from common import OSAVAException
 
 # Bad input case(s):
 # 0. 1 <= Frame number
@@ -39,45 +40,35 @@ def is_valid_value(value):
         return False
 
 def check_for_bad_input(data):
-    error = 0 # Boolean to check if bad input entered
     error_status = {} # Dictionary to store error number and error message
     frames_number = data['num_frames']
     page_numbers = data['ref_str']
     if frames_number <= 0:
         error_status = get_error_message(0, -1)
-        error = 1
+        raise OSAVAException(error_status)
     else:
         if len(page_numbers) == 0:
             error_status = get_error_message(1, 1)
-            error = 1
+            raise OSAVAException(error_status)
         else:
             for idx,page_number in enumerate(page_numbers):
                 if not is_valid_value(page_number) or int(page_number) < 0:
                     # print "Error detected"
                     error_status = get_error_message(1, idx+1)
-                    error = 1
-                    break
-    if(error == 1):
-        status = (error, error_status);
-        #print "Error detected"
-        return status
-    else:
+                    raise OSAVAException(error_status)
         if data['algo'] == 4:
             modify_bit_string = data['modify_bits'] 
             if len(modify_bit_string) == 0:
                 error_status = get_error_message(2, 1)
-                error = 1
+                raise OSAVAException(error_status)
             else:
                 for idx,modify_bit in enumerate(modify_bit_string):
                     if not is_valid_value(modify_bit) or (int(modify_bit) != 0 and int(modify_bit) != 1):
                         error_status = get_error_message(2, idx+1)
-                        error = 1
-                        break
-        if(error == 0):
-            error_status = get_error_message(-1, -1) # No error in input data
-            error = 0
-        status = (error, error_status);
-        return status
+                        raise OSAVAException(error_status)
+        
+        error_status = get_error_message(-1, -1) # No error in input data     
+        return error_status
 
 # Utility function to check if referenced page is already in memory
 def page_in_memory(page_number, memory_frames):
@@ -344,13 +335,8 @@ def page_replacement(data):
     # To store the state of main memory(which is divided into frames) after each page arrives
     memory_chart = [] 
     # For bad input handling
-    error, error_status = check_for_bad_input(data)
-    if(error):
-        temp_memory = {}
-        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
-        memory_chart.append(temp_memory)
-        return memory_chart
-    else:
+    try:
+    	error_status = check_for_bad_input(data)
         frames_number = data['num_frames']
         page_numbers = data['ref_str']
         memory_frames = []
@@ -410,3 +396,9 @@ def page_replacement(data):
                 memory_chart.append(temp_memory)
 
         return memory_chart
+    except OSAVAException as ex:
+	temp_memory = {}
+        temp_memory = construct_output(ex.error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
+        return memory_chart
+

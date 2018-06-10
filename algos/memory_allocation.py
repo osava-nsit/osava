@@ -4,6 +4,7 @@ This file contains the implementation of Memory Allocation strategies
 
 from operator import itemgetter
 from copy import deepcopy
+from common import OSAVAException
 
 # Bad input case(s):
 # 0. 1 <= total_size 
@@ -35,13 +36,12 @@ def get_error_message(error_number, process_id):
     return ERROR
 
 def check_for_bad_input(data):
-    error = 0 # Boolean to check bad input 
     error_status = {} # Dictionary to store error number and error message
     processes = sorted(data, key=itemgetter('arrival'))
     total_size = processes[0]['mem_size']
     if int(total_size) <= 0:
         error_status = get_error_message(0, -1)
-        error = 1
+        raise OSAVAException(error_status)
     else:
         for process in processes:
             #total_size=process['mem_size']
@@ -49,23 +49,19 @@ def check_for_bad_input(data):
             arrival_time = process['arrival']
             if int(arrival_time) < 0:
                 error_status = get_error_message(2, process_id)
-                error = 1
-                break
+                raise OSAVAException(error_status)
             burst_time = process['burst']
             if int(burst_time) <= 0:
                 error_status = get_error_message(3, process_id)
-                error = 1
-                break
+                raise OSAVAException(error_status)
             process_size = process['size']
             if int(process_size) <= 0:
                 error_status = get_error_message(1, process_id)
-                error = 1
-                break
+                raise OSAVAException(error_status)
 
-    if(error == 0):
-        error_status = get_error_message(-1, -1)
-    status = (error, error_status);
-    return status
+    # No bad input
+    error_status = get_error_message(-1, -1)
+    return error_status
 
 # To construct output in case of bad input             
 def construct_output(error_status, event, memory_state, processes_waiting, wait_to_memory, external_fragmentation):
@@ -252,14 +248,8 @@ def first_fit(data):
     # To store memory states and wait queue state after arrival of each process
     memory_chart = [] 
     # For bad input handling
-    error, error_status = check_for_bad_input(data)
-
-    if(error):
-        temp_memory = {}
-        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
-        memory_chart.append(temp_memory)
-        return memory_chart
-    else:
+    try:
+    	error_status = check_for_bad_input(data)
         processes = sorted(data, key=itemgetter('arrival'))
         total_size = processes[0]['mem_size']
         curr_time = 0
@@ -267,7 +257,6 @@ def first_fit(data):
         wait_queue = []
         event_list = []
         wait_to_memory = [] # Processes added from wait queue to memory
-
         for process in processes:
             #total_size=process['mem_size']
             process_id = process['name']
@@ -310,6 +299,11 @@ def first_fit(data):
                 # print "----------
             del event_list[0]
         return memory_chart
+    except OSAVAException as ex:
+	    temp_memory = {}
+	    temp_memory = construct_output(ex.error_status, -1, -1, -1, -1, -1)
+	    memory_chart.append(temp_memory)
+	    return memory_chart
 
 # Worst Fit Agorithm
 def add_to_memory_worstfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
@@ -458,13 +452,8 @@ def worst_fit(data):
     # To store memory states and wait queue state after arrival of each process
     memory_chart = [] 
     # For bad input handling
-    error, error_status = check_for_bad_input(data)
-    if(error):
-        temp_memory = {}
-        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
-        memory_chart.append(temp_memory)
-        return memory_chart
-    else:
+    try:
+    	error_status = check_for_bad_input(data)
         processes = sorted(data, key=itemgetter('arrival'))
         total_size = processes[0]['mem_size']
         curr_time = 0
@@ -503,6 +492,11 @@ def worst_fit(data):
                 temp_memory['error_status'] = error_status
                 memory_chart.append(temp_memory)
             del event_list[0]
+        return memory_chart
+    except OSAVAException as ex:
+	temp_memory = {}
+        temp_memory = construct_output(ex.error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
         return memory_chart
 
 def add_to_memory_bestfit(event_list,process_id,arrival_time,burst_time,process_size,total_size,curr_time,memory_allocated,wait_queue):
@@ -649,13 +643,8 @@ def best_fit(data):
     # To store memory states and wait queue state after arrival of each process
     memory_chart = [] 
     # For bad input handling
-    error, error_status = check_for_bad_input(data)
-    if(error):
-        temp_memory = {}
-        temp_memory = construct_output(error_status, -1, -1, -1, -1, -1)
-        memory_chart.append(temp_memory)
-        return memory_chart
-    else:
+    try:
+    	error_status = check_for_bad_input(data)
         curr_time = 0
         memory_allocated = []
         wait_queue = []
@@ -695,3 +684,9 @@ def best_fit(data):
                 memory_chart.append(temp_memory)
             del event_list[0]
         return memory_chart
+    except OSAVAException as ex:
+	temp_memory = {}
+        temp_memory = construct_output(ex.error_status, -1, -1, -1, -1, -1)
+        memory_chart.append(temp_memory)
+        return memory_chart
+    
