@@ -103,7 +103,7 @@ def create_dl_process(dispatch_latency, curr_time):
 def fcfs(data, dispatch_latency = 0):
     # For bad input handling
     try:
-        error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 1, -1, -1, -1)
+        error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 1, -1, -1, -1)
         processes = sorted(data, key=itemgetter('arrival'))
         process_chart = []
         curr_time = 0
