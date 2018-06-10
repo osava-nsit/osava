@@ -6,6 +6,8 @@ from sys import maxsize
 from operator import itemgetter
 import Queue
 from copy import deepcopy
+from common import OSAVAException
+
 # Bad input case(s):
 # 0. 1 <= queue assigned <= num_queues
 # 1. 0 < burst_time 
@@ -52,21 +54,20 @@ def get_error_message(error_number, process_id, queue_number=-1):
 
 # Values for algo : FCFS = 1, SJF Premptive/Non-premptive = 2, Priority Premptive/Non-premptive = 3, Round Robin = 4, Multilevel Queue = 5, Multilevel Feedback Queue = 6
 def check_for_bad_input(data, dispatch_latency, priority, aging, quantum, algo, num_queues, quantum_queue, algo_queue):
-    error = 0 # Boolean to check bad input 
     error_status = {} # Dictionary to store error number and error message
     processes = sorted(data, key=itemgetter('arrival'))
     if int(dispatch_latency) < 0:
         error_status = get_error_message(5, -1, -1)
-        error = 1
+        raise OSAVAException(error_status)
     elif algo == 3 and int(priority) < 0:
         error_status = get_error_message(3, -1, -1)
-        error = 1
+        raise OSAVAException(error_status)
     elif algo == 3 and int(aging) <= 0:
         error_status = get_error_message(7, -1, -1)
-        error = 1
+        raise OSAVAException(error_status)
     elif algo == 4 and int(quantum) <= 0:
         error_status = get_error_message(2, -1, -1)
-        error = 1
+        raise OSAVAException(error_status)
     else:
         for process in processes:
             #total_size=process['mem_size']
@@ -74,28 +75,23 @@ def check_for_bad_input(data, dispatch_latency, priority, aging, quantum, algo, 
             arrival_time = process['arrival']
             if int(arrival_time) < 0:
                 error_status = get_error_message(4, process_id, -1)
-                error = 1
-                break
+                raise OSAVAException(error_status)
             burst_time = process['burst']
             if int(burst_time) <= 0:
                 error_status = get_error_message(1, process_id, -1)
-                error = 1
-                break
+                raise OSAVAException(error_status)
             if algo == 5:
                 if process['queue_assigned'] <= 0 or process['queue_assigned'] > num_queues:
                     error_status = get_error_message(0, process_id, -1)
-                    error = 1
-                    break
-    if error == 0 and algo == 5:
+                    raise OSAVAException(error_status)
+    if algo == 5:
         for i in range(len(quantum_queue)):
             if quantum_queue[i] <= 0 and algo_queue[i] == 1:
                 error_status = get_error_message(6, -1, i+1)
-                error = 1
-                break
-    if(error == 0):
-        error_status = get_error_message(-1, -1, -1)
-    status = (error, error_status);
-    return status
+                raise OSAVAException(error_status)
+    
+    error_status = get_error_message(-1, -1, -1)
+    return error_status
 
 def create_dl_process(dispatch_latency, curr_time):
     dl_cpu = dict()
@@ -106,10 +102,8 @@ def create_dl_process(dispatch_latency, curr_time):
 
 def fcfs(data, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 1, -1, -1, -1)
-    if(error):
-        return -1, -1, -1, error_status
-    else:
+    try:
+        error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 1, -1, -1, -1)
         processes = sorted(data, key=itemgetter('arrival'))
         process_chart = []
         curr_time = 0
@@ -172,13 +166,14 @@ def fcfs(data, dispatch_latency = 0):
         stats['throughput'] = len(processes)/float(curr_time)
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
         return process_chart, stats, details_process, error_status
+    except OSAVAException as ex:
+        return -1, -1, -1, ex.error_status
+
 
 def round_robin(data, quantum=4, dispatch_latency=0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, quantum, 4, -1, -1, -1)
-    if(error):
-        return -1, -1, -1, error_status
-
+ try:
+    error_status = check_for_bad_input(data, dispatch_latency, -1, -1, quantum, 4, -1, -1, -1)
     all_processes = sorted(data, key=itemgetter('arrival'))
     curr_time = 0
     total_wait_time = 0
@@ -282,6 +277,8 @@ def round_robin(data, quantum=4, dispatch_latency=0):
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
+ except OSAVAException as ex:
+    return -1, -1, -1, ex.error_status
 
 # Returns the index of the next process to be scheduled
 def rr_get_next_process(robin_idx, curr_time, process_queue):
@@ -443,10 +440,8 @@ def round_robin_old(data, max_quanta = 4, dispatch_latency = 0):
 
 def shortest_job_non_prempted(data, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 2, -1, -1, -1)
-    if(error):
-        return -1, -1, -1, error_status
-    else:
+    try:
+        error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 2, -1, -1, -1)
         all_processes = sorted(data, key=itemgetter('burst'))
         time_present = 0
         var = 0
@@ -534,13 +529,13 @@ def shortest_job_non_prempted(data, dispatch_latency = 0):
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
+    except OSAVAException as ex:
+        return -1, -1, -1, ex.error_status
 
 def shortest_job_prempted(data, dispatch_latency=0):
-    # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 2, -1, -1, -1)
-    if(error):
-        return -1, -1, -1, error_status
-
+ # For bad input handling
+ try:
+    error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 2, -1, -1, -1)
     all_processes = sorted(data, key=itemgetter('arrival'))
     curr_time = 0
     total_wait_time = 0
@@ -653,6 +648,8 @@ def shortest_job_prempted(data, dispatch_latency=0):
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
+ except OSAVAException as ex:
+     return -1, -1, -1, ex.error_status
 
 def get_shortest(curr_time, process_queue):
     shortest_burst = -1
@@ -784,10 +781,8 @@ def shortest_job_prempted_old(data, dispatch_latency = 0):
 
 def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority = 0, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, increment_after_time, -1, 3, -1, -1, -1)
-    if(error):
-        return -1, -1, -1, error_status
-    else:
+    try:
+        error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, increment_after_time, -1, 3, -1, -1, -1)
         all_processes = sorted(data, key=itemgetter('priority'))
         time_present = 0 
         var = 0
@@ -885,13 +880,13 @@ def priority_non_preemptive(data, increment_after_time = 4, upper_limit_priority
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
         
         return process_chart, stats, process_details, error_status
+    except OSAVAException as ex:
+        return -1, -1, -1, ex.error_status
 
 def priority_preemptive(data, increment_after_time=4, upper_limit_priority=0, dispatch_latency=0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, increment_after_time, -1, 3, -1, -1, -1)
-    if(error):
-        return -1, -1, -1, error_status
-
+ try:
+    error_status = check_for_bad_input(data, dispatch_latency, upper_limit_priority, increment_after_time, -1, 3, -1, -1, -1)
     all_processes = sorted(data, key=itemgetter('arrival'))
     curr_time = 0
     total_wait_time = 0
@@ -1027,6 +1022,8 @@ def priority_preemptive(data, increment_after_time=4, upper_limit_priority=0, di
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
+ except OSAVAException as ex:
+     return -1, -1, -1, ex.error_status
 
 def get_most_priority(curr_time, process_queue):
     shortest_priority = -1
@@ -1194,10 +1191,8 @@ def priority_preemptive_old(data, increment_after_time = 4, upper_limit_priority
 
 def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 5, num_queues, quantum_queue, algo_queue)
-    if(error):
-        return -1, -1, -1, error_status
-    else:
+    try:
+        error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 5, num_queues, quantum_queue, algo_queue)
         queue_data = [[] for i in range(num_queues)]
         all_processes = data
         queue_cpu_schedule = [list() for i in range(num_queues)]
@@ -1348,6 +1343,8 @@ def multilevel(data, num_queues, algo_queue, quantum_queue, dispatch_latency = 0
         stats['cpu_utilization'] = float(sum_time)*100/curr_time
 
         return process_chart, stats, process_details, error_status
+    except OSAVAException as ex:
+        return -1, -1, -1, ex.error_status
 
 def add_processes_to_list_multilevel_feedback(processes):
     process_list = []
@@ -1377,10 +1374,8 @@ def get_highest_queue(curr_time, process_queue):
 
 def multilevel_feedback(data, num_queues, queue_quantum, dispatch_latency=0):
     # For bad input handling
-    error, error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 6, num_queues, queue_quantum, -1)
-    if(error):
-        return -1, -1, -1, error_status
-
+ try:
+    error_status = check_for_bad_input(data, dispatch_latency, -1, -1, -1, 6, num_queues, queue_quantum, -1)
     all_processes = sorted(data, key=itemgetter('arrival'))
     curr_time = 0
     total_wait_time = 0
@@ -1530,6 +1525,8 @@ def multilevel_feedback(data, num_queues, queue_quantum, dispatch_latency=0):
     stats['cpu_utilization'] = float(sum_time)*100/float(curr_time)
 
     return process_chart, stats, details_process, error_status
+ except OSAVAException as ex:
+        return -1, -1, -1, ex.error_status
 
 # Returns the index of the next process to be scheduled
 # If no process is found to be scheduled, we've reached the last queue, hence directly apply FCFS
